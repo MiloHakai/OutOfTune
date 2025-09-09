@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OutOfTune</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Dark mysterious colors */
+      --bg-dark: #0a0a0a;           /* Deep black */
+      --bg-secondary: #151515;      /* Slightly lighter black */
+      --bg-tertiary: #1a1a1a;      /* Card backgrounds */
+      
+      /* Text colors */
+      --text-primary: #e0e0e0;      /* Light gray text */
+      --text-secondary: #888888;    /* Muted text */
+      --text-tertiary: #666666;     /* Very muted text */
+      
+      /* Mysterious accent colors */
+      --accent-primary: #8b4a6b;    /* Dark purple-pink */
+      --accent-secondary: #6b3a5b;  /* Darker purple */
+      --accent-glow: #a05a7a;       /* Lighter for glows */
+      
+      /* Red warning accent */
+      --warning: #cc4444;
+      --warning-glow: rgba(204, 68, 68, 0.6);
+      
+      /* Glow colors */
+      --glow-primary: rgba(139, 74, 107, 0.6);
+      --glow-secondary: rgba(107, 58, 91, 0.8);
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: 'Press Start 2P', cursive;
+      overflow: hidden;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+    }
+
+    body {
+      position: relative;
+      /* Subtle noise texture */
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(139, 74, 107, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(107, 58, 91, 0.03) 0%, transparent 50%);
+    }
+
+    /* Minimal animated border - single subtle line */
+    .border-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .border-line {
+      position: absolute;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        transparent 40%, 
+        var(--accent-primary) 50%,
+        transparent 60%, 
+        transparent 100%);
+      background-size: 200% 100%;
+      animation: ghost-flow 20s linear infinite;
+      opacity: 0.4;
+    }
+
+    .border-top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      box-shadow: 0 0 8px var(--glow-primary);
+    }
+
+    .border-bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      box-shadow: 0 0 8px var(--glow-primary);
+      animation-delay: 10s;
+    }
+
+    @keyframes ghost-flow {
+      0% { background-position: -100% 0; }
+      100% { background-position: 100% 0; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 2.8rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.4s ease;
+      position: relative;
+      display: inline-block;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: 0;
+    }
+
+    /* Mysterious glitch effect */
+    .glitch-text {
+      position: relative;
+      animation: subtle-glitch 8s ease-in-out infinite;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+    }
+
+    .glitch-text::before {
+      color: var(--accent-primary);
+      animation: glitch-1 0.3s ease-in-out infinite alternate-reverse;
+      clip-path: polygon(0 0%, 100% 0%, 100% 45%, 0 45%);
+    }
+
+    .glitch-text::after {
+      color: var(--accent-secondary);
+      animation: glitch-2 0.3s ease-in-out infinite alternate-reverse;
+      clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    }
+
+    @keyframes subtle-glitch {
+      0%, 90%, 100% { 
+        transform: translate(0);
+        filter: blur(0px);
+      }
+      91%, 94% { 
+        transform: translate(1px, -1px);
+        filter: blur(0.5px);
+      }
+      92%, 96% { 
+        transform: translate(-1px, 1px);
+      }
+      95%, 97% { 
+        transform: translate(2px, 0px);
+      }
+    }
+
+    @keyframes glitch-1 {
+      0%, 90%, 100% { opacity: 0; }
+      91%, 96% { opacity: 0.3; transform: translate(1px, -1px); }
+    }
+
+    @keyframes glitch-2 {
+      0%, 90%, 100% { opacity: 0; }
+      93%, 97% { opacity: 0.2; transform: translate(-1px, 1px); }
+    }
+
+    h1:hover {
+      color: var(--accent-glow);
+      text-shadow: 
+        0 0 10px var(--glow-primary),
+        0 0 20px var(--glow-primary),
+        0 0 40px var(--glow-secondary);
+      transform: scale(1.02);
+    }
+
+    .subtitle {
+      margin-top: 1.5rem;
+      font-size: 0.7rem;
+      font-family: 'Press Start 2P', cursive;
+      font-weight: 400;
+      opacity: 0.6;
+      animation: fade-pulse 6s ease-in-out infinite;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    @keyframes fade-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.9; }
+    }
+
+    .status-indicator {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      font-size: 0.6rem;
+      color: var(--text-tertiary);
+      opacity: 0.7;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      animation: pulse-dot 2s ease-in-out infinite;
+      box-shadow: 0 0 8px var(--glow-primary);
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { 
+        opacity: 0.5;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 1;
+        transform: scale(1.2);
+      }
+    }
+
+    .easter-egg-message {
+      margin-top: 1.5rem;
+      font-size: 0.6rem;
+      font-family: 'Press Start 2P', cursive;
+      font-weight: 400;
+      opacity: 0;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      transition: all 0.5s ease;
+      animation: flicker-in 0.8s ease-in-out;
+    }
+
+    .easter-egg-message.show {
+      opacity: 0.8;
+    }
+
+    .easter-egg-message.warning {
+      color: var(--warning);
+      text-shadow: 0 0 15px var(--warning-glow);
+      animation: warning-flicker 1.5s ease-in-out infinite;
+      opacity: 1;
+    }
+
+    @keyframes warning-flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes flicker-in {
+      0%, 20%, 40%, 60% { opacity: 0; }
+      10%, 30%, 50%, 70%, 100% { opacity: 0.8; }
+    }
+
+    .minimal-links {
+      margin-top: 3rem;
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+    }
+
+    .minimal-links a {
+      color: var(--text-tertiary);
+      text-decoration: none;
+      font-size: 1.2rem;
+      transition: all 0.4s ease;
+      opacity: 0.5;
+      filter: drop-shadow(0 0 4px var(--glow-secondary));
+    }
+
+    .minimal-links a:hover {
+      color: var(--accent-glow);
+      opacity: 1;
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 12px var(--glow-primary));
+    }
+
+    footer {
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.5rem;
+      color: var(--text-tertiary);
+      z-index: 2;
+      font-family: 'Press Start 2P', cursive;
+      line-height: 1.6;
+      opacity: 0.4;
+      letter-spacing: 0.02em;
+    }
+
+    footer a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: var(--accent-glow);
+    }
+
+    /* Theme toggle - minimal and hidden */
+    .theme-toggle {
+      position: fixed;
+      top: 25px;
+      right: 25px;
+      z-index: 5;
+      background: transparent;
+      border: 1px solid var(--accent-primary);
+      padding: 8px;
+      color: var(--text-tertiary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.3;
+      image-rendering: pixelated;
+    }
+
+    .theme-toggle:hover {
+      opacity: 0.8;
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      box-shadow: 0 0 10px var(--glow-primary);
+    }
+
+    .theme-icon {
+      transition: all 0.3s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+        line-height: 1.3;
+      }
+      .subtitle {
+        font-size: 0.6rem;
+        margin-top: 1rem;
+      }
+      .status-indicator {
+        font-size: 0.55rem;
+        margin-top: 1.5rem;
+      }
+      .minimal-links {
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+      .minimal-links a {
+        font-size: 1rem;
+      }
+      footer {
+        font-size: 0.45rem;
+        bottom: 15px;
+      }
+    }
+
+    /* Atmospheric particles */
+    .particle {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      background: var(--accent-primary);
+      opacity: 0.1;
+      animation: float 15s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.1;
+      }
+      90% {
+        opacity: 0.1;
+      }
+      100% {
+        transform: translateY(-10vh) translateX(50px);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Minimal Border Animation -->
+  <div class="border-container">
+    <div class="border-line border-top"></div>
+    <div class="border-line border-bottom"></div>
+  </div>
+
+  <!-- Atmospheric Particles -->
+  <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="left: 20%; animation-delay: 3s;"></div>
+  <div class="particle" style="left: 30%; animation-delay: 6s;"></div>
+  <div class="particle" style="left: 40%; animation-delay: 9s;"></div>
+  <div class="particle" style="left: 50%; animation-delay: 12s;"></div>
+  <div class="particle" style="left: 60%; animation-delay: 15s;"></div>
+  <div class="particle" style="left: 70%; animation-delay: 18s;"></div>
+  <div class="particle" style="left: 80%; animation-delay: 21s;"></div>
+  <div class="particle" style="left: 90%; animation-delay: 24s;"></div>
+
+  <button class="theme-toggle" onclick="handleThemeToggle()" aria-label="Toggle theme" title="Light mode (experimental)">
+    <i class="fas fa-sun theme-icon"></i>
+  </button>
+
+  <div class="container">
+    <h1 id="username" class="glitch-text" data-text="OutOfTune" onclick="handleNameClick()">OutOfTune</h1>
+    
+    <p class="subtitle">Something is brewing in the shadows...</p>
+    
+    <div class="status-indicator">
+      <div class="status-dot"></div>
+      <span>Work in Progress</span>
+    </div>
+    
+    <p id="easter-egg-text" class="easter-egg-message">...</p>
+
+    <div class="minimal-links">
+      <a href="#" title="Soon"><i class="fas fa-code"></i></a>
+      <a href="#" title="Soon"><i class="fas fa-music"></i></a>
+      <a href="#" title="Soon"><i class="fab fa-discord"></i></a>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 OutOfTune • In Development<br>
+    <span style="opacity: 0.6;">Something mysterious is coming...</span>
+  </footer>
+
+  <script>
+    // Easter egg variables
+    let nameClickCount = 0;
+    const maxClicks = 7;
+    const messages = [
+      "...",
+      "You're curious...",
+      "Keep looking...",
+      "The shadows whisper...",
+      "Almost there...",
+      "You found something...",
+      "Stop. You've seen enough.",
+      "I warned you."
+    ];
+
+    // Audio context for generating ambient sounds
+    let audioContext;
+    let isAudioEnabled = false;
+
+    // Initialize audio context on first user interaction
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        isAudioEnabled = true;
+      }
+    }
+
+    // Generate ambient sound for each phrase
+    function playAmbientSound(clickCount) {
+      if (!isAudioEnabled) return;
+
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const filterNode = audioContext.createBiquadFilter();
+
+      oscillator.connect(filterNode);
+      filterNode.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Different ambient sounds for different phases
+      switch(clickCount) {
+        case 1: // "You're curious..."
+          oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 2);
+          filterNode.frequency.setValueAtTime(800, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+          oscillator.type = 'sine';
+          break;
+
+        case 2: // "Keep looking..."
+          oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(120, audioContext.currentTime + 1.5);
+          filterNode.frequency.setValueAtTime(400, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.2);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
+          oscillator.type = 'triangle';
+          break;
+
+        case 3: // "The shadows whisper..."
+          // Whisper-like filtered noise
+          oscillator.frequency.setValueAtTime(80, audioContext.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(60, audioContext.currentTime + 3);
+          filterNode.frequency.setValueAtTime(200, audioContext.currentTime);
+          filterNode.Q.setValueAtTime(10, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.3);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 3);
+          oscillator.type = 'sawtooth';
+          break;
+
+        case 4: // "Almost there..."
+          oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 2.5);
+          filterNode.frequency.setValueAtTime(600, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2.5);
+          oscillator.type = 'sine';
+          break;
+
+        case 5: // "You found something..."
+          // Mysterious discovery sound
+          oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(180, audioContext.currentTime + 0.5);
+          oscillator.frequency.linearRampToValueAtTime(120, audioContext.currentTime + 2);
+          filterNode.frequency.setValueAtTime(1000, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+          oscillator.type = 'triangle';
+          break;
+
+        case 6: // "Stop. You've seen enough."
+          // Warning tone
+          oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(350, audioContext.currentTime + 1);
+          filterNode.frequency.setValueAtTime(800, audioContext.currentTime);
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+          oscillator.type = 'square';
+          break;
+
+        case 7: // "I warned you."
+          // Intense warning sound
+          createIntenseWarningSound();
+          return; // Don't create the regular oscillator
+
+        default:
+          if (clickCount > 7) {
+            // Spam sounds - harsh and annoying
+            createSpamSound();
+            return;
+          }
+      }
+
+      if (clickCount <= 6) {
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 3);
+      }
+    }
+
+    function createIntenseWarningSound() {
+      if (!isAudioEnabled) return;
+
+      // Create multiple oscillators for a more intense sound
+      for (let i = 0; i < 3; i++) {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const filterNode = audioContext.createBiquadFilter();
+
+        oscillator.connect(filterNode);
+        filterNode.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(200 + (i * 100), audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(150 + (i * 50), audioContext.currentTime + 2);
+        
+        filterNode.frequency.setValueAtTime(400, audioContext.currentTime);
+        filterNode.Q.setValueAtTime(5, audioContext.currentTime);
+        
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+        
+        oscillator.type = 'square';
+        oscillator.start(audioContext.currentTime + (i * 0.1));
+        oscillator.stop(audioContext.currentTime + 2);
+      }
+    }
+
+    function createSpamSound() {
+      if (!isAudioEnabled) return;
+
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Harsh, annoying sound for spam
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+      
+      oscillator.type = 'sawtooth';
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    }
+
+    function handleNameClick() {
+      // Initialize audio on first click
+      if (!audioContext) {
+        initAudio();
+      }
+
+      nameClickCount++;
+      
+      const easterEggEl = document.getElementById('easter-egg-text');
+      const body = document.body;
+      
+      if (nameClickCount <= maxClicks) {
+        easterEggEl.textContent = messages[nameClickCount];
+        easterEggEl.classList.add('show');
+        easterEggEl.classList.remove('warning');
+        
+        if (nameClickCount === maxClicks) {
+          easterEggEl.classList.add('warning');
+          body.classList.add('spam-mode');
+        }
+        
+        // Play appropriate ambient sound
+        playAmbientSound(nameClickCount);
+        
+      } else if (nameClickCount <= maxClicks + 3) {
+        // Spam warning phase
+        const warnings = [
+          "STOP.",
+          "You should not be here.", 
+          "This is your final warning."
+        ];
+        const warningIndex = nameClickCount - maxClicks - 1;
+        easterEggEl.textContent = warnings[warningIndex];
+        easterEggEl.classList.add('warning', 'show');
+        body.classList.add('spam-mode');
+        
+        // Play spam sound
+        playAmbientSound(nameClickCount);
+        
+      } else {
+        // Final redirect - they've been warned enough
+        easterEggEl.textContent = "Fine. You asked for this...";
+        playAmbientSound(nameClickCount);
+        
+        setTimeout(() => {
+          window.open('https://youtu.be/OR6olLu61u8?list=RDOR6olLu61u8', '_blank');
+        }, 2000);
+        return;
+      }
+      
+      // Reset after longer delay for mysterious effect
+      setTimeout(() => {
+        if (nameClickCount < maxClicks) {
+          nameClickCount = 0;
+          easterEggEl.textContent = "...";
+          easterEggEl.classList.remove('show', 'warning');
+          body.classList.remove('spam-mode');
+        }
+      }, 8000);
+    }
+
+    function handleThemeToggle() {
+      // Placeholder for future light theme
+      alert("The light reveals nothing new.\nDarkness is where we belong.");
+    }
+
+    // Generate random particles occasionally
+    function createRandomParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = '0s';
+      particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+      document.body.appendChild(particle);
+      
+      setTimeout(() => {
+        particle.remove();
+      }, 20000);
+    }
+
+    // Create particles periodically
+    setInterval(createRandomParticle, 8000);
+
+    // Add mysterious console message
+    console.log("%cOutOfTune", "color: #87ceeb; font-size: 20px; font-weight: bold;");
+    console.log("%cSomething is being built in the shadows...", "color: #666; font-size: 12px;");
+    console.log("%cAre you ready?", "color: #cc4444; font-size: 14px;");
+    console.log("%cP.S. Try clicking the logo... but don't overdo it.", "color: #87ceeb; font-size: 10px;");
+  </script>
+</body>
+</html>
