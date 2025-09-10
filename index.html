@@ -9,8 +9,8 @@
   <style>
     :root {
       /* Dark mysterious colors */
-      --bg-dark: #0a0a0a;           /* Deep black */
-      --bg-secondary: #151515;      /* Slightly lighter black */
+      --bg-dark: #000000;           /* Deep black */
+      --bg-secondary: #111111;      /* Slightly lighter black */
       --bg-tertiary: #1a1a1a;      /* Card backgrounds */
       
       /* Text colors */
@@ -30,6 +30,14 @@
       /* Glow colors */
       --glow-primary: rgba(139, 74, 107, 0.6);
       --glow-secondary: rgba(107, 58, 91, 0.8);
+
+      /* Scary mode colors */
+      --scary-bg: #0a0000;          /* Very dark red-black */
+      --scary-bg-secondary: #150000; /* Darker red-black */
+      --scary-text: #ff6666;        /* Light red text */
+      --scary-accent: #ff0000;      /* Pure red */
+      --scary-glow: rgba(255, 0, 0, 0.8);
+      --scary-shadow: rgba(255, 0, 0, 0.3);
     }
 
     html, body {
@@ -42,6 +50,7 @@
       image-rendering: crisp-edges;
       background: var(--bg-dark);
       color: var(--text-primary);
+      transition: all 1s ease-in-out;
     }
 
     body {
@@ -50,6 +59,59 @@
       background-image: 
         radial-gradient(circle at 25% 25%, rgba(139, 74, 107, 0.05) 0%, transparent 50%),
         radial-gradient(circle at 75% 75%, rgba(107, 58, 91, 0.03) 0%, transparent 50%);
+      transition: all 1s ease-in-out;
+    }
+
+    /* Scary mode styling */
+    body.scary-mode {
+      background: var(--scary-bg);
+      background-image: 
+        radial-gradient(circle at 25% 25%, var(--scary-shadow) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
+      color: var(--scary-text);
+    }
+
+    body.scary-mode .container {
+      text-shadow: 0 0 20px var(--scary-glow);
+    }
+
+    body.scary-mode .border-line {
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        transparent 40%, 
+        var(--scary-accent) 50%,
+        transparent 60%, 
+        transparent 100%);
+      box-shadow: 0 0 15px var(--scary-glow);
+      animation: scary-border-pulse 1s linear infinite;
+    }
+
+    @keyframes scary-border-pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+
+    body.scary-mode h1 {
+      color: var(--scary-text);
+      text-shadow: 
+        0 0 10px var(--scary-glow),
+        0 0 20px var(--scary-glow),
+        0 0 40px var(--scary-shadow);
+    }
+
+    body.scary-mode .developers-section {
+      color: var(--scary-text);
+      text-shadow: 0 0 10px var(--scary-glow);
+    }
+
+    body.scary-mode .developer-name {
+      color: var(--scary-accent);
+      text-shadow: 0 0 15px var(--scary-glow);
+    }
+
+    body.scary-mode .particle {
+      background: var(--scary-accent);
+      box-shadow: 0 0 5px var(--scary-glow);
     }
 
     /* Minimal animated border - single subtle line */
@@ -74,6 +136,7 @@
       background-size: 200% 100%;
       animation: ghost-flow 20s linear infinite;
       opacity: 0.4;
+      transition: all 1s ease-in-out;
     }
 
     .border-top {
@@ -110,6 +173,7 @@
       text-align: center;
       max-width: 800px;
       margin: 0 auto;
+      transition: all 1s ease-in-out;
     }
 
     h1 {
@@ -192,6 +256,54 @@
       transform: scale(1.02);
     }
 
+    .developers-section {
+      margin-top: 2rem;
+      font-size: 0.5rem;
+      font-family: 'Press Start 2P', cursive;
+      font-weight: 400;
+      opacity: 0.7;
+      line-height: 2;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      transition: all 1s ease-in-out;
+    }
+
+    .brought-by-text {
+      margin-bottom: 0.8rem;
+      opacity: 0.5;
+    }
+
+    .developers-list {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .developer-name {
+      color: var(--accent-primary);
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid transparent;
+    }
+
+    .developer-name:hover {
+      color: var(--accent-glow);
+      text-shadow: 
+        0 0 8px var(--glow-primary),
+        0 0 15px var(--glow-primary);
+      border-color: var(--accent-primary);
+      background: rgba(139, 74, 107, 0.1);
+      transform: scale(1.05);
+    }
+
+    .developer-separator {
+      color: var(--text-tertiary);
+      opacity: 0.4;
+    }
+
     .subtitle {
       margin-top: 1.5rem;
       font-size: 0.7rem;
@@ -263,6 +375,23 @@
       opacity: 1;
     }
 
+    body.scary-mode .easter-egg-message.warning {
+      color: var(--scary-accent);
+      text-shadow: 0 0 20px var(--scary-glow);
+      animation: scary-text-pulse 0.8s ease-in-out infinite;
+    }
+
+    @keyframes scary-text-pulse {
+      0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 0.7; 
+        transform: scale(1.05);
+      }
+    }
+
     @keyframes warning-flicker {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
@@ -296,6 +425,11 @@
       filter: drop-shadow(0 0 12px var(--glow-primary));
     }
 
+    body.scary-mode .minimal-links a:hover {
+      color: var(--scary-accent);
+      filter: drop-shadow(0 0 15px var(--scary-glow));
+    }
+
     footer {
       position: fixed;
       bottom: 20px;
@@ -308,6 +442,12 @@
       line-height: 1.6;
       opacity: 0.4;
       letter-spacing: 0.02em;
+      transition: all 1s ease-in-out;
+    }
+
+    body.scary-mode footer {
+      color: var(--scary-text);
+      text-shadow: 0 0 10px var(--scary-glow);
     }
 
     footer a {
@@ -318,6 +458,14 @@
 
     footer a:hover {
       color: var(--accent-glow);
+    }
+
+    body.scary-mode footer a {
+      color: var(--scary-accent);
+    }
+
+    body.scary-mode footer a:hover {
+      color: var(--scary-text);
     }
 
     /* Theme toggle - minimal and hidden */
@@ -349,6 +497,17 @@
       box-shadow: 0 0 10px var(--glow-primary);
     }
 
+    body.scary-mode .theme-toggle {
+      border-color: var(--scary-accent);
+      color: var(--scary-text);
+    }
+
+    body.scary-mode .theme-toggle:hover {
+      border-color: var(--scary-accent);
+      color: var(--scary-accent);
+      box-shadow: 0 0 15px var(--scary-glow);
+    }
+
     .theme-icon {
       transition: all 0.3s ease;
     }
@@ -358,6 +517,14 @@
       h1 {
         font-size: 1.8rem;
         line-height: 1.3;
+      }
+      .developers-section {
+        font-size: 0.45rem;
+        margin-top: 1.5rem;
+      }
+      .developers-list {
+        flex-direction: column;
+        gap: 0.8rem;
       }
       .subtitle {
         font-size: 0.6rem;
@@ -389,6 +556,7 @@
       opacity: 0.1;
       animation: float 15s linear infinite;
       z-index: 0;
+      transition: all 1s ease-in-out;
     }
 
     @keyframes float {
@@ -435,7 +603,16 @@
   <div class="container">
     <h1 id="username" class="glitch-text" data-text="OutOfTune" onclick="handleNameClick()">OutOfTune</h1>
     
-    <p class="subtitle">Something is brewing in the shadows...</p>
+    <div class="developers-section">
+      <div class="brought-by-text">Brought to you by</div>
+      <div class="developers-list">
+        <span class="developer-name" onclick="handleDeveloperClick('Bluerra')" title="Click to learn more">Bluerra</span>
+        <span class="developer-separator">&</span>
+        <span class="developer-name" onclick="handleDeveloperClick('MiloHakai')" title="Click to learn more">MiloHakai</span>
+      </div>
+    </div>
+    
+    <p class="subtitle">What is this going to be now?</p>
     
     <div class="status-indicator">
       <div class="status-dot"></div>
@@ -453,7 +630,7 @@
 
   <footer>
     &copy; 2025 OutOfTune • In Development<br>
-    <span style="opacity: 0.6;">Something mysterious is coming...</span>
+    <span style="opacity: 0.6;">Please let me out. . .</span>
   </footer>
 
   <script>
@@ -487,156 +664,170 @@
     function playAmbientSound(clickCount) {
       if (!isAudioEnabled) return;
 
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      const filterNode = audioContext.createBiquadFilter();
+      const ctx = audioContext;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      const filterNode = ctx.createBiquadFilter();
 
       oscillator.connect(filterNode);
       filterNode.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(ctx.destination);
 
-      // Different ambient sounds for different phases
       switch(clickCount) {
         case 1: // "You're curious..."
-          oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 2);
-          filterNode.frequency.setValueAtTime(800, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+          oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 2);
+          filterNode.frequency.setValueAtTime(800, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
           oscillator.type = 'sine';
           break;
 
         case 2: // "Keep looking..."
-          oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
-          oscillator.frequency.linearRampToValueAtTime(120, audioContext.currentTime + 1.5);
-          filterNode.frequency.setValueAtTime(400, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.2);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
+          oscillator.frequency.setValueAtTime(100, ctx.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(120, ctx.currentTime + 1.5);
+          filterNode.frequency.setValueAtTime(400, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.2);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
           oscillator.type = 'triangle';
           break;
 
         case 3: // "The shadows whisper..."
-          // Whisper-like filtered noise
-          oscillator.frequency.setValueAtTime(80, audioContext.currentTime);
-          oscillator.frequency.linearRampToValueAtTime(60, audioContext.currentTime + 3);
-          filterNode.frequency.setValueAtTime(200, audioContext.currentTime);
-          filterNode.Q.setValueAtTime(10, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.06, audioContext.currentTime + 0.3);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 3);
+          oscillator.frequency.setValueAtTime(80, ctx.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(60, ctx.currentTime + 3);
+          filterNode.frequency.setValueAtTime(200, ctx.currentTime);
+          filterNode.Q.setValueAtTime(10, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.3);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3);
           oscillator.type = 'sawtooth';
           break;
 
         case 4: // "Almost there..."
-          oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 2.5);
-          filterNode.frequency.setValueAtTime(600, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.1);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2.5);
+          oscillator.frequency.setValueAtTime(300, ctx.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 2.5);
+          filterNode.frequency.setValueAtTime(600, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
           oscillator.type = 'sine';
           break;
 
         case 5: // "You found something..."
-          // Mysterious discovery sound
-          oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
-          oscillator.frequency.linearRampToValueAtTime(180, audioContext.currentTime + 0.5);
-          oscillator.frequency.linearRampToValueAtTime(120, audioContext.currentTime + 2);
-          filterNode.frequency.setValueAtTime(1000, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+          oscillator.frequency.setValueAtTime(150, ctx.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(180, ctx.currentTime + 0.5);
+          oscillator.frequency.linearRampToValueAtTime(120, ctx.currentTime + 2);
+          filterNode.frequency.setValueAtTime(1000, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.1);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
           oscillator.type = 'triangle';
           break;
 
         case 6: // "Stop. You've seen enough."
-          // Warning tone
-          oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-          oscillator.frequency.linearRampToValueAtTime(350, audioContext.currentTime + 1);
-          filterNode.frequency.setValueAtTime(800, audioContext.currentTime);
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+          oscillator.frequency.setValueAtTime(400, ctx.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(350, ctx.currentTime + 1);
+          filterNode.frequency.setValueAtTime(800, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
           oscillator.type = 'square';
           break;
 
         case 7: // "I warned you."
-          // Intense warning sound
-          createIntenseWarningSound();
-          return; // Don't create the regular oscillator
+          createIntenseWarningSound(ctx);
+          return;
 
         default:
           if (clickCount > 7) {
-            // Spam sounds - harsh and annoying
-            createSpamSound();
+            createSpamSound(ctx);
             return;
           }
       }
 
       if (clickCount <= 6) {
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 3);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 3);
       }
     }
 
-    function createIntenseWarningSound() {
-      if (!isAudioEnabled) return;
+    // Intense warning sound for final warning
+    function createIntenseWarningSound(ctx) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
 
-      // Create multiple oscillators for a more intense sound
-      for (let i = 0; i < 3; i++) {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        const filterNode = audioContext.createBiquadFilter();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(60, ctx.currentTime + 1.2);
 
-        oscillator.connect(filterNode);
-        filterNode.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1200, ctx.currentTime);
+      filter.frequency.linearRampToValueAtTime(80, ctx.currentTime + 1.2);
 
-        oscillator.frequency.setValueAtTime(200 + (i * 100), audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(150 + (i * 50), audioContext.currentTime + 2);
-        
-        filterNode.frequency.setValueAtTime(400, audioContext.currentTime);
-        filterNode.Q.setValueAtTime(5, audioContext.currentTime);
-        
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
-        
-        oscillator.type = 'square';
-        oscillator.start(audioContext.currentTime + (i * 0.1));
-        oscillator.stop(audioContext.currentTime + 2);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 1.2);
+
+      // Add a burst of filtered noise
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.3, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.08));
       }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.2, ctx.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      noise.connect(noiseGain).connect(ctx.destination);
+      noise.start(ctx.currentTime);
+      noise.stop(ctx.currentTime + 0.3);
     }
 
-    function createSpamSound() {
-      if (!isAudioEnabled) return;
+    // Spam sound for clicks after the warning
+    function createSpamSound(ctx) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
 
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      // Harsh, annoying sound for spam
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
-      
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-      
-      oscillator.type = 'sawtooth';
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.3);
-    }
-
-    function handleNameClick() {
-      // Initialize audio on first click
-      if (!audioContext) {
-        initAudio();
+      // Extra noise burst
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.05));
       }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.3, ctx.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      noise.connect(noiseGain).connect(ctx.destination);
+      noise.start(ctx.currentTime);
+      noise.stop(ctx.currentTime + 0.1);
+    }
+  
+      function handleNameClick() {
+        // Initialize audio on first click
+        if (!audioContext) {
+          initAudio();
+        }
 
       nameClickCount++;
       
@@ -650,7 +841,7 @@
         
         if (nameClickCount === maxClicks) {
           easterEggEl.classList.add('warning');
-          body.classList.add('spam-mode');
+          body.classList.add('scary-mode');
         }
         
         // Play appropriate ambient sound
@@ -659,25 +850,25 @@
       } else if (nameClickCount <= maxClicks + 3) {
         // Spam warning phase
         const warnings = [
-          "STOP.",
-          "You should not be here.", 
-          "This is your final warning."
+          "You're being watched.",
+          "My patience wears thin...",
+          "Back off.",
         ];
         const warningIndex = nameClickCount - maxClicks - 1;
         easterEggEl.textContent = warnings[warningIndex];
         easterEggEl.classList.add('warning', 'show');
-        body.classList.add('spam-mode');
+        body.classList.add('scary-mode');
         
         // Play spam sound
         playAmbientSound(nameClickCount);
         
       } else {
         // Final redirect - they've been warned enough
-        easterEggEl.textContent = "Fine. You asked for this...";
+        easterEggEl.textContent = "I CAN'T TAKE IT ANYMORE, GOODBYE!";
         playAmbientSound(nameClickCount);
         
         setTimeout(() => {
-          window.open('https://youtu.be/OR6olLu61u8?list=RDOR6olLu61u8', '_blank');
+          window.open('https://youtu.be/tcL7xW5gVlw?si=Q0rurfLshoSCt6Ua', '_blank');
         }, 2000);
         return;
       }
@@ -688,14 +879,65 @@
           nameClickCount = 0;
           easterEggEl.textContent = "...";
           easterEggEl.classList.remove('show', 'warning');
-          body.classList.remove('spam-mode');
+          body.classList.remove('scary-mode');
         }
       }, 8000);
     }
 
+    function handleDeveloperClick(developerName) {
+      // Initialize audio on first click
+      if (!audioContext) {
+        initAudio();
+      }
+
+      // Play a subtle click sound
+      if (isAudioEnabled) {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
+        
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+        
+        oscillator.type = 'sine';
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      }
+
+      // Redirect to developer page
+      if (developerName === 'Bluerra') {
+        window.open('https://bluerra.outoftune.dev/', '_blank');
+      } else if (developerName === 'MiloHakai') {
+        window.open('https://milohakai.outoftune.dev/', '_blank');
+      }
+
+      // Show mysterious developer messages
+      const easterEggEl = document.getElementById('easter-egg-text');
+      const developerMessages = {
+        'Bluerra': "Creator of evil...",
+        'MiloHakai': "Going out of the rules..."
+      };
+
+      easterEggEl.textContent = developerMessages[developerName];
+      easterEggEl.classList.add('show');
+      easterEggEl.classList.remove('warning');
+
+      // Reset after delay
+      setTimeout(() => {
+        easterEggEl.textContent = "...";
+        easterEggEl.classList.remove('show');
+      }, 3000);
+    }
+
     function handleThemeToggle() {
       // Placeholder for future light theme
-      alert("The light reveals nothing new.\nDarkness is where we belong.");
+      alert("There's no light to be seen.\nDarkness is where we belong.");
     }
 
     // Generate random particles occasionally
@@ -718,6 +960,7 @@
     // Add mysterious console message
     console.log("%cOutOfTune", "color: #87ceeb; font-size: 20px; font-weight: bold;");
     console.log("%cSomething is being built in the shadows...", "color: #666; font-size: 12px;");
+    console.log("%cBrought to you by Bluerra & MiloHakai", "color: #197d7e; font-size: 12px;");
     console.log("%cAre you ready?", "color: #cc4444; font-size: 14px;");
     console.log("%cP.S. Try clicking the logo... but don't overdo it.", "color: #87ceeb; font-size: 10px;");
   </script>
