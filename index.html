@@ -299,6 +299,36 @@
       transform: scale(1.05);
     }
 
+    /* Inline collaborators (displayed under the developer names) */
+    .collaborators-inline {
+      margin-top: 0.6rem;
+      display: flex !important;
+      gap: 0.9rem;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.45rem;
+      opacity: 0.95;
+      z-index: 4;
+      pointer-events: auto;
+    }
+
+    .collaborator-name {
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 0.18rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      display: inline-block;
+      transition: color 0.15s ease, text-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .collaborator-name:hover {
+      color: var(--accent-glow);
+      text-shadow: 0 0 8px var(--glow-primary);
+      transform: none;
+    }
+
     .developer-separator {
       color: var(--text-tertiary);
       opacity: 0.4;
@@ -512,6 +542,76 @@
       transition: all 0.3s ease;
     }
 
+    /* Collaborators tab */
+    .collab-wrapper {
+      margin-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .collab-tab {
+      background: transparent;
+      border: 1px solid var(--accent-primary);
+      color: var(--accent-primary);
+      padding: 8px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.6rem;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+      -webkit-appearance: none;
+    }
+
+    .collab-tab:hover,
+    .collab-tab:focus {
+      box-shadow: 0 0 10px var(--glow-primary);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .collab-panel {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.02);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      min-width: 200px;
+      text-align: center;
+      backdrop-filter: blur(4px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .collab-panel[hidden] {
+      display: none;
+    }
+
+    .collab-panel ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .collab-panel li {
+      margin: 6px 0;
+    }
+
+    .collab-link {
+      color: var(--accent-glow);
+      text-decoration: none;
+      font-size: 0.7rem;
+      transition: color 0.15s ease, text-shadow 0.15s ease;
+    }
+
+    .collab-link:hover {
+      color: var(--accent-primary);
+      text-shadow: 0 0 8px var(--glow-primary);
+    }
+
+    /* Light-theme tweak */
+    [data-theme="light"] .collab-tab { color: var(--border-color-light); border-color: var(--border-color-light); }
+    [data-theme="light"] .collab-panel { background: rgba(0,0,0,0.03); }
+    
     /* Responsive */
     @media (max-width: 600px) {
       h1 {
@@ -617,7 +717,14 @@
         <span class="developer-separator">&</span>
         <span class="developer-name" onclick="handleDeveloperClick('MiloHakai')" title="Click to learn more">MiloHakai</span>
       </div>
-    </div>
+
+      <div class="collaborators-inline" aria-label="Collaborators">
+        <a class="collaborator-name" title="Umilushi" href="./umilushi/index.html" target="_blank" rel="noopener">Umilushi</a>
+        <a class="collaborator-name" title="Lavender" href="./lavender/index.html" target="_blank" rel="noopener">Lavender</a>
+        <a class="collaborator-name" title="Cinnovabun" href="./cinnovabun/index.html" target="_blank" rel="noopener">Cinnovabun</a>
+      </div>
+
+    </div> <!-- closing .developers-section (ensure this exists) -->
     
     <p class="subtitle">What is this going to be now?</p>
     
@@ -633,6 +740,9 @@
       <a href="#" title="Soon"><i class="fas fa-music"></i></a>
       <a href="#" title="Soon"><i class="fab fa-discord"></i></a>
     </div>
+
+    <!-- Supported / collaborators line -->
+    <!-- (removed duplicate supported-line from the bottom of the page) -->
   </div>
 
   <footer>
@@ -919,10 +1029,18 @@
 
       // Redirect to developer page
       if (developerName === 'Bluerra') {
-        window.open('https://outoftune.dev/bluerra', '_blank');
+        window.open('./bluerra/index.html', '_blank');
       } else if (developerName === 'MiloHakai') {
-        window.open('https://outoftune.dev/milohakai', '_blank');
+        window.open('./milohakai/index.html', '_blank');
       }
+
+      // Redirect to collaborators page
+      const collabLinks = {
+        'Cinnovabun': './cinnovabun/index.html',
+        'Umilushi': './umilushi/index.html',
+        'Lavender': './lavender/index.html',
+      };
+
 
       // Show mysterious developer messages
       const easterEggEl = document.getElementById('easter-egg-text');
@@ -970,6 +1088,45 @@
     console.log("%cBrought to you by Bluerra & MiloHakai", "color: #197d7e; font-size: 12px;");
     console.log("%cAre you ready?", "color: #cc4444; font-size: 14px;");
     console.log("%cP.S. Try clicking the logo... but don't overdo it.", "color: #87ceeb; font-size: 10px;");
+
+    // Collaborators tab behavior
+    (function () {
+      const toggle = document.getElementById('collabToggle');
+      const panel = document.getElementById('collabPanel');
+      if (!toggle || !panel) return;
+
+      toggle.addEventListener('click', (e) => {
+        const open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!open));
+        panel.hidden = open;
+      });
+
+      // close on outside click
+      document.addEventListener('click', (e) => {
+        if (!toggle.contains(e.target) && !panel.contains(e.target)) {
+          panel.hidden = true;
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // close on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          panel.hidden = true;
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    })();
+
+    // Ensure inline collaborators are always visible (override any leftover toggle code)
+    document.addEventListener('DOMContentLoaded', () => {
+      const collabs = document.querySelectorAll('.collaborators-inline');
+      collabs.forEach(el => {
+        el.hidden = false;
+        el.style.display = 'flex';
+        el.style.zIndex = '4';
+      });
+    });
   </script>
 </body>
 </html>
