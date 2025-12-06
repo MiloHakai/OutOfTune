@@ -1,54 +1,743 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MiloHakai</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0a0a;
+      --bg-light: #fdfdfd;
+      --text-dark: #ccc;
+      --text-light: #222;
+      --border-color-dark: #fff;
+      --border-color-light: #000;
+      --glow-color-dark: rgba(255, 255, 255, 0.8);
+      --glow-color-light: rgba(0, 0, 0, 0.8);
+    }
 
-        body {
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Press Start 2P', monospace;
-        }
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+    }
 
-        .container {
-            text-align: center;
-        }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+      transition: background 0.4s ease, color 0.4s ease;
+      position: relative;
+    }
 
-        .message {
-            color: #888;
-            font-size: 13px;
-            line-height: 2;
-            letter-spacing: 2px;
-        }
+    [data-theme="light"] body {
+      background-color: var(--bg-light);
+      color: var(--text-light);
+    }
 
-        .line1 {
-            margin-bottom: 10px;
-            font-size: 13px;
-        }
+    /* Alternative approach with individual border segments */
+    .border-segments {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
 
-        .line2 {
-            font-size: 13px;
-        }
-    </style>
+    /* Border line animations */
+    .border-top,
+    .border-right,
+    .border-bottom,
+    .border-left {
+      position: absolute;
+    }
+
+    /* Dark theme borders (default) */
+    .border-top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 300% 100%;
+      animation: move-horizontal 12s linear infinite;
+    }
+
+    .border-right {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 100% 300%;
+      animation: move-vertical 12s linear infinite;
+    }
+
+    .border-bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(-90deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 300% 100%;
+      animation: move-horizontal-reverse 12s linear infinite;
+    }
+
+    .border-left {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(-180deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 100% 300%;
+      animation: move-vertical-reverse 12s linear infinite;
+    }
+
+    /* Light theme borders */
+    [data-theme="light"] .border-top {
+      background: linear-gradient(90deg,
+          transparent 0%,
+          transparent 30%,
+          #000 40%,
+          #000 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    [data-theme="light"] .border-right {
+      background: linear-gradient(180deg,
+          transparent 0%,
+          transparent 30%,
+          #000 40%,
+          #000 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    [data-theme="light"] .border-bottom {
+      background: linear-gradient(-90deg,
+          transparent 0%,
+          transparent 30%,
+          #000 40%,
+          #000 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    [data-theme="light"] .border-left {
+      background: linear-gradient(-180deg,
+          transparent 0%,
+          transparent 30%,
+          #000 40%,
+          #000 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    /* First line - no delays, continuous movement */
+    .border-line-1.border-top {
+      animation-delay: 0s;
+    }
+
+    .border-line-1.border-right {
+      animation-delay: 3s;
+    }
+
+    .border-line-1.border-bottom {
+      animation-delay: 6s;
+    }
+
+    .border-line-1.border-left {
+      animation-delay: 9s;
+    }
+
+    /* Second line - offset by 6s (half cycle) */
+    .border-line-2.border-top {
+      animation-delay: 6s;
+    }
+
+    .border-line-2.border-right {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-bottom {
+      animation-delay: 0s;
+    }
+
+    .border-line-2.border-left {
+      animation-delay: 3s;
+    }
+
+    @keyframes move-horizontal {
+      0% {
+        background-position: -100% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    @keyframes move-horizontal-reverse {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
+    }
+
+    @keyframes move-vertical {
+      0% {
+        background-position: 0 -100%;
+      }
+
+      100% {
+        background-position: 0 200%;
+      }
+    }
+
+    @keyframes move-vertical-reverse {
+      0% {
+        background-position: 0 200%;
+      }
+
+      100% {
+        background-position: 0 -100%;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 2.2rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+      position: relative;
+      display: inline-block;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      line-height: 1.2;
+    }
+
+    /* Wave effect setup */
+    .wave-text {
+      background: linear-gradient(90deg,
+          #fff 0%,
+          #fff 35%,
+          #000 50%,
+          #fff 65%,
+          #fff 100%);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: wave-effect 6s linear infinite;
+      text-shadow:
+        0 0 20px rgba(255, 255, 255, 0.6),
+        0 0 40px rgba(255, 255, 255, 0.4),
+        0 0 60px rgba(255, 255, 255, 0.2);
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+    }
+
+    [data-theme="light"] .wave-text {
+      background: linear-gradient(90deg,
+          #000 0%,
+          #000 35%,
+          #fff 50%,
+          #000 65%,
+          #000 100%);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow:
+        0 0 20px rgba(0, 0, 0, 0.6),
+        0 0 40px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(0, 0, 0, 0.2);
+      filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+    }
+
+    @keyframes wave-effect {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
+    }
+
+    h1:active {
+      transform: scale(0.98);
+    }
+
+    p {
+      margin-top: 1.5rem;
+      font-size: 0.7rem;
+      font-family: 'Press Start 2P', monospace;
+      font-weight: 400;
+      opacity: 0.9;
+      animation: subtle-pulse 12s ease-in-out infinite;
+      letter-spacing: 0.05em;
+      line-height: 1.4;
+    }
+
+    @keyframes subtle-pulse {
+
+      0%,
+      100% {
+        opacity: 0.9;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .icons {
+      margin-top: 1.5rem;
+    }
+
+    .click-counter {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+
+    .click-counter.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .click-counter p {
+      font-size: 0.6rem;
+      color: #00ff00;
+      margin: 0;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+      animation: none;
+    }
+
+    [data-theme="light"] .click-counter p {
+      color: #006600;
+      text-shadow: 0 0 10px rgba(0, 102, 0, 0.5);
+    }
+
+    .icons a {
+      margin: 0 10px;
+      font-size: 1.5rem;
+      color: inherit;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .icons a:hover {
+      color: #fff;
+      transform: scale(1.1);
+    }
+
+    [data-theme="light"] .icons a:hover {
+      color: #000;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.5rem;
+      color: #666;
+      z-index: 2;
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 0.05em;
+      line-height: 1.4;
+    }
+
+    /* Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 5;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 12px;
+      color: inherit;
+      font-size: 1.2rem;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 50px;
+      height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="light"] .theme-toggle {
+      background: rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="light"] .theme-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 25px rgba(255, 255, 255, 0.15);
+    }
+
+    /* ICON TRANSITION: use opacity/transform instead of display so it can animate */
+    .theme-icon {
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      will-change: opacity, transform;
+      display: inline-block;
+    }
+
+    /* renderable but hidden state */
+    .sun-icon,
+    .moon-icon {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.96);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* dark theme: show moon */
+    [data-theme="dark"] .moon-icon {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      visibility: visible;
+    }
+
+    /* light theme: show sun */
+    [data-theme="light"] .sun-icon {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      visibility: visible;
+    }
+
+    /* keep icons positioned correctly */
+    .theme-toggle .theme-icon {
+      position: relative;
+    }
+
+    /* Splash screen */
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    .splash-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-content {
+      text-align: center;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    /* Splash title: use wave-text look but remove heavy shadows/filters so it "merges" */
+    .splash-content h2 {
+      margin: 0;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      background: linear-gradient(90deg,
+          #fff 0%,
+          #fff 35%,
+          #000 50%,
+          #fff 65%,
+          #fff 100%);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      /* remove heavy text-shadow / drop-shadow to avoid visible box */
+      text-shadow: none;
+      filter: none;
+    }
+
+    /* Typing caret: transparent background, caret uses currentColor */
+    .typing-text {
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid currentColor;
+      padding-right: 6px;
+      background: transparent;
+    }
+    .typing-text.typing { animation: blink-caret 0.75s step-end infinite; }
+    @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: currentColor; } }
+
+    /* Theme toggle: absolute-stack icons so switching won't reflow/shift */
+    .theme-toggle { position: fixed; top: 20px; left: 20px; z-index: 5; width:50px; height:50px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; }
+    .theme-toggle .theme-icon {
+      position: absolute;
+      inset: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      line-height: 1;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      opacity: 0; transform: translateY(-6px) scale(0.96); visibility: hidden;
+      pointer-events: none;
+    }
+    [data-theme="dark"] .theme-toggle .moon-icon,
+    [data-theme="light"] .theme-toggle .sun-icon {
+      opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto;
+    }
+
+    /* keep splash blending with page background */
+    .splash-screen { background-color: var(--bg-dark); transition: opacity 0.8s ease, visibility 0.8s ease; z-index:1000; }
+    .splash-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+
+    /* Fade-in effect for elements with .fade-in class */
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="message">
-            <div class="line1">I'm not feeling well.</div>
-            <div class="line2">Need some time to take my mind at ease for a bit.</div>
-            <div class="line3">I feel overwhelmed and not accepted, I'm sorry for being a shame.</div>
-        </div>
+  <!-- Splash screen (INSERT) -->
+  <div class="splash-screen" id="splashScreen" role="dialog" aria-label="Welcome">
+    <div class="splash-content" id="splashContent">
+      <!-- add wave-text so splash text matches final title visuals -->
+      <h2 class="typing-text wave-text" id="splashTitle">MiloHakai</h2>
     </div>
+  </div>
+
+  <!-- Animated Border Lines -->
+  <div class="border-segments">
+    <div class="border-top border-line-1"></div>
+    <div class="border-right border-line-1"></div>
+    <div class="border-bottom border-line-1"></div>
+    <div class="border-left border-line-1"></div>
+    <div class="border-top border-line-2"></div>
+    <div class="border-right border-line-2"></div>
+    <div class="border-bottom border-line-2"></div>
+    <div class="border-left border-line-2"></div>
+  </div>
+
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+    <i class="fas fa-sun theme-icon sun-icon"></i>
+    <i class="fas fa-moon theme-icon moon-icon"></i>
+  </button>
+
+  <div class="container">
+    <h1 id="username" class="wave-text" onclick="playClickSound()">MiloHakai</h1>
+    <p>Student and occasional streamer from Italy.</p>
+
+    <div id="clickCounter" class="click-counter" style="display: none;">
+      <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
+    </div>
+
+    <div class="icons">
+      <a href="https://discord.com/users/379002314226401320/" title="Discord" target="_blank"><i
+          class="fab fa-discord"></i></a>
+      <a href="https://github.com/MiloHakai" title="GitHub" target="_blank"><i class="fab fa-github"></i></a>
+      <a href="https://steamcommunity.com/id/5483625764" title="Steam" target="_blank"><i class="fab fa-steam"></i></a>
+      <a href="https://twitch.tv/MiloHakai" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
+    </div>
+  </div>
+
+  <footer>
+    Copyright © 2025–present MiloHakai <br>
+    Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank"> SpectraPulse</a>
+  </footer>
+
+  <!-- Audio element for background music -->
+  <audio id="backgroundAudio" preload="auto" loop muted playsinline>
+    <source src="./bgm.mp3" type="audio/mpeg">
+    <source src="./bgm.flac" type="audio/ogg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Audio element for click sound effect -->
+  <audio id="clickSound" preload="auto">
+    <source src="./click-sound.mp3" type="audio/mpeg">
+    <source src="./click-sound.ogg" type="audio/ogg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute("data-theme");
+      html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+    }
+
+    // Click counter functionality
+    let clickCount = 0;
+    const clickCounter = document.getElementById('clickCounter');
+    const clickCountSpan = document.getElementById('clickCount');
+
+    // Function to play click sound and update counter
+    function playClickSound() {
+      const clickSound = document.getElementById('clickSound');
+      clickSound.currentTime = 0; // Reset to beginning in case it's already playing
+      clickSound.play().catch(error => {
+        console.log('Click sound could not be played:', error);
+      });
+
+      // Update click counter
+      clickCount++;
+      clickCountSpan.textContent = clickCount;
+
+      // Show the counter after first click
+      if (clickCount === 1) {
+        clickCounter.style.display = 'block';
+        setTimeout(() => {
+          clickCounter.classList.add('show');
+        }, 10);
+      }
+    }
+
+    /* Robust muted-autoplay with fallback button and logging */
+    (function setupBackgroundAudioNoButton() {
+      const bg = document.getElementById('backgroundAudio');
+      if (!bg) return;
+
+      bg.muted = true;
+      bg.volume = 0.3;
+
+      // Try muted autoplay immediately (best-effort)
+      bg.play().catch(() => { /* autoplay blocked — will start on gesture below */ });
+
+      // On first user gesture: unmute and ensure playback
+      const handleFirstGesture = () => {
+        try { bg.muted = false; bg.volume = 0.3; } catch (_) {}
+        bg.play().catch(() => { /* ignore play errors */ });
+        document.removeEventListener('pointerdown', handleFirstGesture);
+        document.removeEventListener('keydown', handleFirstGesture);
+        document.removeEventListener('touchstart', handleFirstGesture);
+      };
+
+      document.addEventListener('pointerdown', handleFirstGesture, { once: true });
+      document.addEventListener('keydown', handleFirstGesture, { once: true });
+      document.addEventListener('touchstart', handleFirstGesture, { once: true });
+    })();
+
+    /* Splash typing + hide (ensure main title merges visually) */
+    (function () {
+      const splash = document.getElementById('splashScreen');
+      const splashTitle = document.getElementById('splashTitle');
+      const mainTitle = document.getElementById('username');
+      const finalText = (splashTitle && splashTitle.textContent.trim()) || (mainTitle && mainTitle.textContent.trim()) || 'MiloHakai';
+
+      function typeText(targetEl, text, delay = 70, onDone) {
+        if (!targetEl) return;
+        targetEl.textContent = '';
+        targetEl.classList.add('typing');
+        let i = 0;
+        const t = setInterval(() => {
+          targetEl.textContent += text.charAt(i);
+          i++;
+          if (i >= text.length) {
+            clearInterval(t);
+            targetEl.classList.remove('typing');
+            if (onDone) onDone();
+          }
+        }, delay);
+      }
+
+      function hideSplashAndReveal() {
+        if (splash) splash.classList.add('hidden');
+        setTimeout(() => {
+          if (mainTitle) {
+            // apply same visual style so it "merges" with page
+            mainTitle.classList.add('wave-text');
+            mainTitle.textContent = finalText;
+          }
+        }, 800);
+      }
+
+      if (splash && splashTitle) {
+        typeText(splashTitle, finalText, 70, () => setTimeout(hideSplashAndReveal, 900));
+        splash.addEventListener('pointerdown', () => hideSplashAndReveal(), { once: true });
+      } else {
+        if (mainTitle) mainTitle.classList.add('wave-text');
+      }
+    })();
+  </script>
 </body>
+
 </html>
