@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0a0a0a;
+      --bg-dark: #000000;
       --bg-light: #fdfdfd;
       --text-dark: #ccc;
       --text-light: #222;
@@ -279,12 +279,17 @@
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+      /* restore animated wave of the gradient */
       animation: wave-effect 6s linear infinite;
+      will-change: background-position, text-shadow;
+      /* reduced, smoother glow (less noise) */
       text-shadow:
-        0 0 20px rgba(255, 255, 255, 0.6),
-        0 0 40px rgba(255, 255, 255, 0.4),
-        0 0 60px rgba(255, 255, 255, 0.2);
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        0 0 4px rgba(255, 255, 255, 0.95),
+        0 0 14px rgba(255, 255, 255, 0.50),
+        0 0 30px rgba(255, 255, 255, 0.18);
+      filter: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     [data-theme="light"] .wave-text {
@@ -298,21 +303,35 @@
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+      /* lighter, reduced dark glow for light theme */
       text-shadow:
-        0 0 20px rgba(0, 0, 0, 0.6),
-        0 0 40px rgba(0, 0, 0, 0.4),
-        0 0 60px rgba(0, 0, 0, 0.2);
-      filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+        0 0 4px rgba(0, 0, 0, 0.9),
+        0 0 10px rgba(0, 0, 0, 0.45),
+        0 0 20px rgba(0, 0, 0, 0.12);
+      filter: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    @keyframes wave-effect {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -100% 0;
-      }
+    /* Splash title: keep minimal/no heavy glow so it merges cleanly */
+    .splash-content h2 {
+      margin: 0;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      background: linear-gradient(90deg,
+          #fff 0%,
+          #fff 35%,
+          #000 50%,
+          #fff 65%,
+          #fff 100%);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      /* keep splash minimal to avoid extra halo */
+      text-shadow: none;
+      filter: none;
     }
 
     h1:active {
@@ -522,7 +541,7 @@
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      /* remove heavy text-shadow / drop-shadow to avoid visible box */
+      /* keep splash minimal to avoid extra halo */
       text-shadow: none;
       filter: none;
     }
@@ -620,7 +639,7 @@
   </div>
 
   <footer>
-    Copyright © 2025–present MiloHakai <br>
+    Copyright © 2025–present MiloHakai // OutOfTune <br>
     Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank"> SpectraPulse</a>
   </footer>
 
