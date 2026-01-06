@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
@@ -40,6 +40,185 @@
       color: var(--text-light);
     }
 
+    /* CRT Screen Effects */
+    .crt-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Scanlines effect - white on dark theme with right-to-left animation */
+    .crt-overlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      background-size: 200% 100%;
+      animation: scanlines-scroll 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scanlines-scroll {
+      0% {
+        background-position: 0% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    /* Light theme scanlines */
+    [data-theme="light"] .crt-overlay::before {
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.03),
+        rgba(0, 0, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      background-size: 200% 100%;
+    }
+
+    /* Screen curvature and vignette */
+    .crt-overlay::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.3) 100%);
+      pointer-events: none;
+    }
+
+    /* Gentle screen flicker effect - much subtler */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.01);
+      pointer-events: none;
+      z-index: 998;
+      animation: flicker 4s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes flicker {
+      0%, 100% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    /* Chromatic Aberration (RGB Split) Effect */
+    .container h1,
+    .container p,
+    .icons a,
+    footer {
+      position: relative;
+    }
+
+    /* RGB split effect on hover for title */
+    h1::before,
+    h1::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    h1::before {
+      color: #ff0000;
+      animation: glitch-1 2s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+
+    h1::after {
+      color: #00ffff;
+      animation: glitch-2 3s infinite;
+      clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    }
+
+    h1:hover::before,
+    h1:hover::after {
+      opacity: 0.9;
+    }
+
+    @keyframes glitch-1 {
+      0%, 100% {
+        transform: translate(0);
+      }
+      33% {
+        transform: translate(-3px, 0);
+      }
+      66% {
+        transform: translate(3px, 0);
+      }
+    }
+
+    @keyframes glitch-2 {
+      0%, 100% {
+        transform: translate(0);
+      }
+      33% {
+        transform: translate(3px, 0);
+      }
+      66% {
+        transform: translate(-3px, 0);
+      }
+    }
+
+    /* Subtle chromatic aberration on all text - barely visible, text looks white/black */
+    .container,
+    footer {
+      text-shadow: 
+        0.5px 0 0 rgba(255, 0, 0, 0.1),
+        -0.5px 0 0 rgba(0, 255, 255, 0.1);
+    }
+
+    /* Slightly stronger effect just on the title when not hovering */
+    h1 {
+      text-shadow: 
+        0.7px 0 0 rgba(255, 0, 0, 0.15),
+        -0.7px 0 0 rgba(0, 255, 255, 0.15);
+    }
+
+    /* Subtle screen curve effect on main content */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -5%;
+      left: -5%;
+      width: 110%;
+      height: 110%;
+      border-radius: 20px;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      z-index: 997;
+    }
+
     /* Alternative approach with individual border segments */
     .border-segments {
       position: fixed;
@@ -68,12 +247,13 @@
       background: linear-gradient(90deg,
           transparent 0%,
           transparent 30%,
-          #fff 40%,
-          #fff 60%,
+          var(--border-color-dark) 40%,
+          var(--border-color-dark) 60%,
           transparent 70%,
           transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal 12s linear infinite;
+      transition: background 0.4s ease;
     }
 
     .border-right {
@@ -84,12 +264,13 @@
       background: linear-gradient(180deg,
           transparent 0%,
           transparent 30%,
-          #fff 40%,
-          #fff 60%,
+          var(--border-color-dark) 40%,
+          var(--border-color-dark) 60%,
           transparent 70%,
           transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical 12s linear infinite;
+      transition: background 0.4s ease;
     }
 
     .border-bottom {
@@ -100,12 +281,13 @@
       background: linear-gradient(-90deg,
           transparent 0%,
           transparent 30%,
-          #fff 40%,
-          #fff 60%,
+          var(--border-color-dark) 40%,
+          var(--border-color-dark) 60%,
           transparent 70%,
           transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal-reverse 12s linear infinite;
+      transition: background 0.4s ease;
     }
 
     .border-left {
@@ -116,12 +298,13 @@
       background: linear-gradient(-180deg,
           transparent 0%,
           transparent 30%,
-          #fff 40%,
-          #fff 60%,
+          var(--border-color-dark) 40%,
+          var(--border-color-dark) 60%,
           transparent 70%,
           transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical-reverse 12s linear infinite;
+      transition: background 0.4s ease;
     }
 
     /* Light theme borders */
@@ -129,40 +312,44 @@
       background: linear-gradient(90deg,
           transparent 0%,
           transparent 30%,
-          #000 40%,
-          #000 60%,
+          var(--border-color-light) 40%,
+          var(--border-color-light) 60%,
           transparent 70%,
-          transparent 100%) !important;
+          transparent 100%);
+      background-size: 300% 100%;
     }
 
     [data-theme="light"] .border-right {
       background: linear-gradient(180deg,
           transparent 0%,
           transparent 30%,
-          #000 40%,
-          #000 60%,
+          var(--border-color-light) 40%,
+          var(--border-color-light) 60%,
           transparent 70%,
-          transparent 100%) !important;
+          transparent 100%);
+      background-size: 100% 300%;
     }
 
     [data-theme="light"] .border-bottom {
       background: linear-gradient(-90deg,
           transparent 0%,
           transparent 30%,
-          #000 40%,
-          #000 60%,
+          var(--border-color-light) 40%,
+          var(--border-color-light) 60%,
           transparent 70%,
-          transparent 100%) !important;
+          transparent 100%);
+      background-size: 300% 100%;
     }
 
     [data-theme="light"] .border-left {
       background: linear-gradient(-180deg,
           transparent 0%,
           transparent 30%,
-          #000 40%,
-          #000 60%,
+          var(--border-color-light) 40%,
+          var(--border-color-light) 60%,
           transparent 70%,
-          transparent 100%) !important;
+          transparent 100%);
+      background-size: 100% 300%;
     }
 
     /* First line - no delays, continuous movement */
@@ -267,91 +454,137 @@
       line-height: 1.2;
     }
 
-    /* Wave effect setup */
-    .wave-text {
-      background: linear-gradient(90deg,
-          #fff 0%,
-          #fff 35%,
-          #000 50%,
-          #fff 65%,
-          #fff 100%);
-      background-size: 300% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: wave-effect 6s linear infinite;
-      text-shadow:
-        0 0 20px rgba(255, 255, 255, 0.6),
-        0 0 40px rgba(255, 255, 255, 0.4),
-        0 0 60px rgba(255, 255, 255, 0.2);
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
-    }
-
-    [data-theme="light"] .wave-text {
-      background: linear-gradient(90deg,
-          #000 0%,
-          #000 35%,
-          #fff 50%,
-          #000 65%,
-          #000 100%);
-      background-size: 300% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow:
-        0 0 20px rgba(0, 0, 0, 0.6),
-        0 0 40px rgba(0, 0, 0, 0.4),
-        0 0 60px rgba(0, 0, 0, 0.2);
-      filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
-    }
-
-    @keyframes wave-effect {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -100% 0;
-      }
-    }
-
-    h1:active {
-      transform: scale(0.98);
-    }
-
     p {
-      margin-top: 1.5rem;
-      font-size: 0.7rem;
-      font-family: 'Press Start 2P', monospace;
-      font-weight: 400;
-      opacity: 0.9;
-      animation: subtle-pulse 12s ease-in-out infinite;
-      letter-spacing: 0.05em;
-      line-height: 1.4;
-    }
-
-    @keyframes subtle-pulse {
-
-      0%,
-      100% {
-        opacity: 0.9;
-      }
-
-      50% {
-        opacity: 1;
-      }
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 1rem 0;
     }
 
     .icons {
-      margin-top: 1.5rem;
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
     }
 
+    .icons a {
+      color: inherit;
+      font-size: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .icons a:hover {
+      transform: translateY(-5px) scale(1.1);
+    }
+
+    .icons a::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 100%;
+      height: 2px;
+      background: currentColor;
+      transition: transform 0.3s ease;
+    }
+
+    .icons a:hover::after {
+      transform: translateX(-50%) scaleX(1);
+    }
+
+    [data-theme="dark"] .icons a:hover {
+      color: #fff;
+      text-shadow: 0 0 20px var(--glow-color-dark);
+    }
+
+    [data-theme="light"] .icons a:hover {
+      color: #000;
+      text-shadow: 0 0 20px var(--glow-color-light);
+    }
+
+    footer {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      text-align: center;
+      z-index: 5;
+      line-height: 1.6;
+    }
+
+    footer a {
+      color: inherit;
+      text-decoration: none;
+      position: relative;
+    }
+
+    footer a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: currentColor;
+      transition: width 0.3s ease;
+    }
+
+    footer a:hover::after {
+      width: 100%;
+    }
+
+    @keyframes pulse-glow {
+      0%,
+      100% {
+        filter: brightness(1);
+      }
+
+      50% {
+        filter: brightness(1.2);
+      }
+    }
+
+    /* Wave text effect */
+    .wave-text {
+      display: inline-block;
+      position: relative;
+      background: linear-gradient(90deg,
+          currentColor 0%,
+          currentColor 35%,
+          transparent 50%,
+          currentColor 65%,
+          currentColor 100%);
+      background-size: 300% 100%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: wave-move 3s ease-in-out infinite;
+    }
+
+    @keyframes wave-move {
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    /* Click counter styling */
     .click-counter {
-      margin-top: 1rem;
-      margin-bottom: 0.5rem;
+      margin-top: 1.5rem;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
       opacity: 0;
       transform: translateY(10px);
-      transition: all 0.3s ease;
+      transition: all 0.5s ease;
+      position: relative;
     }
 
     .click-counter.show {
@@ -360,121 +593,7 @@
     }
 
     .click-counter p {
-      font-size: 0.6rem;
-      color: #00ff00;
       margin: 0;
-      text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-      animation: none;
-    }
-
-    [data-theme="light"] .click-counter p {
-      color: #006600;
-      text-shadow: 0 0 10px rgba(0, 102, 0, 0.5);
-    }
-
-    .icons a {
-      margin: 0 10px;
-      font-size: 1.5rem;
-      color: inherit;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    .icons a:hover {
-      color: #fff;
-      transform: scale(1.1);
-    }
-
-    [data-theme="light"] .icons a:hover {
-      color: #000;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 10px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.5rem;
-      color: #666;
-      z-index: 2;
-      font-family: 'Press Start 2P', monospace;
-      letter-spacing: 0.05em;
-      line-height: 1.4;
-    }
-
-    /* Toggle Button */
-    .theme-toggle {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 5;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 12px;
-      color: inherit;
-      font-size: 1.2rem;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 50px;
-      height: 50px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .theme-toggle:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-      transform: scale(1.1);
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    [data-theme="light"] .theme-toggle {
-      background: rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-    }
-
-    [data-theme="light"] .theme-toggle:hover {
-      background-color: rgba(0, 0, 0, 0.2);
-      box-shadow: 0 6px 25px rgba(255, 255, 255, 0.15);
-    }
-
-    /* ICON TRANSITION: use opacity/transform instead of display so it can animate */
-    .theme-icon {
-      transition: opacity 0.28s ease, transform 0.28s ease;
-      will-change: opacity, transform;
-      display: inline-block;
-    }
-
-    /* renderable but hidden state */
-    .sun-icon,
-    .moon-icon {
-      opacity: 0;
-      transform: translateY(-6px) scale(0.96);
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    /* dark theme: show moon */
-    [data-theme="dark"] .moon-icon {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      visibility: visible;
-    }
-
-    /* light theme: show sun */
-    [data-theme="light"] .sun-icon {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      visibility: visible;
-    }
-
-    /* keep icons positioned correctly */
-    .theme-toggle .theme-icon {
-      position: relative;
     }
 
     /* Splash screen */
@@ -540,7 +659,26 @@
     @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: currentColor; } }
 
     /* Theme toggle: absolute-stack icons so switching won't reflow/shift */
-    .theme-toggle { position: fixed; top: 20px; left: 20px; z-index: 5; width:50px; height:50px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; }
+    .theme-toggle { 
+      position: fixed; 
+      top: 20px; 
+      left: 20px; 
+      z-index: 5; 
+      width:50px; 
+      height:50px; 
+      padding:0; 
+      display:inline-flex; 
+      align-items:center; 
+      justify-content:center; 
+      border-radius:50%;
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+    .theme-toggle:focus {
+      outline: none;
+    }
     .theme-toggle .theme-icon {
       position: absolute;
       inset: 0;
@@ -553,9 +691,19 @@
       opacity: 0; transform: translateY(-6px) scale(0.96); visibility: hidden;
       pointer-events: none;
     }
-    [data-theme="dark"] .theme-toggle .moon-icon,
+    [data-theme="dark"] .theme-toggle .moon-icon {
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+      visibility: visible; 
+      pointer-events: auto;
+      color: #fff;
+    }
     [data-theme="light"] .theme-toggle .sun-icon {
-      opacity: 1; transform: translateY(0) scale(1); visibility: visible; pointer-events: auto;
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+      visibility: visible; 
+      pointer-events: auto;
+      color: #000;
     }
 
     /* keep splash blending with page background */
@@ -573,10 +721,29 @@
         opacity: 1;
       }
     }
+
+    /* Fix click counter text color to sync with theme */
+    #clickCount {
+      font-weight: bold;
+      display: inline-block;
+      animation: pulse 0.3s ease;
+      position: relative;
+    }
+
+    [data-theme="dark"] #clickCount {
+      color: var(--border-color-dark);
+    }
+
+    [data-theme="light"] #clickCount {
+      color: var(--border-color-light);
+    }
   </style>
 </head>
 
 <body>
+  <!-- CRT Screen Effects Overlay -->
+  <div class="crt-overlay"></div>
+
   <!-- Splash screen (INSERT) -->
   <div class="splash-screen" id="splashScreen" role="dialog" aria-label="Welcome">
     <div class="splash-content" id="splashContent">
@@ -603,7 +770,7 @@
   </button>
 
   <div class="container">
-    <h1 id="username" class="wave-text" onclick="playClickSound()">MiloHakai</h1>
+    <h1 id="username" class="wave-text" data-text="MiloHakai" onclick="playClickSound()">MiloHakai</h1>
     <p>Student and occasional streamer from Italy.</p>
 
     <div id="clickCounter" class="click-counter" style="display: none;">
@@ -726,6 +893,7 @@
             // apply same visual style so it "merges" with page
             mainTitle.classList.add('wave-text');
             mainTitle.textContent = finalText;
+            mainTitle.setAttribute('data-text', finalText);
           }
         }, 800);
       }
