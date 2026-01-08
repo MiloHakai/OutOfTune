@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>MiloHakai</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     crossorigin="anonymous" />
@@ -61,22 +64,21 @@
       height: 100%;
       background: repeating-linear-gradient(
         0deg,
-        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 0px,
         rgba(0, 0, 0, 0.15) 2px,
         transparent 2px,
         transparent 4px
       );
-      background-size: 100% 200%;
       animation: scanlines-scroll-vertical 8s linear infinite;
       pointer-events: none;
     }
 
     @keyframes scanlines-scroll-vertical {
       0% {
-        background-position: 0 0%;
+        transform: translateY(0);
       }
       100% {
-        background-position: 0 100%;
+        transform: translateY(4px);
       }
     }
 
@@ -84,12 +86,11 @@
     [data-theme="light"] .crt-overlay::before {
       background: repeating-linear-gradient(
         0deg,
-        rgba(0, 0, 0, 0.08),
+        rgba(0, 0, 0, 0.08) 0px,
         rgba(0, 0, 0, 0.08) 2px,
         transparent 2px,
         transparent 4px
       );
-      background-size: 100% 200%;
     }
 
     /* Screen curvature and vignette */
@@ -841,18 +842,54 @@
     /* Robust muted-autoplay with fallback button and logging */
     (function setupBackgroundAudioNoButton() {
       const bg = document.getElementById('backgroundAudio');
-      if (!bg) return;
+      if (!bg) {
+        console.error('Background audio element not found');
+        return;
+      }
+
+      console.log('Audio element found');
+      
+      // Log when audio can play
+      bg.addEventListener('canplay', () => {
+        console.log('Audio can play - ready to start');
+      });
+      
+      // Log loading errors
+      bg.addEventListener('error', (e) => {
+        console.error('Audio loading error:', e);
+        console.error('Error details:', bg.error);
+      });
+      
+      // Log when audio loads successfully
+      bg.addEventListener('loadeddata', () => {
+        console.log('Audio loaded successfully');
+      });
 
       bg.muted = true;
       bg.volume = 0.3;
 
       // Try muted autoplay immediately (best-effort)
-      bg.play().catch(() => { /* autoplay blocked — will start on gesture below */ });
+      bg.play().then(() => {
+        console.log('Muted autoplay started');
+      }).catch((err) => {
+        console.log('Autoplay blocked (expected):', err.message);
+      });
 
       // On first user gesture: unmute and ensure playback
       const handleFirstGesture = () => {
-        try { bg.muted = false; bg.volume = 0.3; } catch (_) {}
-        bg.play().catch(() => { /* ignore play errors */ });
+        console.log('User gesture detected - attempting to unmute and play');
+        try { 
+          bg.muted = false; 
+          bg.volume = 0.3;
+          console.log('Audio unmuted, volume set to 0.3');
+        } catch (_) {
+          console.error('Failed to unmute');
+        }
+        bg.play().then(() => {
+          console.log('Audio playing successfully!');
+        }).catch((err) => {
+          console.error('Failed to play audio:', err);
+        });
         document.removeEventListener('pointerdown', handleFirstGesture);
         document.removeEventListener('keydown', handleFirstGesture);
         document.removeEventListener('touchstart', handleFirstGesture);
