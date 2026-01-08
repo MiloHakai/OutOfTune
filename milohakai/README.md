@@ -1,6 +1,6 @@
-# MiloHakai Personal Site
+# MiloHakai's Site
 
-A pixelated terminal-style personal website featuring animated borders, theme switching, and retro aesthetics.
+Hey, that's me! :3
 
 ## Credits
 
@@ -23,6 +23,7 @@ The site structure is heavily inspired by [SpectraPulse](https://github.com/spec
 - Vanilla JavaScript
 - Font Awesome icons
 - Google Fonts (Press Start 2P)
+- Claude Sonnet for code fixes and animation/crt looks
 
 ## License
 
