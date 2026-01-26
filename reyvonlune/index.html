@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reyvonlune</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Palette inspired by the attached image: deep purples, magenta, warm yellow, cyan */
+      --bg-dark: #07021a;            /* slightly deeper indigo background */
+      --bg-light: #fff7ff;           /* pale lilac for light theme */
+
+      /* Text */
+      --text-dark: #efe8ff;          /* pale lavender text on dark bg */
+      --text-light: #37183a;         /* deep plum text on light bg */
+
+      /* Accents (image-inspired) */
+      --accent-sapphire: #5b21b6;    /* deep violet */
+      --accent-soft: #caa0ff;        /* soft lavender */
+      --accent-ice: #f6eefc;         /* pale lilac */
+      --accent-magenta: #ff2d8f;     /* bright magenta/pink */
+      --accent-hot: #ffd24a;         /* warm yellow */
+      --accent-cyan: #00e5ff;        /* bright cyan accent */
+
+      /* Borders & glows */
+      --border-color-dark: rgba(91,33,182,0.95);
+      --border-color-light: rgba(202,160,255,0.95);
+      --glow-sapphire: rgba(91,33,182,0.95);
+      --glow-soft: rgba(202,160,255,0.45);
+
+      /* Utility */
+      --muted: #c9aee0;
+      --faint: rgba(246, 238, 252, 0.04);
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+      transition: background 0.5s ease, color 0.5s ease;
+      position: relative;
+      background-image: url('background.gif');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+
+    /* Background overlay for dimming */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* slightly darker overlay to dim the background a bit more */
+      background: linear-gradient(180deg,
+        rgba(6, 12, 28, 0.60) 0%,
+        rgba(6, 12, 28, 0.50) 50%,
+        rgba(10, 16, 36, 0.62) 100%);
+      z-index: 0;
+      transition: background 0.4s ease;
+    }
+
+    [data-theme="light"] body {
+      background-color: var(--bg-light);
+      color: var(--text-light);
+    }
+
+    [data-theme="light"] body::before {
+      background: linear-gradient(135deg,
+        rgba(251, 247, 255, 0.50) 0%,
+        rgba(229, 208, 255, 0.40) 50%,
+        rgba(200, 169, 255, 0.35) 100%);
+    }
+
+    /* Alternative approach with individual border segments */
+    .border-segments {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Border line animations */
+    .border-top,
+    .border-right,
+    .border-bottom,
+    .border-left {
+      position: absolute;
+    }
+
+    /* Dark theme borders (default) */
+    .border-top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--accent-sapphire) 40%,
+          var(--accent-soft) 50%,
+          var(--accent-sapphire) 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 300% 100%;
+      animation: move-horizontal 12s linear infinite;
+    }
+
+    .border-right {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--accent-sapphire) 40%,
+          var(--accent-soft) 50%,
+          var(--accent-sapphire) 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 100% 300%;
+      animation: move-vertical 12s linear infinite;
+    }
+
+    .border-bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(-90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--accent-sapphire) 40%,
+          var(--accent-soft) 50%,
+          var(--accent-sapphire) 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 300% 100%;
+      animation: move-horizontal-reverse 12s linear infinite;
+    }
+
+    .border-left {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(-180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--accent-sapphire) 40%,
+          var(--accent-soft) 50%,
+          var(--accent-sapphire) 60%,
+          transparent 70%,
+          transparent 100%);
+      background-size: 100% 300%;
+      animation: move-vertical-reverse 12s linear infinite;
+    }
+
+    /* Light theme borders */
+    [data-theme="light"] .border-top {
+      background: linear-gradient(90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--border-color-light) 40%,
+          var(--accent-soft) 50%,
+          var(--border-color-light) 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    [data-theme="light"] .border-right {
+      background: linear-gradient(180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--border-color-light) 40%,
+          var(--accent-soft) 50%,
+          var(--border-color-light) 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    [data-theme="light"] .border-bottom {
+      background: linear-gradient(-90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--border-color-light) 40%,
+          var(--accent-soft) 50%,
+          var(--border-color-light) 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    [data-theme="light"] .border-left {
+      background: linear-gradient(-180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--border-color-light) 40%,
+          var(--accent-soft) 50%,
+          var(--border-color-light) 60%,
+          transparent 70%,
+          transparent 100%) !important;
+    }
+
+    /* First line - no delays, continuous movement */
+    .border-line-1.border-top {
+      animation-delay: 0s;
+    }
+
+    .border-line-1.border-right {
+      animation-delay: 3s;
+    }
+
+    .border-line-1.border-bottom {
+      animation-delay: 6s;
+    }
+
+    .border-line-1.border-left {
+      animation-delay: 9s;
+    }
+
+    /* Second line - offset by 6s (half cycle) */
+    .border-line-2.border-top {
+      animation-delay: 6s;
+    }
+
+    .border-line-2.border-right {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-bottom {
+      animation-delay: 0s;
+    }
+
+    .border-line-2.border-left {
+      animation-delay: 3s;
+    }
+
+    @keyframes move-horizontal {
+      0% {
+        background-position: -100% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    @keyframes move-horizontal-reverse {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
+    }
+
+    @keyframes move-vertical {
+      0% {
+        background-position: 0 -100%;
+      }
+
+      100% {
+        background-position: 0 200%;
+      }
+    }
+
+    @keyframes move-vertical-reverse {
+      0% {
+        background-position: 0 200%;
+      }
+
+      100% {
+        background-position: 0 -100%;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 2.2rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+      position: relative;
+      display: inline-block;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      line-height: 1.2;
+    }
+
+    /* Wave effect setup */
+    .wave-text {
+      /* gradient mixing pale lilac -> lavender -> deep violet -> magenta -> warm yellow -> cyan */
+      background: linear-gradient(90deg,
+        var(--accent-ice) 0%,
+        var(--accent-soft) 20%,
+        var(--accent-sapphire) 45%,
+        var(--accent-magenta) 70%,
+        var(--accent-hot) 85%,
+        var(--accent-cyan) 100%);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: wave-effect 6s linear infinite;
+      text-shadow:
+        0 0 18px rgba(91,33,182,0.9),
+        0 0 36px rgba(255,45,143,0.18),
+        0 0 60px rgba(255,210,74,0.06);
+      filter: drop-shadow(0 0 10px rgba(91,33,182,0.9));
+    }
+
+    [data-theme="light"] .wave-text {
+      background: linear-gradient(90deg,
+          var(--accent-ice) 0%,
+          var(--accent-soft) 30%,
+          var(--accent-magenta) 55%,
+          var(--accent-hot) 80%);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow:
+        0 0 16px rgba(202,160,255,0.6),
+        0 0 32px rgba(255,45,143,0.28);
+      filter: drop-shadow(0 0 8px rgba(202,160,255,0.45));
+    }
+
+    @keyframes wave-effect {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
+    }
+
+    h1:active {
+      transform: scale(0.98);
+    }
+
+    p {
+      margin-top: 1.5rem;
+      font-size: 0.7rem;
+      font-family: 'Press Start 2P', monospace;
+      font-weight: 400;
+      opacity: 0.9;
+      animation: subtle-pulse 12s ease-in-out infinite;
+      letter-spacing: 0.05em;
+      line-height: 1.4;
+    }
+
+    @keyframes subtle-pulse {
+
+      0%,
+      100% {
+        opacity: 0.9;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .icons {
+      margin-top: 1.5rem;
+    }
+
+    .click-counter {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+
+    .click-counter.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .click-counter p {
+      font-size: 0.6rem;
+      color: var(--accent-sapphire);
+      margin: 0;
+      text-shadow: 0 0 10px var(--glow-sapphire);
+      animation: none;
+    }
+
+    .icons a {
+      margin: 0 10px;
+      font-size: 1.5rem;
+      color: inherit;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .icons a:hover {
+      color: var(--accent-sapphire);
+      transform: scale(1.1);
+    }
+
+    footer {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.5rem;
+      color: #8899aa;
+      z-index: 6; /* bumped so footer is above the main container and overlays */
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 0.05em;
+      line-height: 1.4;
+    }
+
+    footer a {
+      color: var(--accent-sapphire);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: var(--accent-soft);
+    }
+
+    [data-theme="light"] footer {
+      color: #5a7a8a;
+    }
+
+    [data-theme="light"] footer a {
+      color: var(--border-color-light);
+    }
+
+    [data-theme="light"] footer a:hover {
+      color: var(--accent-purple);
+    }
+
+    /* Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 5;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 12px;
+      color: inherit;
+      font-size: 1.2rem;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="light"] .theme-toggle {
+      background: rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="light"] .theme-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 25px rgba(255, 255, 255, 0.15);
+    }
+
+    .theme-icon {
+      transition: all 0.3s ease;
+    }
+
+    .sun-icon {
+      display: none;
+    }
+
+    .moon-icon {
+      display: block;
+    }
+
+    [data-theme="light"] .sun-icon {
+      display: block;
+    }
+
+    [data-theme="light"] .moon-icon {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      p {
+        font-size: 0.6rem;
+      }
+
+      .icons a {
+        font-size: 1.3rem;
+        margin: 0 8px;
+      }
+
+      footer {
+        font-size: 0.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Animated Border Lines -->
+  <div class="border-segments">
+    <div class="border-top border-line-1"></div>
+    <div class="border-right border-line-1"></div>
+    <div class="border-bottom border-line-1"></div>
+    <div class="border-left border-line-1"></div>
+    <div class="border-top border-line-2"></div>
+    <div class="border-right border-line-2"></div>
+    <div class="border-bottom border-line-2"></div>
+    <div class="border-left border-line-2"></div>
+  </div>
+
+  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+    <i class="fas fa-sun theme-icon sun-icon"></i>
+    <i class="fas fa-moon theme-icon moon-icon"></i>
+  </button>
+
+  <div class="container">
+    <h1 id="username" class="wave-text" onclick="playClickSound()">Reyvonlune</h1>
+    <p>Dottore's boywife reporting for duty.</p>
+
+    <div id="clickCounter" class="click-counter" style="display: none;">
+      <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
+    </div>
+
+    <div class="icons">
+      <a href="https://discord.com/users/1148380126212538388" title="Discord" target="_blank"><i
+          class="fab fa-discord"></i></a>
+      <a href="https://x.com/reyvonlune" title="X" target="_blank"><i class="fab fa-x-twitter"></i></a>
+      <!-- 
+      // Disabled Steam link for now
+      <a href="https://steamcommunity.com/profiles/76561199001053773" title="Steam" target="_blank"><i class="fab fa-steam"></i></a> 
+      -->
+      <a href="https://www.twitch.tv/reyvonlune" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
+    </div>
+  </div>
+
+  <footer>
+    Copyright © 2026–present <br>
+    Reyvonlune // OutOfTune <br>
+    Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank"> SpectraPulse</a>
+  </footer>
+
+  <!-- Audio element for background music -->
+  <audio id="backgroundAudio" preload="auto" loop>
+    <source src="./bgm.flac" type="audio/flac">
+    <source src="./bgm.mp3" type="audio/mpeg">
+    <!-- Fallback message -->
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Audio element for click sound effect -->
+  <audio id="clickSound" preload="auto">
+    <source src="./click-sound.mp3" type="audio/mpeg">
+    <source src="./click-sound.ogg" type="audio/ogg">
+    <!-- Fallback message -->
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute("data-theme");
+      html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+    }
+
+    // Click counter functionality
+    let clickCount = 0;
+    const clickCounter = document.getElementById('clickCounter');
+    const clickCountSpan = document.getElementById('clickCount');
+
+    // Function to play click sound and update counter
+    function playClickSound() {
+      const clickSound = document.getElementById('clickSound');
+      clickSound.currentTime = 0; // Reset to beginning in case it's already playing
+      clickSound.play().catch(error => {
+        console.log('Click sound could not be played:', error);
+      });
+
+      // Update click counter
+      clickCount++;
+      clickCountSpan.textContent = clickCount;
+
+      // Show the counter after first click
+      if (clickCount === 1) {
+        clickCounter.style.display = 'block';
+        setTimeout(() => {
+          clickCounter.classList.add('show');
+        }, 10);
+      }
+    }
+
+    // Audio functionality for background music
+    const audio = document.getElementById('backgroundAudio');
+
+    // Function to start background audio
+    function startBackgroundAudio() {
+      audio.play().catch(error => {
+        console.log('Audio autoplay prevented:', error);
+        // If autoplay fails, try again on next user interaction
+        document.addEventListener('click', function () {
+          if (audio.paused) {
+            audio.play().catch(err => console.log('Audio play failed:', err));
+          }
+        }, {
+          once: true
+        });
+      });
+    }
+
+    // Set audio volumes
+    audio.volume = 0.3; // Background music at 30%
+    const clickSound = document.getElementById('clickSound');
+    clickSound.volume = 0.5; // Click sound at 50%
+
+    // Start background music when page loads
+    window.addEventListener('load', () => {
+      startBackgroundAudio();
+    });
+
+    // Fallback: start audio on first user interaction
+    document.addEventListener('click', function () {
+      if (audio.paused) {
+        startBackgroundAudio();
+      }
+    }, {
+      once: true
+    });
+  </script>
+</body>
+
+</html>

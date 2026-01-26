@@ -4,34 +4,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HolyBruhMoment</title>
+  <title>Visceral_fab</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Tuned sapphire palette to better reveal & complement the background image */
-      --bg-dark: #07102a;            /* deep navy background */
-      --bg-light: #eaf4ff;           /* very light sapphire tint for light theme */
+      /* Cyan + electric palette */
+      --bg-dark: #0a1a1f;
+      /* deep dark cyan for dark background */
+      --bg-light: #b8e6e6;
+      /* darker cyan for light theme */
+      --text-dark: #e0f7fa;
+      /* very pale cyan text on dark bg */
+      --text-light: #004d5a;
+      /* deep cyan text on light bg */
 
-      /* Text */
-      --text-dark: #dbeeff;          /* pale sapphire text on dark bg */
-      --text-light: #04263f;         /* deep blue text on light bg */
+      /* Accents */
+      --accent-pink: #00d4d4;
+      /* main cyan */
+      --accent-soft: #80e8e8;
+      /* soft light cyan */
+      --accent-purple: #00a8a8;
+      /* darker cyan/teal */
+      --accent-cyan: #00ffff;
+      /* bright electric cyan */
 
-      /* Accents (sapphire family) */
-      --accent-sapphire: #0F52BA;    /* main sapphire accent */
-      --accent-soft: #7FB3FF;        /* softer sapphire for highlights */
-      --accent-ice: #E6F4FF;         /* very pale icy blue for contrast */
-
-      /* Borders & glows (muted so background shows through) */
-      --border-color-dark: rgba(15,82,186,0.9);
-      --border-color-light: rgba(106,160,255,0.9);
-      --glow-sapphire: rgba(15, 82, 186, 0.9);
-      --glow-soft: rgba(127,179,255,0.45);
+      /* Borders & glows */
+      --border-color-dark: #00b8b8;
+      /* border tone on dark */
+      --border-color-light: #006b6b;
+      /* darker border tone on light */
+      --glow-cyan: rgba(0, 255, 255, 0.85);
+      /* cyan glow */
+      --glow-purple: rgba(0, 168, 168, 0.8);
 
       /* Utility */
-      --muted: #9fb4d9;
-      --faint: rgba(219, 238, 255, 0.04);
+      --muted: #5eb8b8;
+      --faint: rgba(255, 255, 255, 0.06);
     }
 
     html,
@@ -62,11 +72,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      /* lighter, semi-transparent overlay so background details remain visible */
-      background: linear-gradient(180deg,
-        rgba(6, 12, 28, 0.45) 0%,
-        rgba(6, 12, 28, 0.33) 50%,
-        rgba(10, 16, 36, 0.48) 100%);
+      background: rgba(10, 10, 20, 0.57);
+      /* Nearly black, very high opacity */
       z-index: 0;
       transition: background 0.4s ease;
     }
@@ -77,10 +84,11 @@
     }
 
     [data-theme="light"] body::before {
-      background: linear-gradient(135deg, 
-        rgba(232, 244, 248, 0.85) 0%,
-        rgba(168, 230, 207, 0.75) 50%,
-        rgba(77, 217, 217, 0.65) 100%);
+      /* cyan/light gradient - made more transparent */
+      background: linear-gradient(135deg,
+          rgba(184, 230, 230, 0.50) 0%,
+          rgba(100, 200, 200, 0.40) 50%,
+          rgba(0, 168, 168, 0.35) 100%);
     }
 
     /* Alternative approach with individual border segments */
@@ -110,11 +118,11 @@
       height: 2px;
       background: linear-gradient(90deg,
           transparent 0%,
-          transparent 30%,
-          var(--accent-sapphire) 40%,
-          var(--accent-soft) 50%,
-          var(--accent-sapphire) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--accent-cyan) 38%,
+          var(--accent-purple) 50%,
+          var(--accent-pink) 62%,
+          transparent 72%,
           transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal 12s linear infinite;
@@ -127,11 +135,11 @@
       width: 2px;
       background: linear-gradient(180deg,
           transparent 0%,
-          transparent 30%,
-          var(--accent-sapphire) 40%,
-          var(--accent-soft) 50%,
-          var(--accent-sapphire) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--accent-cyan) 38%,
+          var(--accent-purple) 50%,
+          var(--accent-pink) 62%,
+          transparent 72%,
           transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical 12s linear infinite;
@@ -144,11 +152,11 @@
       height: 2px;
       background: linear-gradient(-90deg,
           transparent 0%,
-          transparent 30%,
-          var(--accent-sapphire) 40%,
-          var(--accent-soft) 50%,
-          var(--accent-sapphire) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--accent-pink) 38%,
+          var(--accent-purple) 50%,
+          var(--accent-cyan) 62%,
+          transparent 72%,
           transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal-reverse 12s linear infinite;
@@ -161,11 +169,11 @@
       width: 2px;
       background: linear-gradient(-180deg,
           transparent 0%,
-          transparent 30%,
-          var(--accent-sapphire) 40%,
-          var(--accent-soft) 50%,
-          var(--accent-sapphire) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--accent-pink) 38%,
+          var(--accent-purple) 50%,
+          var(--accent-cyan) 62%,
+          transparent 72%,
           transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical-reverse 12s linear infinite;
@@ -175,44 +183,44 @@
     [data-theme="light"] .border-top {
       background: linear-gradient(90deg,
           transparent 0%,
-          transparent 30%,
-          var(--border-color-light) 40%,
-          var(--accent-soft) 50%,
-          var(--border-color-light) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--border-color-light) 38%,
+          var(--accent-purple) 50%,
+          var(--border-color-light) 62%,
+          transparent 72%,
           transparent 100%) !important;
     }
 
     [data-theme="light"] .border-right {
       background: linear-gradient(180deg,
           transparent 0%,
-          transparent 30%,
-          var(--border-color-light) 40%,
-          var(--accent-soft) 50%,
-          var(--border-color-light) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--border-color-light) 38%,
+          var(--accent-purple) 50%,
+          var(--border-color-light) 62%,
+          transparent 72%,
           transparent 100%) !important;
     }
 
     [data-theme="light"] .border-bottom {
       background: linear-gradient(-90deg,
           transparent 0%,
-          transparent 30%,
-          var(--border-color-light) 40%,
-          var(--accent-soft) 50%,
-          var(--border-color-light) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--border-color-light) 38%,
+          var(--accent-purple) 50%,
+          var(--border-color-light) 62%,
+          transparent 72%,
           transparent 100%) !important;
     }
 
     [data-theme="light"] .border-left {
       background: linear-gradient(-180deg,
           transparent 0%,
-          transparent 30%,
-          var(--border-color-light) 40%,
-          var(--accent-soft) 50%,
-          var(--border-color-light) 60%,
-          transparent 70%,
+          transparent 28%,
+          var(--border-color-light) 38%,
+          var(--accent-purple) 50%,
+          var(--border-color-light) 62%,
+          transparent 72%,
           transparent 100%) !important;
     }
 
@@ -320,40 +328,39 @@
 
     /* Wave effect setup */
     .wave-text {
-      /* clearer multi-stop sapphire gradient for strong contrast with the background */
       background: linear-gradient(90deg,
-        var(--accent-ice) 0%,
-        var(--accent-soft) 30%,
-        var(--accent-sapphire) 62%,
-        #cfe9ff 100%);
+          var(--accent-cyan) 0%,
+          var(--accent-pink) 30%,
+          var(--accent-purple) 55%,
+          var(--accent-soft) 75%,
+          var(--accent-cyan) 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: wave-effect 6s linear infinite;
       text-shadow:
-        0 0 18px var(--glow-sapphire),
-        0 0 36px var(--glow-soft),
-        0 0 60px rgba(200, 230, 255, 0.08);
-      filter: drop-shadow(0 0 10px var(--glow-sapphire));
+        0 0 18px var(--glow-cyan),
+        0 0 36px var(--glow-purple),
+        0 0 60px rgba(255, 200, 230, 0.12);
+      filter: drop-shadow(0 0 10px var(--glow-cyan));
     }
 
     [data-theme="light"] .wave-text {
       background: linear-gradient(90deg,
-          #3ca0a0 0%,
-          #2d5a6b 35%,
-          #8e44ad 50%,
-          #2d5a6b 65%,
-          #3ca0a0 100%);
+          var(--text-light) 0%,
+          var(--accent-purple) 40%,
+          var(--accent-pink) 60%,
+          var(--text-light) 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow:
-        0 0 20px rgba(60, 160, 160, 0.6),
-        0 0 40px rgba(142, 68, 173, 0.4),
-        0 0 60px rgba(45, 90, 107, 0.2);
-      filter: drop-shadow(0 0 10px rgba(60, 160, 160, 0.5));
+        0 0 18px rgba(0, 168, 168, 0.7),
+        0 0 36px var(--glow-purple),
+        0 0 60px rgba(0, 212, 212, 0.14);
+      filter: drop-shadow(0 0 10px rgba(0, 168, 168, 0.6));
     }
 
     @keyframes wave-effect {
@@ -379,6 +386,11 @@
       animation: subtle-pulse 12s ease-in-out infinite;
       letter-spacing: 0.05em;
       line-height: 1.4;
+    }
+
+    [data-theme="light"] p {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     @keyframes subtle-pulse {
@@ -412,10 +424,15 @@
 
     .click-counter p {
       font-size: 0.6rem;
-      color: var(--accent-sapphire);
+      color: var(--accent-cyan);
       margin: 0;
-      text-shadow: 0 0 10px var(--glow-sapphire);
+      text-shadow: 0 0 10px var(--glow-cyan);
       animation: none;
+    }
+
+    [data-theme="light"] .click-counter p {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     .icons a {
@@ -426,9 +443,19 @@
       transition: all 0.3s ease;
     }
 
+    [data-theme="light"] .icons a {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
     .icons a:hover {
-      color: var(--accent-sapphire);
+      color: var(--accent-cyan);
       transform: scale(1.1);
+      text-shadow: 0 0 12px var(--glow-cyan);
+    }
+
+    [data-theme="light"] .icons a:hover {
+      color: var(--accent-cyan);
     }
 
     footer {
@@ -437,33 +464,36 @@
       width: 100%;
       text-align: center;
       font-size: 0.5rem;
-      color: #8899aa;
-      z-index: 6; /* bumped so footer is above the main container and overlays */
+      color: inherit;
+      z-index: 2;
       font-family: 'Press Start 2P', monospace;
       letter-spacing: 0.05em;
       line-height: 1.4;
     }
 
+    [data-theme="light"] footer {
+      color: #ffffff;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    }
+
     footer a {
-      color: var(--accent-sapphire);
+      color: var(--accent-cyan);
       text-decoration: none;
       transition: color 0.3s ease;
     }
 
     footer a:hover {
-      color: var(--accent-soft);
-    }
-
-    [data-theme="light"] footer {
-      color: #5a7a8a;
+      color: var(--accent-purple);
+      text-shadow: 0 0 8px var(--glow-purple);
     }
 
     [data-theme="light"] footer a {
-      color: var(--border-color-light);
+      color: #ffffff;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
     }
 
     [data-theme="light"] footer a:hover {
-      color: var(--accent-purple);
+      color: var(--accent-cyan);
     }
 
     /* Toggle Button */
@@ -492,7 +522,7 @@
     .theme-toggle:hover {
       background-color: rgba(255, 255, 255, 0.2);
       transform: scale(1.1);
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
     }
 
     [data-theme="light"] .theme-toggle {
@@ -567,25 +597,23 @@
   </button>
 
   <div class="container">
-    <h1 id="username" class="wave-text" onclick="playClickSound()">HolyBruhMoment</h1>
-    <p>Just a cool guy on the internet!</p>
+    <h1 id="username" class="wave-text" onclick="playClickSound()">Visceral_fab</h1>
+    <p>UI-UX Designer</p>
 
     <div id="clickCounter" class="click-counter" style="display: none;">
       <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
     </div>
 
     <div class="icons">
-      <a href="https://discord.com/users/508418817765015573" title="Discord" target="_blank"><i
-          class="fab fa-discord"></i></a>
-      <a href="https://x.com/HolyBruhMoment" title="X" target="_blank"><i class="fab fa-x-twitter"></i></a>
-      <a href="https://steamcommunity.com/profiles/76561199001053773" title="Steam" target="_blank"><i class="fab fa-steam"></i></a>
-      <a href="https://www.twitch.tv/HolyBruhMoment" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
+      <a href="https://www.instagram.com/visceral_fab/" title="Instagram" target="_blank"><i
+          class="fa-brands fa-instagram"></i></a>
+      <a href="https://visceralfab.outoftune.dev" title="Portfolio" target="_blank"><i
+          class="fa-solid fa-palette"></i></a>
     </div>
   </div>
 
   <footer>
-    Copyright © 2025–present <br>
-    HolyBruhMoment // OutOfTune <br>
+    Copyright © 2025–present Visceral_fab // OutOfTune <br>
     Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank"> SpectraPulse</a>
   </footer>
 
@@ -657,7 +685,7 @@
     }
 
     // Set audio volumes
-    audio.volume = 0.3; // Background music at 30%
+    audio.volume = 0.15; // Background music at 15%
     const clickSound = document.getElementById('clickSound');
     clickSound.volume = 0.5; // Click sound at 50%
 
