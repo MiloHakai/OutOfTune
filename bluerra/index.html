@@ -628,8 +628,7 @@
 
   <!-- Audio element for background music -->
   <audio id="backgroundAudio" preload="auto" loop>
-    <source src="./bg-music.flac" type="audio/flac">
-    <source src="./bg-music.mp3" type="audio/mpeg">
+    <source src="./bgm.mp3" type="audio/mpeg">
     <!-- Fallback message -->
     Your browser does not support the audio element.
   </audio>
@@ -709,7 +708,7 @@
     }
 
     // Set audio volumes
-    audio.volume = 0.3; // Background music at 30%
+    audio.volume = 0.15; // Background music at 30%
     const clickSound = document.getElementById('clickSound');
     clickSound.volume = 0.5; // Click sound at 50%
 
