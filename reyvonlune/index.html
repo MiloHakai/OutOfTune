@@ -11,26 +11,36 @@
   <style>
     :root {
       /* Palette inspired by the attached image: deep purples, magenta, warm yellow, cyan */
-      --bg-dark: #07021a;            /* slightly deeper indigo background */
-      --bg-light: #fff7ff;           /* pale lilac for light theme */
+      --bg-dark: #07021a;
+      /* slightly deeper indigo background */
+      --bg-light: #fff7ff;
+      /* pale lilac for light theme */
 
       /* Text */
-      --text-dark: #efe8ff;          /* pale lavender text on dark bg */
-      --text-light: #37183a;         /* deep plum text on light bg */
+      --text-dark: #efe8ff;
+      /* pale lavender text on dark bg */
+      --text-light: #37183a;
+      /* deep plum text on light bg */
 
       /* Accents (image-inspired) */
-      --accent-sapphire: #5b21b6;    /* deep violet */
-      --accent-soft: #caa0ff;        /* soft lavender */
-      --accent-ice: #f6eefc;         /* pale lilac */
-      --accent-magenta: #ff2d8f;     /* bright magenta/pink */
-      --accent-hot: #ffd24a;         /* warm yellow */
-      --accent-cyan: #00e5ff;        /* bright cyan accent */
+      --accent-sapphire: #5b21b6;
+      /* deep violet */
+      --accent-soft: #caa0ff;
+      /* soft lavender */
+      --accent-ice: #f6eefc;
+      /* pale lilac */
+      --accent-magenta: #ff2d8f;
+      /* bright magenta/pink */
+      --accent-hot: #ffd24a;
+      /* warm yellow */
+      --accent-cyan: #00e5ff;
+      /* bright cyan accent */
 
       /* Borders & glows */
-      --border-color-dark: rgba(91,33,182,0.95);
-      --border-color-light: rgba(202,160,255,0.95);
-      --glow-sapphire: rgba(91,33,182,0.95);
-      --glow-soft: rgba(202,160,255,0.45);
+      --border-color-dark: rgba(91, 33, 182, 0.95);
+      --border-color-light: rgba(202, 160, 255, 0.95);
+      --glow-sapphire: rgba(91, 33, 182, 0.95);
+      --glow-soft: rgba(202, 160, 255, 0.45);
 
       /* Utility */
       --muted: #c9aee0;
@@ -67,9 +77,9 @@
       bottom: 0;
       /* slightly darker overlay to dim the background a bit more */
       background: linear-gradient(180deg,
-        rgba(6, 12, 28, 0.60) 0%,
-        rgba(6, 12, 28, 0.50) 50%,
-        rgba(10, 16, 36, 0.62) 100%);
+          rgba(6, 12, 28, 0.60) 0%,
+          rgba(6, 12, 28, 0.50) 50%,
+          rgba(10, 16, 36, 0.62) 100%);
       z-index: 0;
       transition: background 0.4s ease;
     }
@@ -81,9 +91,9 @@
 
     [data-theme="light"] body::before {
       background: linear-gradient(135deg,
-        rgba(251, 247, 255, 0.50) 0%,
-        rgba(229, 208, 255, 0.40) 50%,
-        rgba(200, 169, 255, 0.35) 100%);
+          rgba(251, 247, 255, 0.50) 0%,
+          rgba(229, 208, 255, 0.40) 50%,
+          rgba(200, 169, 255, 0.35) 100%);
     }
 
     /* Alternative approach with individual border segments */
@@ -325,22 +335,22 @@
     .wave-text {
       /* gradient mixing pale lilac -> lavender -> deep violet -> magenta -> warm yellow -> cyan */
       background: linear-gradient(90deg,
-        var(--accent-ice) 0%,
-        var(--accent-soft) 20%,
-        var(--accent-sapphire) 45%,
-        var(--accent-magenta) 70%,
-        var(--accent-hot) 85%,
-        var(--accent-cyan) 100%);
+          var(--accent-ice) 0%,
+          var(--accent-soft) 20%,
+          var(--accent-sapphire) 45%,
+          var(--accent-magenta) 70%,
+          var(--accent-hot) 85%,
+          var(--accent-cyan) 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: wave-effect 6s linear infinite;
       text-shadow:
-        0 0 18px rgba(91,33,182,0.9),
-        0 0 36px rgba(255,45,143,0.18),
-        0 0 60px rgba(255,210,74,0.06);
-      filter: drop-shadow(0 0 10px rgba(91,33,182,0.9));
+        0 0 18px rgba(91, 33, 182, 0.9),
+        0 0 36px rgba(255, 45, 143, 0.18),
+        0 0 60px rgba(255, 210, 74, 0.06);
+      filter: drop-shadow(0 0 10px rgba(91, 33, 182, 0.9));
     }
 
     [data-theme="light"] .wave-text {
@@ -354,9 +364,9 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow:
-        0 0 16px rgba(202,160,255,0.6),
-        0 0 32px rgba(255,45,143,0.28);
-      filter: drop-shadow(0 0 8px rgba(202,160,255,0.45));
+        0 0 16px rgba(202, 160, 255, 0.6),
+        0 0 32px rgba(255, 45, 143, 0.28);
+      filter: drop-shadow(0 0 8px rgba(202, 160, 255, 0.45));
     }
 
     @keyframes wave-effect {
@@ -441,7 +451,8 @@
       text-align: center;
       font-size: 0.5rem;
       color: #8899aa;
-      z-index: 6; /* bumped so footer is above the main container and overlays */
+      z-index: 6;
+      /* bumped so footer is above the main container and overlays */
       font-family: 'Press Start 2P', monospace;
       letter-spacing: 0.05em;
       line-height: 1.4;

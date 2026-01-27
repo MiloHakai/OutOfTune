@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MiloHakai - Music Spot</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
@@ -21,7 +23,8 @@
       --accent-color: #00ff00;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       height: 100%;
       font-family: 'Press Start 2P', monospace;
@@ -51,7 +54,10 @@
       z-index: 1;
     }
 
-    .border-top, .border-right, .border-bottom, .border-left {
+    .border-top,
+    .border-right,
+    .border-bottom,
+    .border-left {
       position: absolute;
     }
 
@@ -60,13 +66,13 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        transparent 30%, 
-        #fff 40%, 
-        #fff 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(90deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal 12s linear infinite;
     }
@@ -76,13 +82,13 @@
       right: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(180deg, 
-        transparent 0%, 
-        transparent 30%, 
-        #fff 40%, 
-        #fff 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(180deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical 12s linear infinite;
     }
@@ -92,13 +98,13 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(-90deg, 
-        transparent 0%, 
-        transparent 30%, 
-        #fff 40%, 
-        #fff 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(-90deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal-reverse 12s linear infinite;
     }
@@ -108,65 +114,107 @@
       left: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(-180deg, 
-        transparent 0%, 
-        transparent 30%, 
-        #fff 40%, 
-        #fff 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(-180deg,
+          transparent 0%,
+          transparent 30%,
+          #fff 40%,
+          #fff 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical-reverse 12s linear infinite;
     }
 
     [data-theme="light"] .border-top {
-      background: linear-gradient(90deg, 
-        transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
+      background: linear-gradient(90deg,
+          transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
     }
 
     [data-theme="light"] .border-right {
-      background: linear-gradient(180deg, 
-        transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
+      background: linear-gradient(180deg,
+          transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
     }
 
     [data-theme="light"] .border-bottom {
-      background: linear-gradient(-90deg, 
-        transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
+      background: linear-gradient(-90deg,
+          transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
     }
 
     [data-theme="light"] .border-left {
-      background: linear-gradient(-180deg, 
-        transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
+      background: linear-gradient(-180deg,
+          transparent 0%, transparent 30%, #000 40%, #000 60%, transparent 70%, transparent 100%) !important;
     }
 
-    .border-line-1.border-top { animation-delay: 0s; }
-    .border-line-1.border-right { animation-delay: 3s; }
-    .border-line-1.border-bottom { animation-delay: 6s; }
-    .border-line-1.border-left { animation-delay: 9s; }
+    .border-line-1.border-top {
+      animation-delay: 0s;
+    }
 
-    .border-line-2.border-top { animation-delay: 6s; }
-    .border-line-2.border-right { animation-delay: 9s; }
-    .border-line-2.border-bottom { animation-delay: 0s; }
-    .border-line-2.border-left { animation-delay: 3s; }
+    .border-line-1.border-right {
+      animation-delay: 3s;
+    }
+
+    .border-line-1.border-bottom {
+      animation-delay: 6s;
+    }
+
+    .border-line-1.border-left {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-top {
+      animation-delay: 6s;
+    }
+
+    .border-line-2.border-right {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-bottom {
+      animation-delay: 0s;
+    }
+
+    .border-line-2.border-left {
+      animation-delay: 3s;
+    }
 
     @keyframes move-horizontal {
-      0% { background-position: -100% 0; }
-      100% { background-position: 200% 0; }
+      0% {
+        background-position: -100% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
     }
 
     @keyframes move-horizontal-reverse {
-      0% { background-position: 200% 0; }
-      100% { background-position: -100% 0; }
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
     }
 
     @keyframes move-vertical {
-      0% { background-position: 0 -100%; }
-      100% { background-position: 0 200%; }
+      0% {
+        background-position: 0 -100%;
+      }
+
+      100% {
+        background-position: 0 200%;
+      }
     }
 
     @keyframes move-vertical-reverse {
-      0% { background-position: 0 200%; }
-      100% { background-position: 0 -100%; }
+      0% {
+        background-position: 0 200%;
+      }
+
+      100% {
+        background-position: 0 -100%;
+      }
     }
 
     /* Theme Toggle */
@@ -206,10 +254,21 @@
       background-color: rgba(0, 0, 0, 0.2);
     }
 
-    .sun-icon { display: none; }
-    .moon-icon { display: block; }
-    [data-theme="light"] .sun-icon { display: block; }
-    [data-theme="light"] .moon-icon { display: none; }
+    .sun-icon {
+      display: none;
+    }
+
+    .moon-icon {
+      display: block;
+    }
+
+    [data-theme="light"] .sun-icon {
+      display: block;
+    }
+
+    [data-theme="light"] .moon-icon {
+      display: none;
+    }
 
     /* Main Layout */
     .main-container {
@@ -288,13 +347,13 @@
       color: #fff;
       position: relative;
       z-index: 1;
-      box-shadow: 0 0 8px 2px rgba(255,255,255,0.25);
+      box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.25);
     }
 
     [data-theme="light"] .queue-item.current {
       border: 2px solid #000;
       color: #000;
-      box-shadow: 0 0 8px 2px rgba(0,0,0,0.15);
+      box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.15);
     }
 
     .queue-item.current::before {
@@ -315,11 +374,11 @@
     }
 
     [data-theme="light"] .queue-item.current::before {
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(0, 0, 0, 0.8) 20%, 
-        rgba(0, 0, 0, 0.8) 80%, 
-        transparent 100%);
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(0, 0, 0, 0.8) 20%,
+          rgba(0, 0, 0, 0.8) 80%,
+          transparent 100%);
       background-size: 200% 100%;
       animation: queue-highlight 2s linear infinite;
     }
@@ -327,21 +386,21 @@
     .divider {
       width: 2px;
       height: 50vh;
-      background: linear-gradient(180deg, 
-        transparent 0%, 
-        var(--border-color-dark) 20%, 
-        var(--border-color-dark) 80%, 
-        transparent 100%);
+      background: linear-gradient(180deg,
+          transparent 0%,
+          var(--border-color-dark) 20%,
+          var(--border-color-dark) 80%,
+          transparent 100%);
       margin: 0 3rem;
       position: relative;
     }
 
     [data-theme="light"] .divider {
-      background: linear-gradient(180deg, 
-        transparent 0%, 
-        var(--border-color-light) 20%, 
-        var(--border-color-light) 80%, 
-        transparent 100%);
+      background: linear-gradient(180deg,
+          transparent 0%,
+          var(--border-color-light) 20%,
+          var(--border-color-light) 80%,
+          transparent 100%);
     }
 
     .right-section {
@@ -360,47 +419,48 @@
       font-weight: 400;
       letter-spacing: 0.1em;
       margin-bottom: 1rem;
-      background: linear-gradient(
-        90deg,
-        #fff 0%,
-        #fff 35%,
-        #000 50%,
-        #fff 65%,
-        #fff 100%
-      );
+      background: linear-gradient(90deg,
+          #fff 0%,
+          #fff 35%,
+          #000 50%,
+          #fff 65%,
+          #fff 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: wave-effect 6s linear infinite;
-      text-shadow: 
+      text-shadow:
         0 0 20px rgba(255, 255, 255, 0.6),
         0 0 40px rgba(255, 255, 255, 0.4);
       filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
     }
 
     [data-theme="light"] .main-title {
-      background: linear-gradient(
-        90deg,
-        #000 0%,
-        #000 35%,
-        #fff 50%,
-        #000 65%,
-        #000 100%
-      );
+      background: linear-gradient(90deg,
+          #000 0%,
+          #000 35%,
+          #fff 50%,
+          #000 65%,
+          #000 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 
+      text-shadow:
         0 0 20px rgba(0, 0, 0, 0.6),
         0 0 40px rgba(0, 0, 0, 0.4);
       filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
     }
 
     @keyframes wave-effect {
-      0% { background-position: 200% 0; }
-      100% { background-position: -100% 0; }
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
     }
 
     .subtitle {
@@ -412,8 +472,15 @@
     }
 
     @keyframes subtle-pulse {
-      0%, 100% { opacity: 0.9; }
-      50% { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0.9;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
 
     /* Visualizer Section */
@@ -432,7 +499,7 @@
       align-items: center;
       justify-content: center;
       color: #fff;
-      text-shadow: 
+      text-shadow:
         0 0 10px rgba(255, 255, 255, 0.8),
         0 0 20px rgba(255, 255, 255, 0.6),
         0 0 30px rgba(255, 255, 255, 0.4);
@@ -453,14 +520,17 @@
     }
 
     @keyframes glow-pulse {
-      0%, 100% { 
-        text-shadow: 
+
+      0%,
+      100% {
+        text-shadow:
           0 0 10px rgba(255, 255, 255, 0.8),
           0 0 20px rgba(255, 255, 255, 0.6),
           0 0 30px rgba(255, 255, 255, 0.4);
       }
-      50% { 
-        text-shadow: 
+
+      50% {
+        text-shadow:
           0 0 15px rgba(255, 255, 255, 1),
           0 0 25px rgba(255, 255, 255, 0.8),
           0 0 35px rgba(255, 255, 255, 0.6);
@@ -469,7 +539,7 @@
 
     [data-theme="light"] .song-title {
       color: #000;
-      text-shadow: 
+      text-shadow:
         0 0 10px rgba(0, 0, 0, 0.8),
         0 0 20px rgba(0, 0, 0, 0.6),
         0 0 30px rgba(0, 0, 0, 0.4);
@@ -477,14 +547,17 @@
     }
 
     @keyframes glow-pulse-light {
-      0%, 100% { 
-        text-shadow: 
+
+      0%,
+      100% {
+        text-shadow:
           0 0 10px rgba(0, 0, 0, 0.8),
           0 0 20px rgba(0, 0, 0, 0.6),
           0 0 30px rgba(0, 0, 0, 0.4);
       }
-      50% { 
-        text-shadow: 
+
+      50% {
+        text-shadow:
           0 0 15px rgba(0, 0, 0, 1),
           0 0 25px rgba(0, 0, 0, 0.8),
           0 0 35px rgba(0, 0, 0, 0.6);
@@ -594,7 +667,7 @@
 
     /* Audio Controls - Fixed at bottom without background */
     .audio-controls {
-      
+
       position: fixed;
       bottom: 40px;
       right: 50%;
@@ -642,10 +715,10 @@
       left: -100%;
       width: 100%;
       height: calc(100% + 4px);
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(255, 255, 255, 0.4) 50%, 
-        transparent 100%);
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.4) 50%,
+          transparent 100%);
       transition: left 0.6s ease;
     }
 
@@ -667,10 +740,10 @@
     }
 
     [data-theme="light"] .file-input-label::before {
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(0, 0, 0, 0.4) 50%, 
-        transparent 100%);
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(0, 0, 0, 0.4) 50%,
+          transparent 100%);
     }
 
     [data-theme="light"] .file-input-label:hover {
@@ -741,7 +814,8 @@
       border-radius: 2px;
       outline: none;
       cursor: pointer;
-      -webkit-appearance: none; /* FIX: put here, not on thumb */
+      -webkit-appearance: none;
+      /* FIX: put here, not on thumb */
       appearance: none;
     }
 
@@ -867,7 +941,9 @@
 
     /* Responsive Design */
     @media (max-width: 1024px) {
-      html, body {
+
+      html,
+      body {
         overflow-x: hidden;
         overflow-y: auto;
       }
@@ -883,48 +959,48 @@
         padding-bottom: 200px;
         overflow-y: visible;
       }
-      
+
       .left-section {
         padding-top: 0;
         order: 1;
         width: 100%;
       }
-      
+
       .right-section {
         padding-top: 0;
         order: 2;
         width: 100%;
       }
-      
+
       .divider {
         width: 60vw;
         height: 2px;
         margin: 1rem auto;
-        background: linear-gradient(90deg, 
-          transparent 0%, 
-          var(--border-color-dark) 20%, 
-          var(--border-color-dark) 80%, 
-          transparent 100%);
+        background: linear-gradient(90deg,
+            transparent 0%,
+            var(--border-color-dark) 20%,
+            var(--border-color-dark) 80%,
+            transparent 100%);
         order: 1.5;
         align-self: center;
       }
-      
+
       [data-theme="light"] .divider {
-        background: linear-gradient(90deg, 
-          transparent 0%, 
-          var(--border-color-light) 20%, 
-          var(--border-color-light) 80%, 
-          transparent 100%);
+        background: linear-gradient(90deg,
+            transparent 0%,
+            var(--border-color-light) 20%,
+            var(--border-color-light) 80%,
+            transparent 100%);
       }
-      
+
       .main-title {
         font-size: 1.8rem;
       }
-      
+
       .title-section {
         margin-bottom: 2rem;
       }
-      
+
       .lyrics-section {
         position: fixed;
         bottom: 220px;
@@ -934,18 +1010,18 @@
         max-height: 120px;
         z-index: 3;
       }
-      
+
       .queue-section {
         max-width: 100%;
         margin-top: 1rem;
         display: block !important;
       }
-      
+
       .queue-container {
         max-height: 200px;
         display: block;
       }
-      
+
       .audio-controls {
         position: fixed;
         bottom: 20px;
@@ -959,37 +1035,37 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
         z-index: 5;
       }
-      
+
       [data-theme="light"] .audio-controls {
         background: rgba(255, 255, 255, 0.9);
         border: 1px solid rgba(0, 0, 0, 0.2);
       }
-      
+
       .file-input-label {
         font-size: 0.5rem;
         padding: 10px 16px;
       }
-      
+
       .media-controls {
         gap: 0.8rem;
       }
-      
+
       .control-button {
         width: 35px;
         height: 35px;
         font-size: 0.7rem;
       }
-      
+
       .play-button {
         width: 45px;
         height: 45px;
         font-size: 0.9rem;
       }
-      
+
       .volume-control {
         margin-top: 0.8rem;
       }
-      
+
       .volume-slider {
         width: 100px;
       }
@@ -1002,108 +1078,108 @@
         padding-bottom: 180px;
         gap: 1rem;
       }
-      
+
       .main-title {
         font-size: 1.4rem;
         margin-bottom: 0.5rem;
       }
-      
+
       .subtitle {
         font-size: 0.5rem;
       }
-      
+
       .title-section {
         margin-bottom: 1.5rem;
       }
-      
+
       .three-container {
         width: 280px;
         height: 280px;
       }
-      
+
       .song-title {
         font-size: 0.55rem;
         min-height: 2.5rem;
       }
-      
+
       .song-name {
         font-size: 0.55rem;
       }
-      
+
       .artist-name {
         font-size: 0.4rem;
       }
-      
+
       .visualizer-container {
         margin-bottom: 1rem;
       }
-      
+
       .queue-title {
         font-size: 0.5rem;
       }
-      
+
       .queue-item {
         font-size: 0.4rem;
         padding: 6px 10px;
       }
-      
+
       .lyrics-section {
         bottom: 200px;
         max-height: 100px;
       }
-      
+
       .lyrics-container {
         font-size: 0.35rem;
         padding: 0.8rem;
       }
-      
+
       .audio-controls {
         padding: 12px;
         gap: 0.8rem;
       }
-      
+
       .file-input-label {
         font-size: 0.45rem;
         padding: 8px 14px;
         gap: 8px;
       }
-      
+
       .media-controls {
         gap: 0.6rem;
       }
-      
+
       .control-button {
         width: 32px;
         height: 32px;
         font-size: 0.6rem;
       }
-      
+
       .play-button {
         width: 40px;
         height: 40px;
         font-size: 0.8rem;
       }
-      
+
       .volume-control {
         gap: 8px;
         margin-top: 0.6rem;
       }
-      
+
       .volume-slider {
         width: 80px;
         height: 3px;
       }
-      
+
       .volume-slider::-webkit-slider-thumb {
         width: 14px;
         height: 14px;
       }
-      
+
       .volume-slider::-moz-range-thumb {
         width: 14px;
         height: 14px;
       }
-      
+
       .theme-toggle {
         top: 15px;
         left: 15px;
@@ -1111,7 +1187,7 @@
         height: 45px;
         font-size: 1rem;
       }
-      
+
       footer {
         font-size: 0.4rem;
         bottom: 5px;
@@ -1126,67 +1202,67 @@
         padding-top: 60px;
         padding-bottom: 190px;
       }
-      
+
       .main-title {
         font-size: 1.2rem;
       }
-      
+
       .subtitle {
         font-size: 0.45rem;
       }
-      
+
       .three-container {
         width: 250px;
         height: 250px;
       }
-      
+
       .song-title {
         font-size: 0.5rem;
       }
-      
+
       .song-name {
         font-size: 0.5rem;
       }
-      
+
       .artist-name {
         font-size: 0.35rem;
       }
-      
+
       .queue-container {
         max-height: 150px;
       }
-      
+
       .lyrics-section {
         bottom: 210px;
         max-height: 80px;
       }
-      
+
       .audio-controls {
         padding: 10px;
         gap: 0.6rem;
       }
-      
+
       .file-input-label {
         font-size: 0.4rem;
         padding: 7px 12px;
       }
-      
+
       .control-button {
         width: 30px;
         height: 30px;
         font-size: 0.55rem;
       }
-      
+
       .play-button {
         width: 36px;
         height: 36px;
         font-size: 0.7rem;
       }
-      
+
       .volume-slider {
         width: 70px;
       }
-      
+
       .theme-toggle {
         width: 40px;
         height: 40px;
@@ -1204,53 +1280,53 @@
         height: 100vh;
         overflow-y: auto;
       }
-      
+
       .left-section {
         flex: 0.4;
         padding-top: 0;
       }
-      
+
       .right-section {
         flex: 0.6;
         padding-top: 0;
       }
-      
+
       .divider {
         width: 2px;
         height: 70vh;
         margin: 0 1rem;
-        background: linear-gradient(180deg, 
-          transparent 0%, 
-          var(--border-color-dark) 20%, 
-          var(--border-color-dark) 80%, 
-          transparent 100%);
+        background: linear-gradient(180deg,
+            transparent 0%,
+            var(--border-color-dark) 20%,
+            var(--border-color-dark) 80%,
+            transparent 100%);
       }
-      
+
       [data-theme="light"] .divider {
-        background: linear-gradient(180deg, 
-          transparent 0%, 
-          var(--border-color-light) 20%, 
-          var(--border-color-light) 80%, 
-          transparent 100%);
+        background: linear-gradient(180deg,
+            transparent 0%,
+            var(--border-color-light) 20%,
+            var(--border-color-light) 80%,
+            transparent 100%);
       }
-      
+
       .main-title {
         font-size: 1.4rem;
       }
-      
+
       .three-container {
         width: 200px;
         height: 200px;
       }
-      
+
       .queue-section {
         max-width: 280px;
       }
-      
+
       .queue-container {
         max-height: 180px;
       }
-      
+
       .lyrics-section {
         bottom: 120px;
         right: 20px;
@@ -1258,7 +1334,7 @@
         max-width: 250px;
         max-height: 100px;
       }
-      
+
       .audio-controls {
         bottom: 15px;
         right: 20px;
@@ -1268,7 +1344,7 @@
         justify-content: space-between;
         padding: 10px 15px;
       }
-      
+
       .volume-control {
         margin-top: 0;
         margin-left: 1rem;
@@ -1321,6 +1397,7 @@
     }
   </style>
 </head>
+
 <body>
   <!-- Animated Border Lines -->
   <div class="border-segments">
@@ -1345,7 +1422,7 @@
         <h1 class="main-title">MiloHakai</h1>
         <p class="subtitle">A web-based media player!</p>
       </div>
-      
+
       <div class="queue-section">
         <div class="queue-title">Queue</div>
         <div class="queue-container" id="queueContainer" style="display: none;"></div>
@@ -1380,8 +1457,8 @@
     <div class="file-input-wrapper">
       <input type="file" id="audioFile" multiple accept="audio/*">
       <label for="audioFile" class="file-input-label">
-          <i class="fas fa-music"></i>
-          Upload Songs
+        <i class="fas fa-music"></i>
+        Upload Songs
       </label>
       <input type="file" id="lrcFile" accept=".lrc">
       <label for="lrcFile" class="file-input-label">
@@ -1389,7 +1466,7 @@
         Upload LRC Lyrics
       </label>
     </div>
-    
+
     <div class="media-controls">
       <button id="prevButton" class="control-button" disabled>
         <i class="fas fa-step-backward"></i>
@@ -1427,7 +1504,8 @@
 
     // --- Three.js Setup ---
     let scene, camera, renderer, sphere, analyser, dataArray, bufferLength;
-    let audioContext, source, isPlaying = false, animationId;
+    let audioContext, source, isPlaying = false,
+      animationId;
     let playlist = [];
     let currentTrackIndex = 0;
 
@@ -1461,7 +1539,7 @@
       }
     }
 
-    prevButton.addEventListener('click', function() {
+    prevButton.addEventListener('click', function () {
       if (playlist.length > 1) {
         let prev = currentTrackIndex - 1;
         if (prev < 0) prev = playlist.length - 1;
@@ -1469,7 +1547,7 @@
       }
     });
 
-    nextButton.addEventListener('click', function() {
+    nextButton.addEventListener('click', function () {
       if (playlist.length > 1) {
         let next = currentTrackIndex + 1;
         if (next >= playlist.length) next = 0;
@@ -1477,7 +1555,7 @@
       }
     });
 
-    playButton.addEventListener('click', function() {
+    playButton.addEventListener('click', function () {
       if (!isPlaying) {
         audio.play();
       } else {
@@ -1485,17 +1563,17 @@
       }
     });
 
-    audio.addEventListener('play', function() {
+    audio.addEventListener('play', function () {
       isPlaying = true;
       playIcon.classList.remove('fa-play');
       playIcon.classList.add('fa-pause');
     });
-    audio.addEventListener('pause', function() {
+    audio.addEventListener('pause', function () {
       isPlaying = false;
       playIcon.classList.remove('fa-pause');
       playIcon.classList.add('fa-play');
     });
-    audio.addEventListener('ended', function() {
+    audio.addEventListener('ended', function () {
       if (playlist.length > 1) {
         let next = currentTrackIndex + 1;
         if (next >= playlist.length) next = 0; // Loop to start
@@ -1510,7 +1588,7 @@
     }
 
     // --- Play/Pause Button Logic ---
-    playButton.addEventListener('click', function() {
+    playButton.addEventListener('click', function () {
       if (!isPlaying) {
         audio.play();
       } else {
@@ -1518,24 +1596,24 @@
       }
     });
 
-    audio.addEventListener('play', function() {
+    audio.addEventListener('play', function () {
       isPlaying = true;
       playIcon.classList.remove('fa-play');
       playIcon.classList.add('fa-pause');
     });
-    audio.addEventListener('pause', function() {
+    audio.addEventListener('pause', function () {
       isPlaying = false;
       playIcon.classList.remove('fa-pause');
       playIcon.classList.add('fa-play');
     });
 
     // --- Audio File Upload Handler ---
-    audioFileInput.addEventListener('change', function(e) {
+    audioFileInput.addEventListener('change', function (e) {
       addToPlaylist(Array.from(e.target.files));
     });
 
     // --- Volume Control ---
-    volumeSlider.addEventListener('input', function() {
+    volumeSlider.addEventListener('input', function () {
       audio.volume = volumeSlider.value / 100;
     });
 
@@ -1559,7 +1637,10 @@
         }
         const text = line.replace(timeTag, '').trim();
         times.forEach(time => {
-          result.push({ time, text });
+          result.push({
+            time,
+            text
+          });
         });
       }
       return result
@@ -1569,11 +1650,11 @@
 
     const lrcFileInput = document.getElementById('lrcFile');
     lrcFileInput.setAttribute('multiple', 'multiple');
-    lrcFileInput.addEventListener('change', function(e) {
+    lrcFileInput.addEventListener('change', function (e) {
       const files = Array.from(e.target.files);
       files.forEach(file => {
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = function (evt) {
           const name = file.name.replace(/\.[^/.]+$/, '').trim().toLowerCase();
           lrcMap[name] = parseLRC(evt.target.result);
         };
@@ -1589,7 +1670,8 @@
 
       // Try song + artist
       for (const key in lrcMap) {
-        if (normalize(key) === songKey || normalize(key) === songKey + artistKey || normalize(key) === artistKey + songKey) {
+        if (normalize(key) === songKey || normalize(key) === songKey + artistKey || normalize(key) === artistKey +
+          songKey) {
           return lrcMap[key];
         }
       }
@@ -1622,7 +1704,8 @@
         if (currentLrcLines[idx - 1]) {
           html += `<div style="opacity:0.5;font-size:0.9em;">${currentLrcLines[idx - 1].text}</div>`;
         }
-        html += `<div style="font-size:1.2em;font-weight:bold;transition:color 0.3s;color:#00ff99;">${currentLrcLines[idx].text}</div>`;
+        html +=
+          `<div style="font-size:1.2em;font-weight:bold;transition:color 0.3s;color:#00ff99;">${currentLrcLines[idx].text}</div>`;
         if (currentLrcLines[idx + 1]) {
           html += `<div style="opacity:0.5;font-size:0.9em;">${currentLrcLines[idx + 1].text}</div>`;
         }
@@ -1630,7 +1713,7 @@
       }
     }
 
-    audio.addEventListener('timeupdate', function() {
+    audio.addEventListener('timeupdate', function () {
       if (currentLrcLines) {
         updateSyncedLyrics(audio.currentTime);
       }
@@ -1640,7 +1723,7 @@
     async function extractLyrics(file) {
       return new Promise((resolve) => {
         window.jsmediatags.read(file, {
-          onSuccess: function(tag) {
+          onSuccess: function (tag) {
             if (tag.tags.USLT && tag.tags.USLT.data) {
               resolve(tag.tags.USLT.data);
             } else if (tag.tags.LYRICS) {
@@ -1649,7 +1732,7 @@
               resolve(null);
             }
           },
-          onError: function() {
+          onError: function () {
             resolve(null);
           }
         });
@@ -1675,7 +1758,7 @@
       currentTrackIndex = index;
       const track = playlist[currentTrackIndex];
       audio.src = track.url;
-      
+
       songTitle.innerHTML = `
         <div class="song-name">${track.song}</div>
         ${track.artist ? `<div class="artist-name">${track.artist}</div>` : ''}
@@ -1751,7 +1834,10 @@
       const container = document.getElementById('threejs-container');
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+      });
       renderer.setSize(400, 400);
       renderer.setClearColor(0x000000, 0);
       container.appendChild(renderer.domElement);
@@ -1815,7 +1901,7 @@
 
     function initAudioContext() {
       if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioContext = new(window.AudioContext || window.webkitAudioContext)();
         analyser = audioContext.createAnalyser();
         source = audioContext.createMediaElementSource(audio);
         source.connect(analyser);
@@ -1831,20 +1917,26 @@
       let name = filename.replace(/\.[^/.]+$/, "");
       let [artist, ...songParts] = name.split(" - ");
       if (songParts.length > 0) {
-        return { artist: artist.trim(), song: songParts.join(" - ").trim() };
+        return {
+          artist: artist.trim(),
+          song: songParts.join(" - ").trim()
+        };
       } else {
-        return { artist: "", song: name.trim() };
+        return {
+          artist: "",
+          song: name.trim()
+        };
       }
     }
 
     // --- Window Events ---
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
       initThreeJS();
       audio.volume = 0.5;
       updateControlButtons();
     });
 
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
       if (renderer && camera) {
         const container = document.getElementById('threejs-container');
         const size = Math.min(container.offsetWidth, container.offsetHeight);
@@ -1854,12 +1946,12 @@
       }
     });
 
-    window.addEventListener('beforeunload', function() {
+    window.addEventListener('beforeunload', function () {
       playlist.forEach(track => {
         URL.revokeObjectURL(track.url);
       });
     });
-    
   </script>
 </body>
+
 </html>

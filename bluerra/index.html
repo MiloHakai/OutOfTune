@@ -1,36 +1,47 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bluerra-Sai</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       /* Snow blue backgrounds */
-      --bg-dark: #1a2332;        /* Darker snow blue for dark theme */
-      --bg-light: #e8f4f8;       /* Light snow blue for light theme */
-      
+      --bg-dark: #1a2332;
+      /* Darker snow blue for dark theme */
+      --bg-light: #e8f4f8;
+      /* Light snow blue for light theme */
+
       /* Text colors for readability */
-      --text-dark: #ffffff;       /* Pure white for dark theme */
-      --text-light: #1a2332;     /* Dark blue for light theme */
-      
+      --text-dark: #ffffff;
+      /* Pure white for dark theme */
+      --text-light: #1a2332;
+      /* Dark blue for light theme */
+
       /* Pastel blue colors (Cinnamoroll inspired) */
-      --pastel-blue: #a8d8ea;    /* Main pastel blue */
-      --pastel-blue-light: #c7e9f5; /* Lighter pastel blue */
-      --pastel-blue-dark: #7fb3d3;  /* Darker pastel blue */
-      
+      --pastel-blue: #a8d8ea;
+      /* Main pastel blue */
+      --pastel-blue-light: #c7e9f5;
+      /* Lighter pastel blue */
+      --pastel-blue-dark: #7fb3d3;
+      /* Darker pastel blue */
+
       /* Border colors */
       --border-color-dark: var(--pastel-blue);
       --border-color-light: var(--pastel-blue-dark);
-      
+
       /* Glow colors */
       --glow-color-dark: rgba(168, 216, 234, 0.8);
       --glow-color-light: rgba(127, 179, 211, 0.8);
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       height: 100%;
       font-family: 'Press Start 2P', cursive;
@@ -61,7 +72,8 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(26, 35, 50, 0.85); /* Dark blue overlay with transparency */
+      background: rgba(26, 35, 50, 0.85);
+      /* Dark blue overlay with transparency */
       z-index: 0;
       pointer-events: none;
     }
@@ -73,7 +85,8 @@
 
     /* Light theme overlay - reduced opacity for better GIF visibility */
     [data-theme="light"] body::before {
-      background: rgba(232, 244, 248, 0.65); /* Reduced from 0.90 to 0.65 for better visibility */
+      background: rgba(232, 244, 248, 0.65);
+      /* Reduced from 0.90 to 0.65 for better visibility */
     }
 
     /* Alternative approach with individual border segments */
@@ -88,7 +101,10 @@
     }
 
     /* Border line animations */
-    .border-top, .border-right, .border-bottom, .border-left {
+    .border-top,
+    .border-right,
+    .border-bottom,
+    .border-left {
       position: absolute;
     }
 
@@ -98,14 +114,14 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue) 40%, 
-        var(--pastel-blue-light) 50%,
-        var(--pastel-blue) 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue) 40%,
+          var(--pastel-blue-light) 50%,
+          var(--pastel-blue) 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal 12s linear infinite;
       box-shadow: 0 0 10px var(--glow-color-dark);
@@ -116,14 +132,14 @@
       right: 0;
       bottom: 0;
       width: 3px;
-      background: linear-gradient(180deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue) 40%, 
-        var(--pastel-blue-light) 50%,
-        var(--pastel-blue) 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue) 40%,
+          var(--pastel-blue-light) 50%,
+          var(--pastel-blue) 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical 12s linear infinite;
       box-shadow: 0 0 10px var(--glow-color-dark);
@@ -134,14 +150,14 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(-90deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue) 40%, 
-        var(--pastel-blue-light) 50%,
-        var(--pastel-blue) 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(-90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue) 40%,
+          var(--pastel-blue-light) 50%,
+          var(--pastel-blue) 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal-reverse 12s linear infinite;
       box-shadow: 0 0 10px var(--glow-color-dark);
@@ -152,14 +168,14 @@
       left: 0;
       bottom: 0;
       width: 3px;
-      background: linear-gradient(-180deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue) 40%, 
-        var(--pastel-blue-light) 50%,
-        var(--pastel-blue) 60%, 
-        transparent 70%, 
-        transparent 100%);
+      background: linear-gradient(-180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue) 40%,
+          var(--pastel-blue-light) 50%,
+          var(--pastel-blue) 60%,
+          transparent 70%,
+          transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical-reverse 12s linear infinite;
       box-shadow: 0 0 10px var(--glow-color-dark);
@@ -167,83 +183,125 @@
 
     /* Light theme borders */
     [data-theme="light"] .border-top {
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue-dark) 40%, 
-        var(--pastel-blue) 50%,
-        var(--pastel-blue-dark) 60%, 
-        transparent 70%, 
-        transparent 100%) !important;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue-dark) 40%,
+          var(--pastel-blue) 50%,
+          var(--pastel-blue-dark) 60%,
+          transparent 70%,
+          transparent 100%) !important;
       box-shadow: 0 0 10px var(--glow-color-light) !important;
     }
 
     [data-theme="light"] .border-right {
-      background: linear-gradient(180deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue-dark) 40%, 
-        var(--pastel-blue) 50%,
-        var(--pastel-blue-dark) 60%, 
-        transparent 70%, 
-        transparent 100%) !important;
+      background: linear-gradient(180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue-dark) 40%,
+          var(--pastel-blue) 50%,
+          var(--pastel-blue-dark) 60%,
+          transparent 70%,
+          transparent 100%) !important;
       box-shadow: 0 0 10px var(--glow-color-light) !important;
     }
 
     [data-theme="light"] .border-bottom {
-      background: linear-gradient(-90deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue-dark) 40%, 
-        var(--pastel-blue) 50%,
-        var(--pastel-blue-dark) 60%, 
-        transparent 70%, 
-        transparent 100%) !important;
+      background: linear-gradient(-90deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue-dark) 40%,
+          var(--pastel-blue) 50%,
+          var(--pastel-blue-dark) 60%,
+          transparent 70%,
+          transparent 100%) !important;
       box-shadow: 0 0 10px var(--glow-color-light) !important;
     }
 
     [data-theme="light"] .border-left {
-      background: linear-gradient(-180deg, 
-        transparent 0%, 
-        transparent 30%, 
-        var(--pastel-blue-dark) 40%, 
-        var(--pastel-blue) 50%,
-        var(--pastel-blue-dark) 60%, 
-        transparent 70%, 
-        transparent 100%) !important;
+      background: linear-gradient(-180deg,
+          transparent 0%,
+          transparent 30%,
+          var(--pastel-blue-dark) 40%,
+          var(--pastel-blue) 50%,
+          var(--pastel-blue-dark) 60%,
+          transparent 70%,
+          transparent 100%) !important;
       box-shadow: 0 0 10px var(--glow-color-light) !important;
     }
 
     /* First line - no delays, continuous movement */
-    .border-line-1.border-top { animation-delay: 0s; }
-    .border-line-1.border-right { animation-delay: 3s; }
-    .border-line-1.border-bottom { animation-delay: 6s; }
-    .border-line-1.border-left { animation-delay: 9s; }
+    .border-line-1.border-top {
+      animation-delay: 0s;
+    }
+
+    .border-line-1.border-right {
+      animation-delay: 3s;
+    }
+
+    .border-line-1.border-bottom {
+      animation-delay: 6s;
+    }
+
+    .border-line-1.border-left {
+      animation-delay: 9s;
+    }
 
     /* Second line - offset by 6s (half cycle) */
-    .border-line-2.border-top { animation-delay: 6s; }
-    .border-line-2.border-right { animation-delay: 9s; }
-    .border-line-2.border-bottom { animation-delay: 0s; }
-    .border-line-2.border-left { animation-delay: 3s; }
+    .border-line-2.border-top {
+      animation-delay: 6s;
+    }
+
+    .border-line-2.border-right {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-bottom {
+      animation-delay: 0s;
+    }
+
+    .border-line-2.border-left {
+      animation-delay: 3s;
+    }
 
     @keyframes move-horizontal {
-      0% { background-position: -100% 0; }
-      100% { background-position: 200% 0; }
+      0% {
+        background-position: -100% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
     }
 
     @keyframes move-horizontal-reverse {
-      0% { background-position: 200% 0; }
-      100% { background-position: -100% 0; }
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
     }
 
     @keyframes move-vertical {
-      0% { background-position: 0 -100%; }
-      100% { background-position: 0 200%; }
+      0% {
+        background-position: 0 -100%;
+      }
+
+      100% {
+        background-position: 0 200%;
+      }
     }
 
     @keyframes move-vertical-reverse {
-      0% { background-position: 0 200%; }
-      100% { background-position: 0 -100%; }
+      0% {
+        background-position: 0 200%;
+      }
+
+      100% {
+        background-position: 0 -100%;
+      }
     }
 
     .container {
@@ -273,20 +331,18 @@
 
     /* Wave effect setup with pastel blue */
     .wave-text {
-      background: linear-gradient(
-        90deg,
-        var(--text-dark) 0%,
-        var(--text-dark) 35%,
-        var(--pastel-blue) 50%,
-        var(--text-dark) 65%,
-        var(--text-dark) 100%
-      );
+      background: linear-gradient(90deg,
+          var(--text-dark) 0%,
+          var(--text-dark) 35%,
+          var(--pastel-blue) 50%,
+          var(--text-dark) 65%,
+          var(--text-dark) 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: wave-effect 6s linear infinite;
-      text-shadow: 
+      text-shadow:
         0 0 20px var(--glow-color-dark),
         0 0 40px var(--glow-color-dark),
         0 0 60px var(--glow-color-dark);
@@ -294,19 +350,17 @@
     }
 
     [data-theme="light"] .wave-text {
-      background: linear-gradient(
-        90deg,
-        var(--text-light) 0%,
-        var(--text-light) 35%,
-        var(--pastel-blue-dark) 50%,
-        var(--text-light) 65%,
-        var(--text-light) 100%
-      );
+      background: linear-gradient(90deg,
+          var(--text-light) 0%,
+          var(--text-light) 35%,
+          var(--pastel-blue-dark) 50%,
+          var(--text-light) 65%,
+          var(--text-light) 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 
+      text-shadow:
         0 0 20px var(--glow-color-light),
         0 0 40px var(--glow-color-light),
         0 0 60px var(--glow-color-light);
@@ -317,6 +371,7 @@
       0% {
         background-position: 200% 0;
       }
+
       100% {
         background-position: -100% 0;
       }
@@ -342,8 +397,15 @@
     }
 
     @keyframes subtle-pulse {
-      0%, 100% { opacity: 0.9; }
-      50% { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0.9;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
 
     .easter-egg-message {
@@ -365,7 +427,7 @@
 
     .easter-egg-message.warning {
       color: #ff4444;
-      text-shadow: 
+      text-shadow:
         0 0 15px rgba(255, 68, 68, 0.8),
         0 0 25px rgba(255, 68, 68, 0.6),
         0 0 35px rgba(255, 68, 68, 0.4);
@@ -373,11 +435,14 @@
     }
 
     @keyframes warning-pulse {
-      0%, 100% { 
+
+      0%,
+      100% {
         opacity: 0.9;
         transform: scale(1);
       }
-      50% { 
+
+      50% {
         opacity: 1;
         transform: scale(1.02);
       }
@@ -417,7 +482,7 @@
 
     .nav-link:hover {
       color: var(--pastel-blue);
-      text-shadow: 
+      text-shadow:
         0 0 15px var(--glow-color-dark),
         0 0 25px var(--glow-color-dark);
       transform: scale(1.05);
@@ -426,7 +491,7 @@
 
     [data-theme="light"] .nav-link:hover {
       color: var(--pastel-blue);
-      text-shadow: 
+      text-shadow:
         0 0 15px var(--glow-color-light),
         0 0 25px var(--glow-color-light);
       border-bottom: 1px solid var(--pastel-blue);
@@ -561,22 +626,27 @@
         font-size: 1.4rem;
         line-height: 1.5;
       }
+
       p {
         font-size: 0.7rem;
         margin-top: 1.5rem;
       }
+
       .icons a {
         font-size: 1.5rem;
         margin: 0 10px;
       }
+
       .navigation-links p {
         font-size: 0.65rem;
         margin: 0.6rem 0;
       }
+
       footer {
         font-size: 0.5rem;
         bottom: 10px;
       }
+
       .theme-toggle {
         width: 40px;
         height: 40px;
@@ -585,6 +655,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Animated Border Lines -->
@@ -608,14 +679,16 @@
     <h1 id="username" class="wave-text" onclick="handleNameClick()">Bluerra-Sai</h1>
     <p id="description">Visual artist and Musician.</p>
     <p id="easter-egg-text" class="easter-egg-message" style="display: none;">boop</p>
-    
+
     <div class="navigation-links">
 
     </div>
 
     <div class="icons">
-      <a href="https://discord.com/users/1027154532070850622/" title="Discord" target="_blank"><i class="fab fa-discord"></i></a>
-      <a href="https://open.spotify.com/artist/3WciAVM3DxjIWwV3aSugVa?si=S43FoBBCRRi9NMNqg-lYdA" title="Spotify" target="_blank"><i class="fab fa-spotify"></i></a>
+      <a href="https://discord.com/users/1027154532070850622/" title="Discord" target="_blank"><i
+          class="fab fa-discord"></i></a>
+      <a href="https://open.spotify.com/artist/3WciAVM3DxjIWwV3aSugVa?si=S43FoBBCRRi9NMNqg-lYdA" title="Spotify"
+        target="_blank"><i class="fab fa-spotify"></i></a>
       <a href="https://www.tiktok.com/@bluerra" title="TikTok" target="_blank"><i class="fab fa-tiktok"></i></a>
       <a href="https://twitch.tv/bluerra_sai" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
     </div>
@@ -649,10 +722,10 @@
     function handleNameClick() {
       nameClickCount++;
       playClickSound();
-      
+
       const descriptionEl = document.getElementById('description');
       const easterEggEl = document.getElementById('easter-egg-text');
-      
+
       if (nameClickCount === 1) {
         // First click - show the warning message
         descriptionEl.style.display = 'none';
@@ -664,7 +737,7 @@
         easterEggEl.textContent = 'Okay buddy, that\'s enough!';
         easterEggEl.classList.add('warning');
       }
-      
+
       // Reset after a delay if they stop clicking
       setTimeout(() => {
         if (nameClickCount < maxClicks) {
@@ -693,17 +766,19 @@
 
     // Audio functionality for background music
     const audio = document.getElementById('backgroundAudio');
-    
+
     // Function to start background audio
     function startBackgroundAudio() {
       audio.play().catch(error => {
         console.log('Audio autoplay prevented:', error);
         // If autoplay fails, try again on next user interaction
-        document.addEventListener('click', function() {
+        document.addEventListener('click', function () {
           if (audio.paused) {
             audio.play().catch(err => console.log('Audio play failed:', err));
           }
-        }, { once: true });
+        }, {
+          once: true
+        });
       });
     }
 
@@ -718,11 +793,14 @@
     });
 
     // Fallback: start audio on first user interaction
-    document.addEventListener('click', function() {
+    document.addEventListener('click', function () {
       if (audio.paused) {
         startBackgroundAudio();
       }
-    }, { once: true });
+    }, {
+      once: true
+    });
   </script>
 </body>
+
 </html>

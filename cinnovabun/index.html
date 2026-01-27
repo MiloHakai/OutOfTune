@@ -11,21 +11,32 @@
   <style>
     :root {
       /* Sakura + sakura-glow palette */
-      --bg-dark: #2b0b17;            /* deep plum for dark background */
-      --bg-light: #fff0f8;           /* pale sakura pink for light theme */
-      --text-dark: #ffeef6;          /* very pale pink text on dark bg */
-      --text-light: #42253f;         /* deep plum text on light bg */
+      --bg-dark: #2b0b17;
+      /* deep plum for dark background */
+      --bg-light: #fff0f8;
+      /* pale sakura pink for light theme */
+      --text-dark: #ffeef6;
+      /* very pale pink text on dark bg */
+      --text-light: #42253f;
+      /* deep plum text on light bg */
 
       /* Accents */
-      --accent-pink: #ff8fb8;        /* main sakura pink */
-      --accent-soft: #ffd6ea;        /* soft light pink */
-      --accent-purple: #b46bd6;      /* soft lavender/purple */
-      --accent-cyan: #ff9ac2;        /* REPLACED: sakura highlight (was cyan) */
+      --accent-pink: #ff8fb8;
+      /* main sakura pink */
+      --accent-soft: #ffd6ea;
+      /* soft light pink */
+      --accent-purple: #b46bd6;
+      /* soft lavender/purple */
+      --accent-cyan: #ff9ac2;
+      /* REPLACED: sakura highlight (was cyan) */
 
       /* Borders & glows */
-      --border-color-dark: #ffb6d6;  /* border tone on dark */
-      --border-color-light: #ffd6ef; /* border tone on light */
-      --glow-cyan: rgba(255, 154, 194, 0.85); /* sakura glow (replacing cyan glow) */
+      --border-color-dark: #ffb6d6;
+      /* border tone on dark */
+      --border-color-light: #ffd6ef;
+      /* border tone on light */
+      --glow-cyan: rgba(255, 154, 194, 0.85);
+      /* sakura glow (replacing cyan glow) */
       --glow-purple: rgba(180, 107, 214, 0.8);
 
       /* Utility */
@@ -61,7 +72,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(10, 10, 20, 0.57); /* Nearly black, very high opacity */
+      background: rgba(10, 10, 20, 0.57);
+      /* Nearly black, very high opacity */
       z-index: 0;
       transition: background 0.4s ease;
     }
@@ -73,10 +85,10 @@
 
     [data-theme="light"] body::before {
       /* sakura/light gradient instead of cyan */
-      background: linear-gradient(135deg, 
-        rgba(255, 224, 236, 0.95) 0%,
-        rgba(255, 196, 223, 0.85) 50%,
-        rgba(255, 154, 194, 0.75) 100%);
+      background: linear-gradient(135deg,
+          rgba(255, 224, 236, 0.95) 0%,
+          rgba(255, 196, 223, 0.85) 50%,
+          rgba(255, 154, 194, 0.75) 100%);
     }
 
     /* Alternative approach with individual border segments */
@@ -415,7 +427,7 @@
 
     [data-theme="light"] .click-counter p {
       color: var(--accent-pink);
-      text-shadow: 0 0 10px rgba(255,154,194,0.5);
+      text-shadow: 0 0 10px rgba(255, 154, 194, 0.5);
     }
 
     .icons a {
@@ -581,8 +593,7 @@
     </div>
 
     <div class="icons">
-      <a href="https://discord.gg/8AbJUtzFB9" title="Discord" target="_blank"><i
-          class="fab fa-discord"></i></a>
+      <a href="https://discord.gg/8AbJUtzFB9" title="Discord" target="_blank"><i class="fab fa-discord"></i></a>
       <a href="https://x.com/Cinnovabun" title="X" target="_blank"><i class="fab fa-x-twitter"></i></a>
       <a href="https://www.twitch.tv/Cinnovabun" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
     </div>

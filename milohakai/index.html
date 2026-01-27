@@ -62,13 +62,11 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.15) 0px,
-        rgba(0, 0, 0, 0.15) 2px,
-        transparent 2px,
-        transparent 4px
-      );
+      background: repeating-linear-gradient(0deg,
+          rgba(0, 0, 0, 0.15) 0px,
+          rgba(0, 0, 0, 0.15) 2px,
+          transparent 2px,
+          transparent 4px);
       animation: scanlines-scroll-vertical 8s linear infinite;
       pointer-events: none;
     }
@@ -77,6 +75,7 @@
       0% {
         transform: translateY(0);
       }
+
       100% {
         transform: translateY(4px);
       }
@@ -84,13 +83,11 @@
 
     /* Light theme scanlines */
     [data-theme="light"] .crt-overlay::before {
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.08) 0px,
-        rgba(0, 0, 0, 0.08) 2px,
-        transparent 2px,
-        transparent 4px
-      );
+      background: repeating-linear-gradient(0deg,
+          rgba(0, 0, 0, 0.08) 0px,
+          rgba(0, 0, 0, 0.08) 2px,
+          transparent 2px,
+          transparent 4px);
     }
 
     /* Screen curvature and vignette */
@@ -121,9 +118,12 @@
     }
 
     @keyframes flicker {
-      0%, 100% {
+
+      0%,
+      100% {
         opacity: 0;
       }
+
       50% {
         opacity: 0.3;
       }
@@ -168,24 +168,32 @@
     }
 
     @keyframes glitch-1 {
-      0%, 100% {
+
+      0%,
+      100% {
         transform: translate(0);
       }
+
       33% {
         transform: translate(-3px, 0);
       }
+
       66% {
         transform: translate(3px, 0);
       }
     }
 
     @keyframes glitch-2 {
-      0%, 100% {
+
+      0%,
+      100% {
         transform: translate(0);
       }
+
       33% {
         transform: translate(3px, 0);
       }
+
       66% {
         transform: translate(-3px, 0);
       }
@@ -194,14 +202,14 @@
     /* Subtle chromatic aberration on all text - barely visible, text looks white/black */
     .container,
     footer {
-      text-shadow: 
+      text-shadow:
         0.5px 0 0 rgba(255, 0, 0, 0.1),
         -0.5px 0 0 rgba(0, 255, 255, 0.1);
     }
 
     /* Slightly stronger effect just on the title when not hovering */
     h1 {
-      text-shadow: 
+      text-shadow:
         0.7px 0 0 rgba(255, 0, 0, 0.15),
         -0.7px 0 0 rgba(0, 255, 255, 0.15);
     }
@@ -537,6 +545,7 @@
     }
 
     @keyframes pulse-glow {
+
       0%,
       100% {
         filter: brightness(1);
@@ -565,6 +574,7 @@
     }
 
     @keyframes wave-move {
+
       0%,
       100% {
         background-position: 0% 50%;
@@ -656,30 +666,46 @@
       padding-right: 6px;
       background: transparent;
     }
-    .typing-text.typing { animation: blink-caret 0.75s step-end infinite; }
-    @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: currentColor; } }
+
+    .typing-text.typing {
+      animation: blink-caret 0.75s step-end infinite;
+    }
+
+    @keyframes blink-caret {
+
+      from,
+      to {
+        border-color: transparent;
+      }
+
+      50% {
+        border-color: currentColor;
+      }
+    }
 
     /* Theme toggle: absolute-stack icons so switching won't reflow/shift */
-    .theme-toggle { 
-      position: fixed; 
-      top: 20px; 
-      left: 20px; 
-      z-index: 5; 
-      width:50px; 
-      height:50px; 
-      padding:0; 
-      display:inline-flex; 
-      align-items:center; 
-      justify-content:center; 
-      border-radius:50%;
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 5;
+      width: 50px;
+      height: 50px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
       background: transparent;
       border: none;
       outline: none;
       cursor: pointer;
     }
+
     .theme-toggle:focus {
       outline: none;
     }
+
     .theme-toggle .theme-icon {
       position: absolute;
       inset: 0;
@@ -689,27 +715,40 @@
       font-size: 1.1rem;
       line-height: 1;
       transition: opacity 0.28s ease, transform 0.28s ease;
-      opacity: 0; transform: translateY(-6px) scale(0.96); visibility: hidden;
+      opacity: 0;
+      transform: translateY(-6px) scale(0.96);
+      visibility: hidden;
       pointer-events: none;
     }
+
     [data-theme="dark"] .theme-toggle .moon-icon {
-      opacity: 1; 
-      transform: translateY(0) scale(1); 
-      visibility: visible; 
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      visibility: visible;
       pointer-events: auto;
       color: #fff;
     }
+
     [data-theme="light"] .theme-toggle .sun-icon {
-      opacity: 1; 
-      transform: translateY(0) scale(1); 
-      visibility: visible; 
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      visibility: visible;
       pointer-events: auto;
       color: #000;
     }
 
     /* keep splash blending with page background */
-    .splash-screen { background-color: var(--bg-dark); transition: opacity 0.8s ease, visibility 0.8s ease; z-index:1000; }
-    .splash-screen.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+    .splash-screen {
+      background-color: var(--bg-dark);
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+      z-index: 1000;
+    }
+
+    .splash-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
     /* Fade-in effect for elements with .fade-in class */
     .fade-in {
@@ -848,18 +887,18 @@
       }
 
       console.log('Audio element found');
-      
+
       // Log when audio can play
       bg.addEventListener('canplay', () => {
         console.log('Audio can play - ready to start');
       });
-      
+
       // Log loading errors
       bg.addEventListener('error', (e) => {
         console.error('Audio loading error:', e);
         console.error('Error details:', bg.error);
       });
-      
+
       // Log when audio loads successfully
       bg.addEventListener('loadeddata', () => {
         console.log('Audio loaded successfully');
@@ -878,8 +917,8 @@
       // On first user gesture: unmute and ensure playback
       const handleFirstGesture = () => {
         console.log('User gesture detected - attempting to unmute and play');
-        try { 
-          bg.muted = false; 
+        try {
+          bg.muted = false;
           bg.volume = 0.3;
           console.log('Audio unmuted, volume set to 0.3');
         } catch (_) {
@@ -895,9 +934,15 @@
         document.removeEventListener('touchstart', handleFirstGesture);
       };
 
-      document.addEventListener('pointerdown', handleFirstGesture, { once: true });
-      document.addEventListener('keydown', handleFirstGesture, { once: true });
-      document.addEventListener('touchstart', handleFirstGesture, { once: true });
+      document.addEventListener('pointerdown', handleFirstGesture, {
+        once: true
+      });
+      document.addEventListener('keydown', handleFirstGesture, {
+        once: true
+      });
+      document.addEventListener('touchstart', handleFirstGesture, {
+        once: true
+      });
     })();
 
     /* Splash typing + hide (ensure main title merges visually) */
@@ -905,7 +950,8 @@
       const splash = document.getElementById('splashScreen');
       const splashTitle = document.getElementById('splashTitle');
       const mainTitle = document.getElementById('username');
-      const finalText = (splashTitle && splashTitle.textContent.trim()) || (mainTitle && mainTitle.textContent.trim()) || 'MiloHakai';
+      const finalText = (splashTitle && splashTitle.textContent.trim()) || (mainTitle && mainTitle.textContent
+      .trim()) || 'MiloHakai';
 
       function typeText(targetEl, text, delay = 70, onDone) {
         if (!targetEl) return;
@@ -937,7 +983,9 @@
 
       if (splash && splashTitle) {
         typeText(splashTitle, finalText, 70, () => setTimeout(hideSplashAndReveal, 900));
-        splash.addEventListener('pointerdown', () => hideSplashAndReveal(), { once: true });
+        splash.addEventListener('pointerdown', () => hideSplashAndReveal(), {
+          once: true
+        });
       } else {
         if (mainTitle) mainTitle.classList.add('wave-text');
       }

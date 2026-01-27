@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wicadev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Moonlit Scene Palette - inspired by the image */
+            --bg-dark: #0a1628;
+            /* deep night blue */
+            --bg-overlay: rgba(10, 22, 40, 0.85);
+            --text-dark: #b8d4e8;
+            /* soft moonlight blue */
+            --text-glow: #d4e8f7;
+            /* pale moonlight */
+
+            /* Scene Accents */
+            --moon-gold: #f4d58d;
+            /* warm golden moon */
+            --deep-blue: #1a3a52;
+            /* deep water blue */
+            --sky-blue: #4a7ba7;
+            /* evening sky blue */
+            --cloud-blue: #6b8caf;
+            /* cloud highlight */
+            --horizon-peach: #d4a574;
+            /* warm horizon */
+            --water-deep: #1e4a66;
+            /* deep water */
+
+            /* Dimmed versions */
+            --moon-gold-dim: #c4a86d;
+            --deep-blue-dim: #0f2638;
+            --sky-blue-dim: #365a7f;
+
+            /* Glows */
+            --glow-moon: rgba(244, 213, 141, 0.3);
+            --glow-blue: rgba(74, 123, 167, 0.25);
+            --glow-water: rgba(30, 74, 102, 0.2);
+
+            /* Light theme */
+            --bg-light: #e8f4f8;
+            --text-light: #1a3a52;
+            --border-light: #6b8caf;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+            position: relative;
+            background-image: url('background.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* Moonlit scene overlay with gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(244, 213, 141, 0.08) 0%, transparent 40%),
+                radial-gradient(ellipse at 80% 70%, rgba(30, 74, 102, 0.15) 0%, transparent 50%),
+                linear-gradient(180deg,
+                    rgba(10, 22, 40, 0.92) 0%,
+                    rgba(26, 58, 82, 0.88) 30%,
+                    rgba(30, 74, 102, 0.90) 70%,
+                    rgba(15, 38, 56, 0.95) 100%);
+            z-index: 0;
+            transition: background 0.4s ease;
+        }
+
+        [data-theme="light"] body {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        [data-theme="light"] body::before {
+            background: linear-gradient(135deg,
+                    rgba(232, 244, 248, 0.95) 0%,
+                    rgba(184, 212, 232, 0.9) 50%,
+                    rgba(107, 140, 175, 0.85) 100%);
+        }
+
+        /* Animated border segments */
+        .border-segments {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .border-top,
+        .border-right,
+        .border-bottom,
+        .border-left {
+            position: absolute;
+        }
+
+        /* Moonlit gradient borders */
+        .border-top {
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    transparent 25%,
+                    var(--deep-blue) 35%,
+                    var(--moon-gold) 50%,
+                    var(--sky-blue) 65%,
+                    transparent 75%,
+                    transparent 100%);
+            background-size: 300% 100%;
+            animation: move-horizontal 10s linear infinite;
+            filter: blur(0.5px);
+            box-shadow: 0 0 15px var(--glow-blue);
+        }
+
+        .border-right {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg,
+                    transparent 0%,
+                    transparent 25%,
+                    var(--sky-blue) 35%,
+                    var(--water-deep) 50%,
+                    var(--cloud-blue) 65%,
+                    transparent 75%,
+                    transparent 100%);
+            background-size: 100% 300%;
+            animation: move-vertical 10s linear infinite;
+            filter: blur(0.5px);
+            box-shadow: 0 0 15px var(--glow-water);
+        }
+
+        .border-bottom {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(-90deg,
+                    transparent 0%,
+                    transparent 25%,
+                    var(--moon-gold) 35%,
+                    var(--deep-blue) 50%,
+                    var(--sky-blue) 65%,
+                    transparent 75%,
+                    transparent 100%);
+            background-size: 300% 100%;
+            animation: move-horizontal-reverse 10s linear infinite;
+            filter: blur(0.5px);
+            box-shadow: 0 0 15px var(--glow-moon);
+        }
+
+        .border-left {
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(-180deg,
+                    transparent 0%,
+                    transparent 25%,
+                    var(--water-deep) 35%,
+                    var(--cloud-blue) 50%,
+                    var(--deep-blue) 65%,
+                    transparent 75%,
+                    transparent 100%);
+            background-size: 100% 300%;
+            animation: move-vertical-reverse 10s linear infinite;
+            filter: blur(0.5px);
+            box-shadow: 0 0 15px var(--glow-blue);
+        }
+
+        /* Light theme borders */
+        [data-theme="light"] .border-top,
+        [data-theme="light"] .border-right,
+        [data-theme="light"] .border-bottom,
+        [data-theme="light"] .border-left {
+            opacity: 0.6;
+            filter: blur(0.5px);
+            box-shadow: 0 0 10px rgba(74, 123, 167, 0.3);
+        }
+
+        /* Border animation timings */
+        .border-line-1.border-top {
+            animation-delay: 0s;
+        }
+
+        .border-line-1.border-right {
+            animation-delay: 2.5s;
+        }
+
+        .border-line-1.border-bottom {
+            animation-delay: 5s;
+        }
+
+        .border-line-1.border-left {
+            animation-delay: 7.5s;
+        }
+
+        .border-line-2.border-top {
+            animation-delay: 5s;
+        }
+
+        .border-line-2.border-right {
+            animation-delay: 7.5s;
+        }
+
+        .border-line-2.border-bottom {
+            animation-delay: 0s;
+        }
+
+        .border-line-2.border-left {
+            animation-delay: 2.5s;
+        }
+
+        @keyframes move-horizontal {
+            0% {
+                background-position: -100% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @keyframes move-horizontal-reverse {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        @keyframes move-vertical {
+            0% {
+                background-position: 0 -100%;
+            }
+
+            100% {
+                background-position: 0 200%;
+            }
+        }
+
+        @keyframes move-vertical-reverse {
+            0% {
+                background-position: 0 200%;
+            }
+
+            100% {
+                background-position: 0 -100%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2.4rem;
+            font-weight: 400;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+            line-height: 1.3;
+            padding: 0.5rem 0;
+        }
+
+        /* Moonlit wave effect */
+        .wave-text {
+            background: linear-gradient(110deg,
+                    var(--moon-gold) 0%,
+                    var(--horizon-peach) 20%,
+                    var(--sky-blue) 40%,
+                    var(--cloud-blue) 60%,
+                    var(--water-deep) 80%,
+                    var(--moon-gold) 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: wave-flow 8s linear infinite;
+            filter: drop-shadow(0 0 20px var(--glow-moon)) drop-shadow(0 0 40px var(--glow-blue)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            position: relative;
+        }
+
+        /* Additional glow layer */
+        .wave-text::before {
+            content: 'Wicadev';
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: -1;
+            background: inherit;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: blur(12px);
+            opacity: 0.7;
+        }
+
+        @keyframes wave-flow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 200% 50%;
+            }
+        }
+
+        [data-theme="light"] .wave-text {
+            background: linear-gradient(110deg,
+                    var(--moon-gold-dim) 0%,
+                    var(--deep-blue) 30%,
+                    var(--sky-blue) 60%,
+                    var(--moon-gold-dim) 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            filter: drop-shadow(0 0 15px rgba(74, 123, 167, 0.4)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        h1:hover {
+            transform: scale(1.02);
+        }
+
+        h1:active {
+            transform: scale(0.98);
+        }
+
+        p {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            font-family: 'Press Start 2P', monospace;
+            font-weight: 400;
+            opacity: 0.85;
+            letter-spacing: 0.06em;
+            line-height: 1.6;
+            text-shadow: 0 0 10px var(--glow-blue);
+            animation: subtle-glow 8s ease-in-out infinite;
+        }
+
+        @keyframes subtle-glow {
+
+            0%,
+            100% {
+                opacity: 0.85;
+                text-shadow: 0 0 10px var(--glow-blue);
+            }
+
+            50% {
+                opacity: 0.95;
+                text-shadow: 0 0 15px var(--glow-blue),
+                    0 0 25px var(--glow-moon);
+            }
+        }
+
+        .icons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .icons a {
+            font-size: 1.6rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        .icons a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--glow-moon) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .icons a:hover {
+            color: var(--moon-gold);
+            transform: scale(1.15) translateY(-3px);
+            filter: drop-shadow(0 0 15px var(--glow-moon)) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .icons a:hover::after {
+            opacity: 1;
+        }
+
+        [data-theme="light"] .icons a:hover {
+            color: var(--deep-blue);
+            filter: drop-shadow(0 0 12px rgba(26, 58, 82, 0.5));
+        }
+
+        .click-counter {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .click-counter.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .click-counter p {
+            font-size: 0.65rem;
+            color: var(--sky-blue);
+            margin: 0;
+            text-shadow: 0 0 15px var(--glow-blue),
+                0 0 25px var(--glow-moon);
+            animation: counter-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes counter-pulse {
+
+            0%,
+            100% {
+                text-shadow: 0 0 15px var(--glow-blue),
+                    0 0 25px var(--glow-moon);
+            }
+
+            50% {
+                text-shadow: 0 0 20px var(--glow-blue),
+                    0 0 35px var(--glow-moon),
+                    0 0 45px var(--glow-water);
+            }
+        }
+
+        [data-theme="light"] .click-counter p {
+            color: var(--deep-blue);
+            text-shadow: 0 0 12px rgba(26, 58, 82, 0.6);
+        }
+
+        footer {
+            position: fixed;
+            bottom: 15px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.5rem;
+            color: rgba(184, 212, 232, 0.6);
+            z-index: 2;
+            font-family: 'Press Start 2P', monospace;
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+            text-shadow: 0 0 8px rgba(74, 123, 167, 0.3);
+        }
+
+        footer a {
+            color: var(--moon-gold);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--sky-blue);
+            text-shadow: 0 0 12px var(--glow-blue);
+        }
+
+        [data-theme="light"] footer {
+            color: rgba(26, 58, 82, 0.7);
+            text-shadow: none;
+        }
+
+        [data-theme="light"] footer a {
+            color: var(--deep-blue);
+        }
+
+        [data-theme="light"] footer a:hover {
+            color: var(--moon-gold);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 5;
+            background: rgba(26, 58, 82, 0.08);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(74, 123, 167, 0.2);
+            padding: 14px;
+            color: var(--text-dark);
+            font-size: 1.3rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(74, 123, 167, 0.15);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(26, 58, 82, 0.15);
+            border-color: rgba(244, 213, 141, 0.4);
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 12px 40px rgba(244, 213, 141, 0.25),
+                0 0 30px rgba(74, 123, 167, 0.15);
+        }
+
+        [data-theme="light"] .theme-toggle {
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(74, 123, 167, 0.25);
+            box-shadow: 0 4px 20px rgba(74, 123, 167, 0.1);
+        }
+
+        [data-theme="light"] .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: var(--deep-blue);
+            box-shadow: 0 6px 25px rgba(26, 58, 82, 0.2);
+        }
+
+        .theme-icon {
+            transition: all 0.3s ease;
+        }
+
+        .sun-icon {
+            display: none;
+        }
+
+        .moon-icon {
+            display: block;
+            filter: drop-shadow(0 0 8px var(--glow-moon));
+        }
+
+        [data-theme="light"] .sun-icon {
+            display: block;
+            filter: drop-shadow(0 0 6px rgba(244, 213, 141, 0.6));
+        }
+
+        [data-theme="light"] .moon-icon {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            p {
+                font-size: 0.65rem;
+            }
+
+            .icons a {
+                font-size: 1.4rem;
+                margin: 0 0.6rem;
+            }
+
+            .theme-toggle {
+                width: 50px;
+                height: 50px;
+                top: 20px;
+                left: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            p {
+                font-size: 0.6rem;
+                margin-top: 1.5rem;
+            }
+
+            .icons {
+                gap: 1rem;
+                margin-top: 1.5rem;
+            }
+
+            .icons a {
+                font-size: 1.3rem;
+            }
+
+            footer {
+                font-size: 0.45rem;
+                bottom: 12px;
+            }
+
+            .theme-toggle {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.05) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.05) 3px);
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0.3;
+        }
+
+        [data-theme="light"] body::after {
+            opacity: 0.1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Animated Border Lines -->
+    <div class="border-segments">
+        <div class="border-top border-line-1"></div>
+        <div class="border-right border-line-1"></div>
+        <div class="border-bottom border-line-1"></div>
+        <div class="border-left border-line-1"></div>
+        <div class="border-top border-line-2"></div>
+        <div class="border-right border-line-2"></div>
+        <div class="border-bottom border-line-2"></div>
+        <div class="border-left border-line-2"></div>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i class="fas fa-sun theme-icon sun-icon"></i>
+        <i class="fas fa-moon theme-icon moon-icon"></i>
+    </button>
+
+    <div class="container">
+        <h1 id="username" class="wave-text" onclick="playClickSound()">Wicadev</h1>
+        <p>Small twitch streamer! :3</p>
+
+        <div id="clickCounter" class="click-counter" style="display: none;">
+            <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
+        </div>
+
+        <div class="icons">
+            <a href="https://discord.com/users/731694717267345460/" title="Discord" target="_blank" rel="noopener"><i
+                    class="fab fa-discord"></i></a>
+            <a href="https://www.twitch.tv/w1cadev" title="Twitch" target="_blank" rel="noopener"><i
+                    class="fab fa-twitch"></i></a>
+            <a href="https://www.instagram.com/wicadev/" title="Instagram" target="_blank" rel="noopener"><i
+                    class="fab fa-instagram"></i></a>
+            <a href="https://www.youtube.com/@wicadev" title="YouTube" target="_blank" rel="noopener"><i
+                    class="fab fa-youtube"></i></a>
+        </div>
+    </div>
+
+    <footer>
+        Copyright © 2026–present Wicadev // OutOfTune<br>
+        Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank" rel="noopener">SpectraPulse</a>
+    </footer>
+
+    <!-- Audio element for background music -->
+    <audio id="backgroundAudio" preload="auto" loop>
+        <source src="./bgm.flac" type="audio/flac">
+        <source src="./bgm.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Audio element for click sound effect -->
+    <audio id="clickSound" preload="auto">
+        <source src="./click-sound.mp3" type="audio/mpeg">
+        <source src="./click-sound.ogg" type="audio/ogg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute("data-theme");
+            html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+            localStorage.setItem('theme', current === "dark" ? "light" : "dark");
+        }
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        // Click counter functionality
+        let clickCount = 0;
+        const clickCounter = document.getElementById('clickCounter');
+        const clickCountSpan = document.getElementById('clickCount');
+
+        // Function to play click sound and update counter
+        function playClickSound() {
+            const clickSound = document.getElementById('clickSound');
+            clickSound.currentTime = 0;
+            clickSound.play().catch(error => {
+                console.log('Click sound could not be played:', error);
+            });
+
+            // Update click counter
+            clickCount++;
+            clickCountSpan.textContent = clickCount;
+
+            // Show the counter after first click
+            if (clickCount === 1) {
+                clickCounter.style.display = 'block';
+                setTimeout(() => {
+                    clickCounter.classList.add('show');
+                }, 10);
+            }
+        }
+
+        // Audio functionality for background music
+        const audio = document.getElementById('backgroundAudio');
+
+        // Function to start background audio
+        function startBackgroundAudio() {
+            audio.play().catch(error => {
+                console.log('Audio autoplay prevented:', error);
+                document.addEventListener('click', function () {
+                    if (audio.paused) {
+                        audio.play().catch(err => console.log('Audio play failed:', err));
+                    }
+                }, {
+                    once: true
+                });
+            });
+        }
+
+        // Set audio volumes
+        audio.volume = 0.3;
+        const clickSound = document.getElementById('clickSound');
+        clickSound.volume = 0.5;
+
+        // Start background music when page loads
+        window.addEventListener('load', () => {
+            startBackgroundAudio();
+        });
+
+        // Fallback: start audio on first user interaction
+        document.addEventListener('click', function () {
+            if (audio.paused) {
+                startBackgroundAudio();
+            }
+        }, {
+            once: true
+        });
+    </script>
+</body>
+
+</html>
