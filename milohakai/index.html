@@ -449,7 +449,7 @@
 
     h1 {
       font-family: 'Press Start 2P', monospace;
-      font-size: 2.2rem;
+      font-size: 1.8rem;
       font-weight: 400;
       letter-spacing: 0.1em;
       cursor: pointer;
@@ -464,7 +464,7 @@
     }
 
     p {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       line-height: 1.6;
       margin: 1rem 0;
     }
@@ -477,7 +477,7 @@
 
     .icons a {
       color: inherit;
-      font-size: 2rem;
+      font-size: 1.7rem;
       transition: all 0.3s ease;
       position: relative;
     }
@@ -517,7 +517,7 @@
       bottom: 1rem;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       text-align: center;
       z-index: 5;
       line-height: 1.6;
@@ -591,7 +591,7 @@
       padding: 1rem 2rem;
       border: none;
       border-radius: 8px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       opacity: 0;
       transform: translateY(10px);
       transition: all 0.5s ease;
@@ -887,6 +887,8 @@
       }
 
       console.log('Audio element found');
+      
+      let hasStarted = false;
 
       // Log when audio can play
       bg.addEventListener('canplay', () => {
@@ -910,39 +912,45 @@
       // Try muted autoplay immediately (best-effort)
       bg.play().then(() => {
         console.log('Muted autoplay started');
+        hasStarted = true;
       }).catch((err) => {
         console.log('Autoplay blocked (expected):', err.message);
       });
 
       // On first user gesture: unmute and ensure playback
       const handleFirstGesture = () => {
-        console.log('User gesture detected - attempting to unmute and play');
-        try {
+        if (hasStarted && !bg.paused) {
+          // Audio is already playing muted, just unmute it
+          console.log('User gesture detected - unmuting already playing audio');
           bg.muted = false;
           bg.volume = 0.3;
           console.log('Audio unmuted, volume set to 0.3');
-        } catch (_) {
-          console.error('Failed to unmute');
+        } else {
+          // Audio hasn't started yet, start it now
+          console.log('User gesture detected - starting and unmuting audio');
+          bg.muted = false;
+          bg.volume = 0.3;
+          bg.play().then(() => {
+            console.log('Audio playing successfully!');
+            hasStarted = true;
+          }).catch((err) => {
+            console.error('Failed to play audio:', err);
+          });
         }
-        bg.play().then(() => {
-          console.log('Audio playing successfully!');
-        }).catch((err) => {
-          console.error('Failed to play audio:', err);
-        });
-        document.removeEventListener('pointerdown', handleFirstGesture);
-        document.removeEventListener('keydown', handleFirstGesture);
-        document.removeEventListener('touchstart', handleFirstGesture);
       };
 
-      document.addEventListener('pointerdown', handleFirstGesture, {
-        once: true
-      });
-      document.addEventListener('keydown', handleFirstGesture, {
-        once: true
-      });
-      document.addEventListener('touchstart', handleFirstGesture, {
-        once: true
-      });
+      // Use capture phase to catch events early, especially on splash screen
+      document.addEventListener('touchstart', handleFirstGesture, { once: true, capture: true });
+      document.addEventListener('pointerdown', handleFirstGesture, { once: true, capture: true });
+      document.addEventListener('mousedown', handleFirstGesture, { once: true, capture: true });
+      document.addEventListener('keydown', handleFirstGesture, { once: true, capture: true });
+      
+      // Also specifically listen on the splash screen for mobile
+      const splash = document.getElementById('splashScreen');
+      if (splash) {
+        splash.addEventListener('click', handleFirstGesture, { once: true });
+        splash.addEventListener('touchend', handleFirstGesture, { once: true });
+      }
     })();
 
     /* Splash typing + hide (ensure main title merges visually) */
