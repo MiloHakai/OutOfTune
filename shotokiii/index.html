@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shotokiii</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b1412;
+            /* monolith dark green-black */
+            --bg-light: #e6efe9;
+            /* cloud white */
+
+            --text-dark: #e8f0ea;
+            /* soft cloud white */
+            --text-light: #2f4f4f;
+            /* muted blue-green */
+
+            --border-color-dark: #9fb8a0;
+            --border-color-light: #6f9f8f;
+
+            --glow-color-dark: rgba(180, 210, 190, 0.7);
+            --glow-color-light: rgba(120, 160, 150, 0.6);
+
+            --accent-primary: #f2c94c;
+            /* field yellow */
+            --accent-secondary: #7aa6c2;
+            /* sky blue */
+            --accent-dark: #1a2a24;
+            /* monolith */
+        }
+
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+            transition: background 0.5s ease, color 0.5s ease;
+            position: relative;
+            background-image: url('background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        /* Background overlay for dimming */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 8, 15, 0.65);
+            z-index: 0;
+            transition: background 0.4s ease;
+        }
+
+        [data-theme="light"] body {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        [data-theme="light"] body::before {
+            background: linear-gradient(135deg,
+                    rgba(212, 232, 234, 0.85) 0%,
+                    rgba(251, 255, 0, 0.25) 50%,
+                    rgba(53, 147, 255, 0.15) 100%);
+        }
+
+        /* Alternative approach with individual border segments */
+        .border-segments {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Border line animations */
+        .border-top,
+        .border-right,
+        .border-bottom,
+        .border-left {
+            position: absolute;
+        }
+
+        /* Dark theme borders (default) */
+        .border-top {
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #00ffcc 40%,
+                    #ff6b35 50%,
+                    #00ffcc 60%,
+                    transparent 70%,
+                    transparent 100%);
+            background-size: 300% 100%;
+            animation: move-horizontal 12s linear infinite;
+        }
+
+        .border-right {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #00ffcc 40%,
+                    #ff6b35 50%,
+                    #00ffcc 60%,
+                    transparent 70%,
+                    transparent 100%);
+            background-size: 100% 300%;
+            animation: move-vertical 12s linear infinite;
+        }
+
+        .border-bottom {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(-90deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #00ffcc 40%,
+                    #ff6b35 50%,
+                    #00ffcc 60%,
+                    transparent 70%,
+                    transparent 100%);
+            background-size: 300% 100%;
+            animation: move-horizontal-reverse 12s linear infinite;
+        }
+
+        .border-left {
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(-180deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #00ffcc 40%,
+                    #ff6b35 50%,
+                    #00ffcc 60%,
+                    transparent 70%,
+                    transparent 100%);
+            background-size: 100% 300%;
+            animation: move-vertical-reverse 12s linear infinite;
+        }
+
+        /* Light theme borders */
+        [data-theme="light"] .border-top {
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #33b8b8 40%,
+                    #ff8c5a 50%,
+                    #33b8b8 60%,
+                    transparent 70%,
+                    transparent 100%) !important;
+        }
+
+        [data-theme="light"] .border-right {
+            background: linear-gradient(180deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #33b8b8 40%,
+                    #ff8c5a 50%,
+                    #33b8b8 60%,
+                    transparent 70%,
+                    transparent 100%) !important;
+        }
+
+        [data-theme="light"] .border-bottom {
+            background: linear-gradient(-90deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #33b8b8 40%,
+                    #ff8c5a 50%,
+                    #33b8b8 60%,
+                    transparent 70%,
+                    transparent 100%) !important;
+        }
+
+        [data-theme="light"] .border-left {
+            background: linear-gradient(-180deg,
+                    transparent 0%,
+                    transparent 30%,
+                    #33b8b8 40%,
+                    #ff8c5a 50%,
+                    #33b8b8 60%,
+                    transparent 70%,
+                    transparent 100%) !important;
+        }
+
+        /* First line - no delays, continuous movement */
+        .border-line-1.border-top {
+            animation-delay: 0s;
+        }
+
+        .border-line-1.border-right {
+            animation-delay: 3s;
+        }
+
+        .border-line-1.border-bottom {
+            animation-delay: 6s;
+        }
+
+        .border-line-1.border-left {
+            animation-delay: 9s;
+        }
+
+        /* Second line - offset by 6s (half cycle) */
+        .border-line-2.border-top {
+            animation-delay: 6s;
+        }
+
+        .border-line-2.border-right {
+            animation-delay: 9s;
+        }
+
+        .border-line-2.border-bottom {
+            animation-delay: 0s;
+        }
+
+        .border-line-2.border-left {
+            animation-delay: 3s;
+        }
+
+        @keyframes move-horizontal {
+            0% {
+                background-position: -100% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @keyframes move-horizontal-reverse {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        @keyframes move-vertical {
+            0% {
+                background-position: 0 -100%;
+            }
+
+            100% {
+                background-position: 0 200%;
+            }
+        }
+
+        @keyframes move-vertical-reverse {
+            0% {
+                background-position: 0 200%;
+            }
+
+            100% {
+                background-position: 0 -100%;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2.2rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            line-height: 1.2;
+        }
+
+        /* Wave effect setup */
+        .wave-text {
+            background: linear-gradient(90deg,
+                    #f2c94c 0%,
+                    /* field */
+                    #9fd3c7 30%,
+                    /* clouds */
+                    #7aa6c2 50%,
+                    /* sky */
+                    #9fd3c7 70%,
+                    #f2c94c 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: wave-effect 6s linear infinite;
+
+            text-shadow:
+                0 0 18px rgba(242, 201, 76, 0.4),
+                0 0 30px rgba(122, 166, 194, 0.3);
+
+            filter: drop-shadow(0 0 10px rgba(180, 210, 190, 0.4));
+        }
+
+        [data-theme="light"] .wave-text {
+            background: linear-gradient(90deg,
+                    #1a8080 0%,
+                    #1a4d5c 25%,
+                    #cc5529 50%,
+                    #1a4d5c 75%,
+                    #1a8080 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow:
+                0 0 20px rgba(26, 128, 128, 0.6),
+                0 0 40px rgba(204, 85, 41, 0.4),
+                0 0 60px rgba(26, 77, 92, 0.2);
+            filter: drop-shadow(0 0 10px rgba(26, 128, 128, 0.5));
+        }
+
+        @keyframes wave-effect {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        h1:active {
+            transform: scale(0.98);
+        }
+
+        p {
+            margin-top: 1.5rem;
+            font-size: 0.7rem;
+            font-family: 'Press Start 2P', monospace;
+            font-weight: 400;
+            opacity: 0.9;
+            animation: subtle-pulse 12s ease-in-out infinite;
+            letter-spacing: 0.05em;
+            line-height: 1.4;
+        }
+
+        @keyframes subtle-pulse {
+
+            0%,
+            100% {
+                opacity: 0.9;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .icons {
+            margin-top: 1.5rem;
+        }
+
+        .click-counter {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .click-counter.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .click-counter p {
+            font-size: 0.6rem;
+            color: #00ffcc;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
+            animation: none;
+        }
+
+        [data-theme="light"] .click-counter p {
+            color: #1a8080;
+            text-shadow: 0 0 10px rgba(26, 128, 128, 0.5);
+        }
+
+        .icons a {
+            margin: 0 10px;
+            font-size: 1.5rem;
+            color: inherit;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .icons a:hover {
+            color: #00ffcc;
+            transform: scale(1.1);
+        }
+
+        [data-theme="light"] .icons a:hover {
+            color: #1a8080;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.5rem;
+            color: #7a9aa8;
+            z-index: 2;
+            font-family: 'Press Start 2P', monospace;
+            letter-spacing: 0.05em;
+            line-height: 1.4;
+        }
+
+        footer a {
+            color: #00ffcc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #ff6b35;
+        }
+
+        [data-theme="light"] footer {
+            color: #5a7a8a;
+        }
+
+        [data-theme="light"] footer a {
+            color: #1a8080;
+        }
+
+        [data-theme="light"] footer a:hover {
+            color: #cc5529;
+        }
+
+        /* Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 5;
+            background: rgba(0, 255, 204, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            padding: 12px;
+            color: inherit;
+            font-size: 1.2rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.2);
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(0, 255, 204, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 255, 204, 0.4);
+        }
+
+        [data-theme="light"] .theme-toggle {
+            background: rgba(26, 128, 128, 0.1);
+            border: 1px solid rgba(26, 128, 128, 0.3);
+            box-shadow: 0 4px 20px rgba(26, 128, 128, 0.2);
+        }
+
+        [data-theme="light"] .theme-toggle:hover {
+            background-color: rgba(26, 128, 128, 0.2);
+            box-shadow: 0 6px 25px rgba(26, 128, 128, 0.3);
+        }
+
+        .theme-icon {
+            transition: all 0.3s ease;
+        }
+
+        .sun-icon {
+            display: none;
+        }
+
+        .moon-icon {
+            display: block;
+        }
+
+        [data-theme="light"] .sun-icon {
+            display: block;
+        }
+
+        [data-theme="light"] .moon-icon {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 0.6rem;
+            }
+
+            .icons a {
+                font-size: 1.3rem;
+                margin: 0 8px;
+            }
+
+            footer {
+                font-size: 0.4rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Animated Border Lines -->
+    <div class="border-segments">
+        <div class="border-top border-line-1"></div>
+        <div class="border-right border-line-1"></div>
+        <div class="border-bottom border-line-1"></div>
+        <div class="border-left border-line-1"></div>
+        <div class="border-top border-line-2"></div>
+        <div class="border-right border-line-2"></div>
+        <div class="border-bottom border-line-2"></div>
+        <div class="border-left border-line-2"></div>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <i class="fas fa-sun theme-icon sun-icon"></i>
+        <i class="fas fa-moon theme-icon moon-icon"></i>
+    </button>
+
+    <div class="container">
+        <h1 id="username" class="wave-text" onclick="playClickSound()">Shotokiii</h1>
+        <p>I feel so free!</p>
+
+        <div id="clickCounter" class="click-counter" style="display: none;">
+            <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
+        </div>
+
+        <div class="icons">
+            <a href="https://discord.gg/users/734621438610243608" title="Discord" target="_blank"><i
+                    class="fab fa-discord"></i></a>
+            <a href="https://www.youtube.com/channel/UCwhvGaTQhEuWTCzzpSnslIg" title="YouTube" target="_blank"><i
+                    class="fab fa-youtube"></i></a>
+            <a href="https://www.twitch.tv/karathekule" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
+        </div>
+    </div>
+
+    <footer>
+        Copyright © 2025–present Shotokiii // OutOfTune <br>
+        Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank"> SpectraPulse</a>
+    </footer>
+
+    <!-- Audio element for background music -->
+    <audio id="backgroundAudio" preload="auto" loop>
+        <source src="./bgm.flac" type="audio/flac">
+        <source src="./bgm.mp3" type="audio/mpeg">
+        <!-- Fallback message -->
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Audio element for click sound effect -->
+    <audio id="clickSound" preload="auto">
+        <source src="./click-sound.mp3" type="audio/mpeg">
+        <source src="./click-sound.ogg" type="audio/ogg">
+        <!-- Fallback message -->
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute("data-theme");
+            html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+        }
+
+        // Click counter functionality
+        let clickCount = 0;
+        const clickCounter = document.getElementById('clickCounter');
+        const clickCountSpan = document.getElementById('clickCount');
+
+        // Function to play click sound and update counter
+        function playClickSound() {
+            const clickSound = document.getElementById('clickSound');
+            clickSound.currentTime = 0; // Reset to beginning in case it's already playing
+            clickSound.play().catch(error => {
+                console.log('Click sound could not be played:', error);
+            });
+
+            // Update click counter
+            clickCount++;
+            clickCountSpan.textContent = clickCount;
+
+            // Show the counter after first click
+            if (clickCount === 1) {
+                clickCounter.style.display = 'block';
+                setTimeout(() => {
+                    clickCounter.classList.add('show');
+                }, 10);
+            }
+        }
+
+        // Audio functionality for background music
+        const audio = document.getElementById('backgroundAudio');
+
+        // Function to start background audio
+        function startBackgroundAudio() {
+            audio.play().catch(error => {
+                console.log('Audio autoplay prevented:', error);
+                // If autoplay fails, try again on next user interaction
+                document.addEventListener('click', function () {
+                    if (audio.paused) {
+                        audio.play().catch(err => console.log('Audio play failed:', err));
+                    }
+                }, {
+                    once: true
+                });
+            });
+        }
+
+        // Set audio volumes
+        audio.volume = 0.4; // Background music at 30%
+        const clickSound = document.getElementById('clickSound');
+        clickSound.volume = 0.3; // Click sound at 50%
+
+        // Start background music when page loads
+        window.addEventListener('load', () => {
+            startBackgroundAudio();
+        });
+
+        // Fallback: start audio on first user interaction
+        document.addEventListener('click', function () {
+            if (audio.paused) {
+                startBackgroundAudio();
+            }
+        }, {
+            once: true
+        });
+    </script>
+</body>
+
+</html>
