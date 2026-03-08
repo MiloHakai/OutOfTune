@@ -1841,7 +1841,6 @@
       renderer.setSize(400, 400);
       renderer.setClearColor(0x000000, 0);
       container.appendChild(renderer.domElement);
-
       const geometry = new THREE.SphereGeometry(1, 64, 32);
       const material = new THREE.MeshBasicMaterial({
         color: 0xffffff,
@@ -1851,7 +1850,18 @@
       });
       sphere = new THREE.Mesh(geometry, material);
       scene.add(sphere);
-      camera.position.z = 3;
+
+      // Snapshot clean unit-sphere positions RIGHT NOW before any frame mutates them
+      const rawPos = geometry.attributes.position;
+      originalPositions = new Float32Array(rawPos.count * 3);
+      for (let i = 0; i < rawPos.count; i++) {
+        const v = new THREE.Vector3().fromBufferAttribute(rawPos, i).normalize();
+        originalPositions[i * 3]     = v.x;
+        originalPositions[i * 3 + 1] = v.y;
+        originalPositions[i * 3 + 2] = v.z;
+      }
+      camera.position.set(0.4, 0.6, 2.8);
+      camera.lookAt(0, 0, 0);
       animate();
     }
 
@@ -1868,28 +1878,47 @@
       renderer.render(scene, camera);
     }
 
+    // Store original vertex positions for clean normalization
+    let originalPositions = null;
+
     function updateSphereVisualization() {
-      if (!sphere || !dataArray) return;
+      if (!sphere || !dataArray || !originalPositions) return;
       const geometry = sphere.geometry;
       const positions = geometry.attributes.position;
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-      let avgAmplitude = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        avgAmplitude += dataArray[i];
-      }
-      avgAmplitude = avgAmplitude / dataArray.length / 255;
+
+      // Frequency bands
+      const len = dataArray.length;
+      let bass = 0, mid = 0, treble = 0;
+      for (let i = 0; i < 8; i++)              bass   += dataArray[i];
+      for (let i = 8; i < 80; i++)             mid    += dataArray[i];
+      for (let i = 80; i < len; i++)           treble += dataArray[i];
+      bass   /= 8   * 255;
+      mid    /= 72  * 255;
+      treble /= (len - 80) * 255;
+
+      // Global scale driven by bass — sphere stays a sphere, just breathes
+      const globalScale = 1.0 + bass * 0.2 + mid * 0.06;
+
+      const t = performance.now() * 0.001;
+
       for (let i = 0; i < positions.count; i++) {
-        const vertex = new THREE.Vector3();
-        vertex.fromBufferAttribute(positions, i);
-        const freq = Math.floor((i / positions.count) * dataArray.length);
-        const amplitude = dataArray[freq] / 255;
-        const displacement = 1 + (amplitude * 0.3) + (avgAmplitude * 0.2);
-        vertex.normalize().multiplyScalar(displacement);
-        positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
+        const nx = originalPositions[i * 3];
+        const ny = originalPositions[i * 3 + 1];
+        const nz = originalPositions[i * 3 + 2];
+
+        // Small ripple on top of global scale using vertex index spread across
+        // the sphere — keeps the sphere recognisable but adds texture
+        const ripple = Math.sin(i * 0.15 + t * 3.0) * treble * 0.04
+                     + Math.cos(i * 0.23 + t * 2.0) * mid    * 0.03;
+
+        const d = globalScale + ripple;
+        positions.setXYZ(i, nx * d, ny * d, nz * d);
       }
+
       positions.needsUpdate = true;
       sphere.material.color.setHex(isDark ? 0xffffff : 0x000000);
-      sphere.material.opacity = 0.7 + avgAmplitude * 0.3;
+      sphere.material.opacity = 0.6 + bass * 0.25;
     }
 
     function updateVisualizerColors() {
