@@ -11,31 +11,15 @@
     rel="stylesheet">
   <style>
     :root {
-      /* Snow blue backgrounds */
       --bg-dark: #1a2332;
-      /* Darker snow blue for dark theme */
       --bg-light: #e8f4f8;
-      /* Light snow blue for light theme */
-
-      /* Text colors for readability */
       --text-dark: #ffffff;
-      /* Pure white for dark theme */
       --text-light: #1a2332;
-      /* Dark blue for light theme */
-
-      /* Pastel blue colors (Cinnamoroll inspired) */
       --pastel-blue: #a8d8ea;
-      /* Main pastel blue */
       --pastel-blue-light: #c7e9f5;
-      /* Lighter pastel blue */
       --pastel-blue-dark: #7fb3d3;
-      /* Darker pastel blue */
-
-      /* Border colors */
       --border-color-dark: var(--pastel-blue);
       --border-color-light: var(--pastel-blue-dark);
-
-      /* Glow colors */
       --glow-color-dark: rgba(168, 216, 234, 0.8);
       --glow-color-light: rgba(127, 179, 211, 0.8);
     }
@@ -56,7 +40,6 @@
       color: var(--text-dark);
       transition: background 0.4s ease, color 0.4s ease;
       position: relative;
-      /* PNG background setup */
       background-image: url('./background.png');
       background-size: cover;
       background-position: center;
@@ -64,17 +47,14 @@
       background-attachment: fixed;
     }
 
-    /* Dark overlay to make text readable */
     body::before {
       content: '';
-      background: rgba(26, 35, 50, 0.72);
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(26, 35, 50, 0.85);
-      /* Dark blue overlay with transparency */
+      background: rgba(26, 35, 50, 0.72);
       z-index: 0;
       pointer-events: none;
     }
@@ -84,13 +64,59 @@
       color: var(--text-light);
     }
 
-    /* Light theme overlay - reduced opacity for better GIF visibility */
     [data-theme="light"] body::before {
-      background: rgba(232, 244, 248, 0.65);
-      /* Reduced from 0.90 to 0.65 for better visibility */
+      background: rgba(232, 244, 248, 0.6);
     }
 
-    /* Alternative approach with individual border segments */
+    #intro-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(12, 18, 30, 0.95);
+      backdrop-filter: blur(10px);
+      animation: intro-fade-out 0.8s ease forwards;
+      animation-delay: 1.5s;
+      overflow: hidden;
+    }
+
+    #intro-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center,
+          rgba(168, 216, 234, 0.12) 0%,
+          rgba(168, 216, 234, 0.04) 30%,
+          rgba(12, 18, 30, 0) 65%);
+      pointer-events: none;
+    }
+
+    .intro-logo {
+      width: clamp(260px, 30vw, 420px);
+      max-width: 82%;
+      height: auto;
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+      image-rendering: auto;
+      filter:
+        drop-shadow(0 0 8px rgba(168, 216, 234, 0.75)) drop-shadow(0 0 18px rgba(168, 216, 234, 0.35));
+      animation: intro-logo-in 0.9s ease forwards;
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: translateY(18px) scale(0.99);
+      filter: blur(10px);
+      animation: main-reveal 0.95s ease forwards;
+      animation-delay: 1.05s;
+    }
+
     .border-segments {
       position: fixed;
       top: 0;
@@ -101,7 +127,6 @@
       z-index: 1;
     }
 
-    /* Border line animations */
     .border-top,
     .border-right,
     .border-bottom,
@@ -109,7 +134,6 @@
       position: absolute;
     }
 
-    /* Dark theme borders (pastel blue) */
     .border-top {
       top: 0;
       left: 0;
@@ -182,7 +206,6 @@
       box-shadow: 0 0 10px var(--glow-color-dark);
     }
 
-    /* Light theme borders */
     [data-theme="light"] .border-top {
       background: linear-gradient(90deg,
           transparent 0%,
@@ -231,7 +254,6 @@
       box-shadow: 0 0 10px var(--glow-color-light) !important;
     }
 
-    /* First line - no delays, continuous movement */
     .border-line-1.border-top {
       animation-delay: 0s;
     }
@@ -248,7 +270,6 @@
       animation-delay: 9s;
     }
 
-    /* Second line - offset by 6s (half cycle) */
     .border-line-2.border-top {
       animation-delay: 6s;
     }
@@ -305,10 +326,35 @@
       }
     }
 
+    @keyframes intro-logo-in {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes intro-fade-out {
+      to {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+    }
+
+    @keyframes main-reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
     .container {
       position: relative;
       z-index: 3;
       height: 100%;
+      max-width: 960px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -317,43 +363,42 @@
       text-align: center;
     }
 
-    h1 {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 2.2rem;
-      font-weight: 400;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.3s ease;
+    .logo-wrapper {
       position: relative;
       display: inline-block;
-      line-height: 1.4;
+      margin-bottom: 32px;
     }
 
-    /* Mobile Changes for the logo btw */
-
     .logo {
-      width: 300px;
-    }
-
-    /* Logo styling with glow and floating animation */
-
-    .logo {
-      width: min(560px, 95vw);
+      width: clamp(460px, 36vw, 620px);
+      max-width: 92%;
       height: auto;
-      margin-bottom: 10px;
       cursor: pointer;
-
-      image-rendering: auto;
-      /* important */
       user-select: none;
-
-      /* glow shadows */
-      filter:
-        drop-shadow(0 0 6px rgba(168, 216, 234, 0.75)) drop-shadow(0 0 14px rgba(168, 216, 234, 0.45));
-
+      image-rendering: auto;
       animation: logo-float 6s ease-in-out infinite;
       transition: transform 0.25s ease, filter 0.25s ease;
+      filter:
+        drop-shadow(0 0 6px rgba(168, 216, 234, 0.65)) drop-shadow(0 0 14px rgba(168, 216, 234, 0.35));
+    }
+
+    .logo-wrapper::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 42%;
+      height: 100%;
+      background: linear-gradient(115deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.06) 35%,
+          rgba(255, 255, 255, 0.28) 50%,
+          rgba(255, 255, 255, 0.06) 65%,
+          transparent 100%);
+      transform: skewX(-18deg);
+      pointer-events: none;
+      animation: logo-sheen 7.5s ease-in-out infinite;
+      mix-blend-mode: screen;
     }
 
     .logo:hover {
@@ -366,112 +411,59 @@
       transform: scale(0.99);
     }
 
-    /* Logo Wrapper */
-
-    .logo-wrapper {
-      position: relative;
-      display: inline-block;
+    [data-theme="light"] .logo {
+      filter:
+        drop-shadow(0 0 6px rgba(127, 179, 211, 0.55)) drop-shadow(0 0 14px rgba(127, 179, 211, 0.25));
     }
 
-    .logo-wrapper::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(120deg,
-          transparent,
-          rgba(255, 255, 255, 0.35),
-          transparent);
-      transform: skewX(-20deg);
-      animation: logo-sheen 6s infinite;
-    }
-
-    /* Wave effect setup with pastel blue */
-    .wave-text {
-      background: linear-gradient(90deg,
-          var(--text-dark) 0%,
-          var(--text-dark) 35%,
-          var(--pastel-blue) 50%,
-          var(--text-dark) 65%,
-          var(--text-dark) 100%);
-      background-size: 300% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: wave-effect 6s linear infinite;
-      text-shadow:
-        0 0 20px var(--glow-color-dark),
-        0 0 40px var(--glow-color-dark),
-        0 0 60px var(--glow-color-dark);
-      filter: drop-shadow(0 0 15px var(--glow-color-dark));
-    }
-
-    [data-theme="light"] .wave-text {
-      background: linear-gradient(90deg,
-          var(--text-light) 0%,
-          var(--text-light) 35%,
-          var(--pastel-blue-dark) 50%,
-          var(--text-light) 65%,
-          var(--text-light) 100%);
-      background-size: 300% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow:
-        0 0 20px var(--glow-color-light),
-        0 0 40px var(--glow-color-light),
-        0 0 60px var(--glow-color-light);
-      filter: drop-shadow(0 0 15px var(--glow-color-light));
+    [data-theme="light"] .logo:hover {
+      filter:
+        drop-shadow(0 0 8px rgba(127, 179, 211, 0.7)) drop-shadow(0 0 18px rgba(127, 179, 211, 0.35));
     }
 
     @keyframes logo-float {
-      0% {
+
+      0%,
+      100% {
         transform: translateY(0px);
       }
 
       50% {
         transform: translateY(-10px);
       }
-
-      100% {
-        transform: translateY(0px);
-      }
     }
 
     @keyframes logo-sheen {
-      0% {
+
+      0%,
+      74% {
         left: -120%;
+        opacity: 0;
+      }
+
+      78% {
+        opacity: 1;
+      }
+
+      90% {
+        left: 120%;
+        opacity: 1;
       }
 
       100% {
         left: 120%;
+        opacity: 0;
       }
-    }
-
-    @keyframes wave-effect {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -100% 0;
-      }
-    }
-
-    h1:active {
-      transform: scale(0.98);
     }
 
     p {
-      margin-top: 2rem;
+      margin-top: 0;
       font-size: 0.9rem;
       font-family: 'Press Start 2P', cursive;
       font-weight: 400;
-      opacity: 0.9;
+      opacity: 0.92;
       animation: subtle-pulse 12s ease-in-out infinite;
-      line-height: 1.6;
+      line-height: 1.7;
       text-shadow: 0 0 10px var(--glow-color-dark);
     }
 
@@ -581,30 +573,17 @@
     }
 
     .icons {
-      margin-top: 0.6rem;
+      margin-top: 1.5rem;
     }
 
     .icons a {
       margin: 0 15px;
       font-size: 1.8rem;
-      opacity: 0.8;
       color: inherit;
       text-decoration: none;
       transition: all 0.3s ease;
       filter: drop-shadow(0 0 8px var(--glow-color-dark));
-      animation: icon-float 3s ease-in-out infinite;
-    }
-
-    @keyframes icon-float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-4px);
-      }
+      opacity: 0.82;
     }
 
     [data-theme="light"] .icons a {
@@ -612,9 +591,9 @@
     }
 
     .icons a:hover {
-      opacity: 1;
       color: var(--pastel-blue);
-      transform: scale(1.2);
+      opacity: 1;
+      transform: scale(1.16);
       filter: drop-shadow(0 0 15px var(--glow-color-dark));
     }
 
@@ -658,7 +637,6 @@
       color: var(--pastel-blue);
     }
 
-    /* Toggle Button */
     .theme-toggle {
       position: fixed;
       top: 20px;
@@ -720,19 +698,21 @@
     }
 
     @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem;
+      }
 
       .logo {
         width: 320px;
       }
 
-      h1 {
-        font-size: 1.4rem;
-        line-height: 1.5;
+      .logo-wrapper {
+        margin-bottom: 24px;
       }
 
       p {
         font-size: 0.7rem;
-        margin-top: 1.5rem;
+        margin-top: 0;
       }
 
       .icons a {
@@ -760,65 +740,65 @@
 </head>
 
 <body>
-
-  <!-- Animated Border Lines -->
-  <div class="border-segments">
-    <div class="border-top border-line-1"></div>
-    <div class="border-right border-line-1"></div>
-    <div class="border-bottom border-line-1"></div>
-    <div class="border-left border-line-1"></div>
-    <div class="border-top border-line-2"></div>
-    <div class="border-right border-line-2"></div>
-    <div class="border-bottom border-line-2"></div>
-    <div class="border-left border-line-2"></div>
+  <div id="intro-screen" aria-hidden="true">
+    <img src="./logo.png" alt="Bluerra-Sai intro logo" class="intro-logo">
   </div>
 
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-    <i class="fas fa-sun theme-icon sun-icon"></i>
-    <i class="fas fa-moon theme-icon moon-icon"></i>
-  </button>
-
-  <div class="container">
-    <img src="./logo.png" id="username" class="logo" onclick="handleNameClick()" alt="Bluerra-Sai Logo">
-    <p id="description">Visual artist and Musician.</p>
-    <p id="easter-egg-text" class="easter-egg-message" style="display: none;">boop</p>
-
-    <div class="navigation-links">
-
+  <div class="page-shell">
+    <div class="border-segments">
+      <div class="border-top border-line-1"></div>
+      <div class="border-right border-line-1"></div>
+      <div class="border-bottom border-line-1"></div>
+      <div class="border-left border-line-1"></div>
+      <div class="border-top border-line-2"></div>
+      <div class="border-right border-line-2"></div>
+      <div class="border-bottom border-line-2"></div>
+      <div class="border-left border-line-2"></div>
     </div>
 
-    <div class="icons">
-      <a href="https://discord.com/users/1027154532070850622/" title="Discord" target="_blank"><i
-          class="fab fa-discord"></i></a>
-      <a href="https://open.spotify.com/artist/3WciAVM3DxjIWwV3aSugVa?si=S43FoBBCRRi9NMNqg-lYdA" title="Spotify"
-        target="_blank"><i class="fab fa-spotify"></i></a>
-      <a href="https://www.tiktok.com/@bluerra" title="TikTok" target="_blank"><i class="fab fa-tiktok"></i></a>
-      <a href="https://twitch.tv/bluerra_sai" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <i class="fas fa-sun theme-icon sun-icon"></i>
+      <i class="fas fa-moon theme-icon moon-icon"></i>
+    </button>
+
+    <div class="container">
+      <div class="logo-wrapper">
+        <img src="./logo.png" id="username" class="logo" onclick="handleNameClick()" alt="Bluerra-Sai Logo">
+      </div>
+
+      <p id="description">Visual artist and Musician.</p>
+      <p id="easter-egg-text" class="easter-egg-message" style="display: none;">boop</p>
+
+      <div class="navigation-links"></div>
+
+      <div class="icons">
+        <a href="https://discord.com/users/1027154532070850622/" title="Discord" target="_blank"><i
+            class="fab fa-discord"></i></a>
+        <a href="https://open.spotify.com/artist/3WciAVM3DxjIWwV3aSugVa?si=S43FoBBCRRi9NMNqg-lYdA" title="Spotify"
+          target="_blank"><i class="fab fa-spotify"></i></a>
+        <a href="https://www.tiktok.com/@bluerra" title="TikTok" target="_blank"><i class="fab fa-tiktok"></i></a>
+        <a href="https://twitch.tv/bluerra_sai" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
+      </div>
     </div>
+
+    <footer>
+      Copyright © 2025–present Bluerra-Sai // OutOfTune <br>
+      Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank">SpectraPulse</a>
+    </footer>
   </div>
 
-  <footer>
-    Copyright © 2025–present Bluerra-Sai // OutOfTune <br>
-    Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank">SpectraPulse</a>
-  </footer>
-
-  <!-- Audio element for background music -->
   <audio id="backgroundAudio" preload="auto" loop>
     <source src="./bgm.mp3" type="audio/mpeg">
-    <!-- Fallback message -->
     Your browser does not support the audio element.
   </audio>
 
-  <!-- Audio element for click sound effect -->
   <audio id="clickSound" preload="auto">
     <source src="./click-sound.mp3" type="audio/mpeg">
     <source src="./click-sound.ogg" type="audio/ogg">
-    <!-- Fallback message -->
     Your browser does not support the audio element.
   </audio>
 
   <script>
-    // Easter egg variables
     let nameClickCount = 0;
     const maxClicks = 5;
 
@@ -830,18 +810,15 @@
       const easterEggEl = document.getElementById('easter-egg-text');
 
       if (nameClickCount === 1) {
-        // First click - show the warning message
         descriptionEl.style.display = 'none';
         easterEggEl.style.display = 'block';
         easterEggEl.textContent = 'boop!';
         easterEggEl.classList.remove('warning');
       } else if (nameClickCount >= maxClicks) {
-        // Too many clicks - show the red warning
         easterEggEl.textContent = 'Okay buddy, that\'s enough!';
         easterEggEl.classList.add('warning');
       }
 
-      // Reset after a delay if they stop clicking
       setTimeout(() => {
         if (nameClickCount < maxClicks) {
           nameClickCount = 0;
@@ -858,51 +835,46 @@
       html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
     }
 
-    // Function to play click sound
     function playClickSound() {
       const clickSound = document.getElementById('clickSound');
-      clickSound.currentTime = 0; // Reset to beginning in case it's already playing
+      clickSound.currentTime = 0;
       clickSound.play().catch(error => {
         console.log('Click sound could not be played:', error);
       });
     }
 
-    // Audio functionality for background music
     const audio = document.getElementById('backgroundAudio');
 
-    // Function to start background audio
     function startBackgroundAudio() {
       audio.play().catch(error => {
         console.log('Audio autoplay prevented:', error);
-        // If autoplay fails, try again on next user interaction
         document.addEventListener('click', function () {
           if (audio.paused) {
             audio.play().catch(err => console.log('Audio play failed:', err));
           }
-        }, {
-          once: true
-        });
+        }, { once: true });
       });
     }
 
-    // Set audio volumes
-    audio.volume = 0.15; // Background music at 30%
+    audio.volume = 0.15;
     const clickSound = document.getElementById('clickSound');
-    clickSound.volume = 0.3; // Click sound at 50%
+    clickSound.volume = 0.3;
 
-    // Start background music when page loads
     window.addEventListener('load', () => {
       startBackgroundAudio();
+      setTimeout(() => {
+        const intro = document.getElementById('intro-screen');
+        if (intro) {
+          intro.setAttribute('aria-hidden', 'true');
+        }
+      }, 2300);
     });
 
-    // Fallback: start audio on first user interaction
     document.addEventListener('click', function () {
       if (audio.paused) {
         startBackgroundAudio();
       }
-    }, {
-      once: true
-    });
+    }, { once: true });
   </script>
 </body>
 
