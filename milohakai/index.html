@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 /* Start Coding */
 
@@ -35,6 +35,18 @@
       /* CRT */
       --scanline: rgba(0, 0, 0, 0.18);
       --vignette: rgba(0, 0, 0, 0.55);
+
+      /* Dynamic sky variables (overridden by script at runtime) */
+      --sky-top: #050505;
+      --sky-mid: #070707;
+      --sky-bottom: #121214;
+      --accent: #3B3A2F;
+      --star-rgb: 255,255,255; /* r,g,b (no spaces required) */
+      --star-density: 1; /* multiplier for generated stars */
+      --wave-a: #ffffff;
+      --wave-b: #000000;
+      --flicker-overlay: rgba(255,255,255,0.006);
+      --icon: var(--text-dim);
     }
 
     html,
@@ -47,24 +59,7 @@
       color: var(--text);
     }
 
-    /* Light theme overrides (kept, but dark is primary) */
-    [data-theme="light"] {
-      --bg: #fbfbfb;
-      --bg2: #f3f3f3;
-      --text: rgba(15, 15, 15, 0.92);
-      --text-dim: rgba(15, 15, 15, 0.60);
-      --line: rgba(0, 0, 0, 0.90);
-      --line-soft: rgba(0, 0, 0, 0.45);
-      --glow: rgba(0, 0, 0, 0.30);
-
-      --band-strong: rgba(0, 0, 0, 0.16);
-      --band-soft: rgba(0, 0, 0, 0.07);
-      --mist: rgba(0, 0, 0, 0.05);
-      --dust: rgba(0, 0, 0, 0.10);
-
-      --scanline: rgba(0, 0, 0, 0.08);
-      --vignette: rgba(0, 0, 0, 0.20);
-    }
+    /* (Light theme overrides removed — site uses time-based palettes now) */
 
     body {
       position: relative;
@@ -78,11 +73,11 @@
 
     .wave-text {
       background: linear-gradient(90deg,
-          #ffffff 0%,
-          #ffffff 40%,
-          #000000 50%,
-          #ffffff 60%,
-          #ffffff 100%);
+          var(--text) 0%,
+          var(--text) 40%,
+          var(--accent) 50%,
+          var(--text) 60%,
+          var(--text) 100%);
 
       background-size: 300% 100%;
 
@@ -93,32 +88,22 @@
       animation: wave-effect 6s linear infinite;
 
       text-shadow:
-        0 0 10px rgba(255, 255, 255, 0.35),
-        0 0 20px rgba(255, 255, 255, 0.15);
+        0 0 10px var(--glow),
+        0 0 20px var(--accent);
+      -webkit-text-stroke: 0.35px var(--line-soft);
     }
 
-    /* Light theme version */
-    [data-theme="light"] .wave-text {
-      background: linear-gradient(90deg,
-          #000000 0%,
-          #000000 40%,
-          #ffffff 50%,
-          #000000 60%,
-          #000000 100%);
-
-      background-size: 300% 100%;
-
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+    /* wave-text remains themed by palette & accent */
 
     .space-plate {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: radial-gradient(ellipse at 50% 40%, var(--bg2), var(--bg));
+      background:
+        linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 60%, var(--sky-bottom) 100%),
+        radial-gradient(ellipse at 50% 40%, var(--bg2), var(--bg));
+      transition: background 1.2s ease;
     }
 
     /* Galaxy band + soft mist */
@@ -133,7 +118,7 @@
         radial-gradient(ellipse 170% 22% at 72% 62%,
           var(--band-strong) 0%,
           var(--band-soft) 38%,
-          rgba(255, 255, 255, 0.03) 58%,
+          var(--band-soft) 58%,
           transparent 78%),
 
         radial-gradient(ellipse 70% 45% at 18% 28%,
@@ -161,9 +146,10 @@
       position: fixed;
       border-radius: 50%;
       pointer-events: none;
-      z-index: 1;
+      z-index: 3;
       opacity: 0.75;
       filter: drop-shadow(0 0 10px var(--glow));
+      transition: opacity 1.2s ease, transform 1.2s ease, filter 1.2s ease;
     }
 
     .moon.big {
@@ -175,8 +161,8 @@
         radial-gradient(circle at 30% 35%,
           transparent 60%,
           var(--line) 61%,
-          rgba(255, 255, 255, 0.95) 63%,
-          rgba(255, 255, 255, 0.75) 66%,
+          var(--line) 63%,
+          var(--line-soft) 66%,
           transparent 70%);
     }
 
@@ -190,9 +176,51 @@
         radial-gradient(circle at 32% 38%,
           transparent 60%,
           var(--line-soft) 61%,
-          rgba(255, 255, 255, 0.70) 64%,
+          var(--line) 64%,
           transparent 70%);
     }
+
+    /* Sun element (appears during day / moves at sunset) */
+    .sun {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      width: 220px;
+      height: 220px;
+      top: 12%;
+      left: 78%;
+      transform: translate(-50%, 0) scale(1);
+      opacity: 0;
+      background: radial-gradient(circle at 30% 30%, var(--sun-core, #FFD66A) 0%, var(--sun-mid, #FF9E4A) 45%, transparent 70%);
+      filter: drop-shadow(0 0 40px var(--sun-glow, rgba(255,158,74,0.18)));
+      transition: opacity 1.2s ease, transform 1.2s ease, left 1.2s ease, top 1.2s ease, filter 1.2s ease;
+    }
+
+    /* gentle bobbing while visible */
+    @keyframes sun-bob {
+      0% { transform: translate(-50%, 0) scale(1); }
+      50% { transform: translate(-50%, -8px) scale(1.02); }
+      100% { transform: translate(-50%, 0) scale(1); }
+    }
+
+    @keyframes moon-bob {
+      0% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-6px) rotate(0.2deg); }
+      100% { transform: translateY(0) rotate(0); }
+    }
+
+    /* Sky-phase visibility rules */
+    [data-sky="day"] .sun { opacity: 1; top: 10%; left: 80%; transform: translate(-50%, 0) scale(1.05); --sun-core: #FFF2B5; --sun-mid: #FFD66A; --sun-glow: rgba(255,215,120,0.16); animation: sun-bob 8s ease-in-out infinite; }
+    [data-sky="sunset"] .sun { opacity: 1; top: 44%; left: 60%; transform: translate(-50%, 0) scale(0.9); --sun-core: #FFD66A; --sun-mid: #FF9E4A; --sun-glow: rgba(255,160,110,0.22); }
+    [data-sky="indigo"] .sun,
+    [data-sky="night"] .sun { opacity: 0; transform: translate(-50%, -10%) scale(0.7); }
+
+    /* Moon visibility across phases */
+    [data-sky="day"] .moon { opacity: 0; transform: translateY(-28px) scale(0.9); filter: blur(0.6px); pointer-events: none; }
+    [data-sky="sunset"] .moon { opacity: 0.35; transform: translateY(-8px) scale(0.95); filter: blur(0); }
+    [data-sky="indigo"] .moon { opacity: 0.7; transform: translateY(-4px) scale(0.98); filter: blur(0); }
+    [data-sky="night"] .moon { opacity: 0.98; transform: translateY(0) scale(1); animation: moon-bob 12s ease-in-out infinite; }
 
     /* Star canvas on top of plate, below UI */
     #starCanvas {
@@ -253,7 +281,7 @@
       content: '';
       position: fixed;
       inset: 0;
-      background: rgba(255, 255, 255, 0.006);
+      background: var(--flicker-overlay);
       pointer-events: none;
       z-index: 998;
       animation: flicker 6.5s ease-in-out infinite;
@@ -298,10 +326,10 @@
       height: 1px;
       background: linear-gradient(90deg,
           transparent 0%, transparent 25%,
-          var(--line-soft) 38%, var(--line) 50%, var(--line-soft) 62%,
+          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
           transparent 75%, transparent 100%);
       background-size: 300% 100%;
-      box-shadow: 0 0 12px var(--glow);
+      box-shadow: 0 0 12px var(--glow), 0 0 10px var(--accent);
       animation: moveH 11s linear infinite;
     }
 
@@ -312,10 +340,10 @@
       width: 1px;
       background: linear-gradient(180deg,
           transparent 0%, transparent 25%,
-          var(--line-soft) 38%, var(--line) 50%, var(--line-soft) 62%,
+          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
           transparent 75%, transparent 100%);
       background-size: 100% 300%;
-      box-shadow: -6px 0 16px var(--glow);
+      box-shadow: -6px 0 16px var(--glow), 0 0 10px var(--accent);
       animation: moveV 11s linear infinite 2.75s;
     }
 
@@ -326,10 +354,10 @@
       height: 1px;
       background: linear-gradient(-90deg,
           transparent 0%, transparent 25%,
-          var(--line-soft) 38%, var(--line) 50%, var(--line-soft) 62%,
+          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
           transparent 75%, transparent 100%);
       background-size: 300% 100%;
-      box-shadow: 0 -6px 16px var(--glow);
+      box-shadow: 0 -6px 16px var(--glow), 0 0 10px var(--accent);
       animation: moveH 11s linear infinite 5.5s;
     }
 
@@ -340,10 +368,10 @@
       width: 1px;
       background: linear-gradient(-180deg,
           transparent 0%, transparent 25%,
-          var(--line-soft) 38%, var(--line) 50%, var(--line-soft) 62%,
+          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
           transparent 75%, transparent 100%);
       background-size: 100% 300%;
-      box-shadow: 6px 0 16px var(--glow);
+      box-shadow: 6px 0 16px var(--glow), 0 0 10px var(--accent);
       animation: moveV 11s linear infinite 8.25s;
     }
 
@@ -415,26 +443,18 @@
       color: var(--text);
       text-shadow:
         0 0 10px var(--glow),
-        0.6px 0 0 rgba(255, 0, 0, 0.10),
-        -0.6px 0 0 rgba(0, 255, 255, 0.10);
+        0 0 6px var(--accent);
       animation: titlePulse 4s ease-in-out infinite;
     }
 
     @keyframes titlePulse {
 
-      0%,
-      100% {
-        text-shadow:
-          0 0 10px var(--glow),
-          0.6px 0 0 rgba(255, 0, 0, 0.10),
-          -0.6px 0 0 rgba(0, 255, 255, 0.10);
+      0%, 100% {
+        text-shadow: 0 0 10px var(--glow), 0 0 6px var(--accent);
       }
 
       50% {
-        text-shadow:
-          0 0 16px var(--glow),
-          0.9px 0 0 rgba(255, 0, 0, 0.12),
-          -0.9px 0 0 rgba(0, 255, 255, 0.12);
+        text-shadow: 0 0 16px var(--glow), 0 0 10px var(--accent);
       }
     }
 
@@ -453,7 +473,7 @@
       line-height: 1.9;
       margin: 1.2rem 0 0;
       color: var(--text-dim);
-      text-shadow: 0 0 12px rgba(255, 255, 255, 0.12);
+      text-shadow: 0 0 12px var(--glow);
       letter-spacing: 0.05em;
     }
 
@@ -464,17 +484,17 @@
     }
 
     .icons a {
-      color: var(--text-dim);
+      color: var(--icon);
       font-size: 1.6rem;
       transition: all 0.25s ease;
       position: relative;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.12);
+      text-shadow: 0 0 8px var(--glow);
     }
 
     .icons a:hover {
-      color: var(--text);
+      color: var(--accent);
       transform: translateY(-5px) scale(1.1);
-      text-shadow: 0 0 18px var(--glow);
+      text-shadow: 0 0 18px var(--accent);
     }
 
     .icons a::after {
@@ -485,8 +505,8 @@
       transform: translateX(-50%) scaleX(0);
       width: 100%;
       height: 1px;
-      background: var(--line);
-      box-shadow: 0 0 10px var(--glow);
+      background: linear-gradient(90deg, var(--accent) 0%, var(--line) 100%);
+      box-shadow: 0 0 10px var(--accent);
       transition: transform 0.25s ease;
     }
 
@@ -510,9 +530,7 @@
       transition: opacity 0.35s ease, transform 0.35s ease;
     }
 
-    [data-theme="light"] .click-counter p {
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
-    }
+    /* click-counter adapts to palette; removed static light-theme tweak */
 
     .click-counter.show {
       opacity: 1;
@@ -522,7 +540,7 @@
     .click-counter p {
       margin: 0;
       color: var(--text-dim);
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.10);
+      text-shadow: 0 0 10px var(--glow);
     }
 
     #clickCount {
@@ -541,7 +559,7 @@
       line-height: 2;
       color: var(--text-dim);
       letter-spacing: 0.08em;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.08);
+      text-shadow: 0 0 10px var(--glow);
     }
 
     footer a {
@@ -552,8 +570,8 @@
     }
 
     footer a:hover {
-      color: var(--text);
-      text-shadow: 0 0 10px var(--glow);
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent);
     }
 
     footer a::after {
@@ -563,7 +581,7 @@
       left: 0;
       width: 0;
       height: 1px;
-      background: var(--line);
+      background: linear-gradient(90deg, var(--accent) 0%, var(--line) 100%);
       transition: width 0.25s ease;
     }
 
@@ -571,65 +589,7 @@
       width: 100%;
     }
 
-    /* Theme toggle */
-    .theme-toggle {
-      position: fixed;
-      top: 18px;
-      left: 18px;
-      z-index: 12;
-      width: 46px;
-      height: 46px;
-      padding: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      cursor: pointer;
-      transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;
-      backdrop-filter: blur(2px);
-    }
-
-    [data-theme="light"] .theme-toggle {
-      background: rgba(0, 0, 0, 0.03);
-      border-color: rgba(0, 0, 0, 0.14);
-    }
-
-    .theme-toggle:hover {
-      box-shadow: 0 0 14px rgba(255, 255, 255, 0.14);
-    }
-
-    [data-theme="light"] .theme-toggle:hover {
-      box-shadow: 0 0 14px rgba(0, 0, 0, 0.12);
-    }
-
-    .theme-toggle .theme-icon {
-      position: absolute;
-      inset: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      opacity: 0;
-      transform: translateY(-6px) scale(0.95);
-      visibility: hidden;
-      pointer-events: none;
-      color: var(--text);
-    }
-
-    [data-theme="dark"] .theme-toggle .moon-icon {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      visibility: visible;
-    }
-
-    [data-theme="light"] .theme-toggle .sun-icon {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      visibility: visible;
-    }
+    /* Theme toggle removed — site uses time-driven palettes */
 
     /* ─────────────────────────────────────────────────────────────
        SPLASH (typing + click to enter)
@@ -666,7 +626,7 @@
       width: 220px;
       height: 220px;
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--line-soft);
       animation: ringPulse 3.2s ease-in-out infinite;
       pointer-events: none;
     }
@@ -727,14 +687,11 @@
 
     .splash-hint {
       font-size: 0.5rem;
-      color: rgba(255, 255, 255, 0.40);
+      color: var(--text-dim);
       letter-spacing: 0.22em;
       animation: hintBlink 2s ease-in-out infinite;
     }
 
-    [data-theme="light"] .splash-hint {
-      color: rgba(0, 0, 0, 0.35);
-    }
 
     @keyframes hintBlink {
 
@@ -769,6 +726,7 @@
 <body>
   <!-- Space plate background -->
   <div class="space-plate" aria-hidden="true"></div>
+  <div class="sun" aria-hidden="true"></div>
   <div class="moon big" aria-hidden="true"></div>
   <div class="moon small" aria-hidden="true"></div>
   <canvas id="starCanvas" aria-hidden="true"></canvas>
@@ -798,11 +756,6 @@
     <div class="border-left border-line-2"></div>
   </div>
 
-  <!-- Theme toggle -->
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-    <i class="fas fa-sun theme-icon sun-icon"></i>
-    <i class="fas fa-moon theme-icon moon-icon"></i>
-  </button>
 
   <!-- Main content -->
   <div class="container">
@@ -830,10 +783,15 @@
     Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank" rel="noopener">SpectraPulse</a>
   </footer>
 
-  <!-- Audio -->
-  <audio id="backgroundAudio" preload="auto" loop muted playsinline>
-    <source src="./bgm.mp3" type="audio/mpeg">
-    <source src="./bgm.flac" type="audio/flac">
+  <!-- Background music tracks (one per phase) -->
+  <audio id="bgmDay" preload="auto" loop muted playsinline>
+    <source src="./bgm-day.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="bgmSunset" preload="auto" loop muted playsinline>
+    <source src="./bgm-sunset.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="bgmNight" preload="auto" loop muted playsinline>
+    <source src="./bgm-night.mp3" type="audio/mpeg">
   </audio>
 
   <audio id="clickSound" preload="auto">
@@ -842,14 +800,7 @@
   </audio>
 
   <script>
-    /* ─────────────────────────────────────────────────────────────
-       THEME (dark default)
-       ───────────────────────────────────────────────────────────── */
-    function toggleTheme() {
-      const html = document.documentElement;
-      const current = html.getAttribute("data-theme");
-      html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
-    }
+    /* Theme switching removed — site uses time-based palettes */
 
     /* ─────────────────────────────────────────────────────────────
        STARFIELD (monochrome) + occasional shooting star
@@ -876,7 +827,9 @@
       function initStars() {
         stars = [];
         const area = window.innerWidth * window.innerHeight;
-        const count = Math.min(Math.floor(area / 2600), 900);
+        const css = getComputedStyle(document.documentElement);
+        const multiplier = (window.__sky && window.__sky.starDensity) || parseFloat(css.getPropertyValue('--star-density')) || 1;
+        const count = Math.min(Math.floor(area / 2600 * multiplier), 900);
 
         for (let i = 0; i < count; i++) {
           const r = Math.random();
@@ -893,10 +846,9 @@
       }
 
       function starColor(alpha) {
-        const theme = document.documentElement.getAttribute("data-theme");
-        return theme === "light"
-          ? `rgba(0,0,0,${alpha})`
-          : `rgba(255,255,255,${alpha})`;
+        const css = getComputedStyle(document.documentElement);
+        const rgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
+        return `rgba(${rgb},${alpha})`;
       }
 
       function drawStar(s, t) {
@@ -929,12 +881,9 @@
 
         if (s.spike) {
           const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, sz * 5);
-          const theme = document.documentElement.getAttribute("data-theme");
-          if (theme === "light") {
-            g.addColorStop(0, `rgba(0,0,0,${a * 0.18})`);
-          } else {
-            g.addColorStop(0, `rgba(255,255,255,${a * 0.22})`);
-          }
+            const css = getComputedStyle(document.documentElement);
+            const starRgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
+            g.addColorStop(0, `rgba(${starRgb},${a * 0.22})`);
           g.addColorStop(1, 'transparent');
           ctx.beginPath();
           ctx.arc(s.x, s.y, sz * 5, 0, Math.PI * 2);
@@ -954,9 +903,9 @@
           };
         }
         if (shooting) {
-          const theme = document.documentElement.getAttribute("data-theme");
-          const head = theme === "light" ? "rgba(0,0,0," : "rgba(255,255,255,";
-          ctx.strokeStyle = `${head}${shooting.life * 0.55})`;
+          const css = getComputedStyle(document.documentElement);
+          const rgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
+          ctx.strokeStyle = `rgba(${rgb},${shooting.life * 0.55})`;
           ctx.lineWidth = 1.6;
           ctx.beginPath();
           ctx.moveTo(shooting.x, shooting.y);
@@ -979,6 +928,14 @@
         maybeShoot();
         requestAnimationFrame(draw);
       }
+
+      /* expose a small API to update sky / star settings from outside this closure */
+      window.__starfield = {
+        setSkyVars(vars) {
+          window.__sky = Object.assign(window.__sky || {}, vars || {});
+          if (typeof initStars === 'function') initStars();
+        }
+      };
 
       window.addEventListener('resize', resize);
       resize();
@@ -1007,23 +964,91 @@
     }
 
     /* ─────────────────────────────────────────────────────────────
-       BACKGROUND AUDIO (muted autoplay then unmute on first gesture)
+       BACKGROUND AUDIO MANAGER
+       - manages three tracks (day, sunset/indigo, night) with crossfade
+       - primes tracks and unmutes on first user gesture
        ───────────────────────────────────────────────────────────── */
     (function () {
-      const bg = document.getElementById('backgroundAudio');
-      if (!bg) return;
-      bg.muted = true;
-      bg.volume = 0.3;
-      bg.play().catch(() => { });
+      const tracks = {
+        day: document.getElementById('bgmDay'),
+        sunset: document.getElementById('bgmSunset'),
+        night: document.getElementById('bgmNight')
+      };
 
-      const unmute = () => {
-        bg.muted = false;
-        bg.volume = 0.3;
-        if (bg.paused) bg.play().catch(() => { });
+      const DEFAULT_VOLUME = 0.22;
+      let current = null;
+
+      function ensureTrack(t) {
+        if (!t) return;
+        t.loop = true;
+        t.preload = 'auto';
+        t.volume = 0;
+        t.muted = true;
+        t.play().catch(() => { });
+      }
+
+      function ensureAll() {
+        Object.values(tracks).forEach(ensureTrack);
+      }
+
+      function fadeTo(el, to, ms = 900) {
+        if (!el) return;
+        el.muted = false;
+        // ensure a sane numeric start volume
+        const start = (typeof el.volume === 'number') ? el.volume : 0;
+        if (ms <= 0) {
+          const v = Math.max(0, Math.min(1, to));
+          try { el.volume = v; } catch (e) { }
+          if (v === 0) try { el.pause(); } catch (e) { }
+          return;
+        }
+        const startT = performance.now();
+        function clamp(v) { return Math.max(0, Math.min(1, v)); }
+        function step(now) {
+          const t = Math.min(1, (now - startT) / Math.max(1, ms));
+          const v = start + (to - start) * t;
+          try { el.volume = clamp(v); } catch (e) { }
+          if (t < 1) requestAnimationFrame(step);
+          else {
+            try { el.volume = clamp(to); } catch (e) { }
+            if (Math.abs(clamp(to)) < 1e-6) try { el.pause(); } catch (e) { }
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      function setFor(paletteName) {
+        const map = { day: 'day', sunset: 'sunset', indigo: 'sunset', night: 'night' };
+        const key = map[paletteName] || 'night';
+        if (current === key) return;
+        const newT = tracks[key];
+        const oldT = current ? tracks[current] : null;
+        current = key;
+        if (newT) {
+          try { newT.play().catch(() => { }); } catch (e) { }
+          fadeTo(newT, DEFAULT_VOLUME);
+        }
+        if (oldT && oldT !== newT) fadeTo(oldT, 0);
+      }
+
+      // expose manager
+      window.__bgmManager = { setFor, ensureAll, tracks };
+
+      // prime tracks now (muted) and wait for user gesture to fully enable
+      ensureAll();
+
+      const onFirstGesture = () => {
+        Object.values(tracks).forEach(t => {
+          if (!t) return;
+          t.muted = false;
+          try { t.play().catch(() => { }); } catch (e) { }
+        });
+        // if there's already a selected track, fade it up
+        if (current && tracks[current]) fadeTo(tracks[current], DEFAULT_VOLUME, 700);
       };
 
       ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(ev =>
-        document.addEventListener(ev, unmute, { once: true, capture: true })
+        document.addEventListener(ev, onFirstGesture, { once: true, capture: true })
       );
     })();
 
@@ -1058,6 +1083,164 @@
         typeText(splashTitle, text, 75, () => setTimeout(hide, 900));
         splash.addEventListener('pointerdown', hide, { once: true });
       }
+    })();
+
+    /* ------------------------------------------------------------------
+       Time-based sky palettes (Central Europe - Europe/Rome)
+       - applies CSS variables for palette and updates starfield density
+       ------------------------------------------------------------------ */
+    (function () {
+      function hexToRgb(hex) {
+        if (!hex) return '';
+        hex = hex.replace('#', '').trim();
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        const int = parseInt(hex, 16);
+        const r = (int >> 16) & 255;
+        const g = (int >> 8) & 255;
+        const b = int & 255;
+        return `${r},${g},${b}`;
+      }
+
+      const palettes = {
+        day: {
+          bg: '#F9FBFF', bg2: '#CFEFFF',
+          text: '#0F1720', textDim: 'rgba(15,23,32,0.6)',
+          line: 'rgba(15,23,32,0.9)', lineSoft: 'rgba(15,23,32,0.45)',
+          glow: 'rgba(63,191,102,0.12)',
+          skyTop: '#7FC0F4', skyMid: '#CFEFFF', skyBottom: '#F9FBFF',
+          accent: '#3FBF66', icon: 'rgba(63,191,102,0.95)', starRgb: '0,0,0', starDensity: 0.25,
+          bandStrong: 'rgba(15,23,32,0.10)', bandSoft: 'rgba(15,23,32,0.05)',
+          mist: 'rgba(15,23,32,0.02)', dust: 'rgba(15,23,32,0.06)',
+          vignette: 'rgba(0,0,0,0.06)', scanline: 'rgba(0,0,0,0.04)',
+          flicker: 'rgba(0,0,0,0.006)',
+          waveA: '#0F1720', waveB: '#F9FBFF'
+        },
+        sunset: {
+          bg: '#3F2A6B', bg2: '#8E6FBF',
+          text: '#FFF5EE', textDim: 'rgba(255,245,232,0.65)',
+          line: 'rgba(255,255,255,0.95)', lineSoft: 'rgba(255,255,255,0.4)',
+          glow: 'rgba(255,199,168,0.12)',
+          skyTop: '#3F2A6B', skyMid: '#C9B6E1', skyBottom: '#FFC7A8',
+          accent: '#FFC7A8', icon: '#FFC7A8', starRgb: '255,255,255', starDensity: 0.6,
+          bandStrong: 'rgba(255,199,168,0.10)', bandSoft: 'rgba(255,199,168,0.04)',
+          mist: 'rgba(255,199,168,0.02)', dust: 'rgba(255,199,168,0.06)',
+          vignette: 'rgba(0,0,0,0.18)', scanline: 'rgba(0,0,0,0.08)',
+          flicker: 'rgba(0,0,0,0.006)',
+          waveA: '#FFF5EE', waveB: '#C9B6E1'
+        },
+        indigo: {
+          bg: '#2D2E6A', bg2: '#7B63B3',
+          text: '#F4F2FF', textDim: 'rgba(244,242,255,0.65)',
+          line: 'rgba(255,255,255,0.92)', lineSoft: 'rgba(255,255,255,0.4)',
+          glow: 'rgba(123,99,179,0.14)',
+          skyTop: '#2D2E6A', skyMid: '#7B63B3', skyBottom: '#C7D0FF',
+          accent: '#FFB4A3', icon: '#FFB4A3', starRgb: '255,255,255', starDensity: 0.95,
+          bandStrong: 'rgba(244,242,255,0.08)', bandSoft: 'rgba(244,242,255,0.04)',
+          mist: 'rgba(244,242,255,0.02)', dust: 'rgba(244,242,255,0.06)',
+          vignette: 'rgba(0,0,0,0.10)', scanline: 'rgba(0,0,0,0.10)',
+          flicker: 'rgba(255,255,255,0.006)',
+          waveA: '#F4F2FF', waveB: '#7B63B3'
+        },
+        night: {
+          bg: '#050505', bg2: '#070707',
+          text: 'rgba(245,245,245,0.92)', textDim: 'rgba(245,245,245,0.6)',
+          line: 'rgba(255,255,255,0.9)', lineSoft: 'rgba(255,255,255,0.45)',
+          glow: 'rgba(255,255,255,0.40)',
+          skyTop: '#050505', skyMid: '#070707', skyBottom: '#121214',
+          accent: '#3B3A2F', icon: 'rgba(255,255,255,0.85)', starRgb: '255,255,255', starDensity: 1.4,
+          bandStrong: 'rgba(255,255,255,0.20)', bandSoft: 'rgba(255,255,255,0.08)',
+          mist: 'rgba(255,255,255,0.06)', dust: 'rgba(255,255,255,0.12)',
+          vignette: 'rgba(0,0,0,0.55)', scanline: 'rgba(0,0,0,0.18)',
+          flicker: 'rgba(255,255,255,0.006)',
+          waveA: '#ffffff', waveB: '#000000'
+        }
+      };
+
+      function applyPalette(name) {
+        const p = palettes[name];
+        if (!p) return;
+        const root = document.documentElement.style;
+        root.setProperty('--bg', p.bg);
+        root.setProperty('--bg2', p.bg2);
+        root.setProperty('--text', p.text);
+        root.setProperty('--text-dim', p.textDim);
+        root.setProperty('--line', p.line);
+        root.setProperty('--line-soft', p.lineSoft);
+        root.setProperty('--glow', p.glow);
+        root.setProperty('--sky-top', p.skyTop);
+        root.setProperty('--sky-mid', p.skyMid);
+        root.setProperty('--sky-bottom', p.skyBottom);
+        root.setProperty('--accent', p.accent || '');
+        // band / mist / dust / vignette / scanline / flicker
+        if (p.bandStrong) root.setProperty('--band-strong', p.bandStrong);
+        if (p.bandSoft) root.setProperty('--band-soft', p.bandSoft);
+        if (p.mist) root.setProperty('--mist', p.mist);
+        if (p.dust) root.setProperty('--dust', p.dust);
+        if (p.vignette) root.setProperty('--vignette', p.vignette);
+        if (p.scanline) root.setProperty('--scanline', p.scanline);
+        if (p.flicker) root.setProperty('--flicker-overlay', p.flicker);
+        // wave / title gradient
+        if (p.waveA) root.setProperty('--wave-a', p.waveA);
+        if (p.waveB) root.setProperty('--wave-b', p.waveB);
+        // ensure star-rgb is stored as r,g,b (no #)
+        const rgb = p.starRgb && p.starRgb.indexOf('#') === 0 ? hexToRgb(p.starRgb) : (p.starRgb || '255,255,255');
+        root.setProperty('--star-rgb', rgb);
+        root.setProperty('--star-density', String(p.starDensity || 1));
+        // icon color
+        if (p.icon) root.setProperty('--icon', p.icon);
+
+        document.documentElement.setAttribute('data-sky', name);
+
+        // instruct bgm manager to switch tracks for this palette (if available)
+        try { if (window.__bgmManager && typeof window.__bgmManager.setFor === 'function') window.__bgmManager.setFor(name); } catch (e) { }
+
+        // add a brief swap class to kick off any CSS keyframe wash if present
+        try {
+          const el = document.documentElement;
+          el.classList.add('palette-swap');
+          window.clearTimeout(el.__paletteSwapTimer);
+          el.__paletteSwapTimer = window.setTimeout(() => el.classList.remove('palette-swap'), 1400);
+        } catch (e) { }
+
+        // tell starfield to reinit with new density when available
+        if (window.__starfield && typeof window.__starfield.setSkyVars === 'function') {
+          window.__starfield.setSkyVars({ starDensity: p.starDensity || 1, starRgb: rgb });
+        } else {
+          window.__sky = Object.assign(window.__sky || {}, { starDensity: p.starDensity || 1, starRgb: rgb });
+        }
+      }
+
+      function getCETParts() {
+        const now = new Date();
+        const tz = 'Europe/Rome';
+        // hour/minute in CET/CEST
+        const hourStr = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12: false, hour: 'numeric' }).format(now);
+        const minuteStr = new Intl.DateTimeFormat('en-US', { timeZone: tz, minute: '2-digit' }).format(now);
+        const hour = parseInt(hourStr, 10);
+        const minute = parseInt(minuteStr, 10);
+        return { hour, minute };
+      }
+
+      function choosePaletteByTime() {
+        const { hour, minute } = getCETParts();
+        const total = (Number(hour) || 0) * 60 + (Number(minute) || 0);
+        let name = 'night';
+        // Day: 06:00 — 18:29 (switch to sunset at 18:30)
+        if (total >= 6 * 60 && total < (18 * 60 + 30)) name = 'day';
+        // Sunset: 18:30 — 19:59
+        else if (total >= (18 * 60 + 30) && total < 20 * 60) name = 'sunset';
+        // Indigo: 20:00 — 21:59
+        else if (total >= 20 * 60 && total < 22 * 60) name = 'indigo';
+        else name = 'night';
+        applyPalette(name);
+      }
+
+      // initial apply and periodic refresh (every minute)
+      choosePaletteByTime();
+      setInterval(choosePaletteByTime, 60 * 1000);
+
+      // expose for testing / manual override
+      window.applySkyPalette = applyPalette;
     })();
   </script>
 </body>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="140" viewBox="0 0 600 140">
+  <rect x="0" y="0" width="600" height="28" fill="#2D2E6A" />
+  <rect x="0" y="28" width="600" height="28" fill="#7B63B3" />
+  <rect x="0" y="56" width="600" height="28" fill="#C7D0FF" />
+  <rect x="0" y="84" width="360" height="28" fill="#FFB4A3" />
+  <rect x="0" y="112" width="600" height="28" fill="#F4F2FF" />
+  <text x="376" y="102" font-family="sans-serif" font-size="12" fill="#000000">accent</text>
+  <text x="376" y="134" font-family="sans-serif" font-size="12" fill="#000000">text</text>
+</svg>
