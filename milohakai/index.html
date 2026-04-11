@@ -14,14 +14,14 @@
 
   <style>
     :root {
-      /* --- Palette: monochrome "astrophoto plate" --- */
+      /* --- Palette: pastel moonlight default (night) --- */
       --bg: #050505;
       --bg2: #070707;
-      --text: rgba(245, 245, 245, 0.92);
-      --text-dim: rgba(245, 245, 245, 0.60);
-      --line: rgba(255, 255, 255, 0.90);
-      --line-soft: rgba(255, 255, 255, 0.45);
-      --glow: rgba(255, 255, 255, 0.40);
+      --text: #f2f0ff;
+      --text-dim: rgba(220, 226, 255, 0.82);
+      --line: rgba(255, 250, 255, 0.92);
+      --line-soft: rgba(230, 228, 255, 0.55);
+      --glow: rgba(190, 198, 255, 0.38);
 
       /* Space plate */
       --band-strong: rgba(255, 255, 255, 0.20);
@@ -31,19 +31,32 @@
 
       /* CRT */
       --scanline: rgba(0, 0, 0, 0.18);
-      --vignette: rgba(0, 0, 0, 0.55);
+      --vignette: rgba(0, 0, 0, 0.4);
 
       /* Dynamic sky variables (overridden by script at runtime) */
       --sky-top: #050505;
       --sky-mid: #070707;
       --sky-bottom: #121214;
-      --accent: #3B3A2F;
+      --accent: #d4c4ff;
       --star-rgb: 255,255,255; /* r,g,b (no spaces required) */
       --star-density: 1; /* multiplier for generated stars */
-      --wave-a: #ffffff;
-      --wave-b: #000000;
+      --wave-a: #f8f6ff;
+      --wave-b: #c4b5fd;
       --flicker-overlay: rgba(255,255,255,0.006);
-      --icon: var(--text-dim);
+      --icon: rgba(208, 214, 255, 0.9);
+
+      /* Sun / moon / sky washes (overridden per sky in palettes) */
+      --sun-core: #FFD66A;
+      --sun-mid: #FF9E4A;
+      --sun-glow: rgba(255, 170, 110, 0.28);
+      --moon-rim: rgba(248, 246, 255, 0.95);
+      --moon-rim-soft: rgba(198, 192, 235, 0.55);
+      --moon-halo: rgba(165, 158, 220, 0.45);
+
+      /* Sun placement from clock (Europe/Rome), set by script */
+      --sun-left: 50%;
+      --sun-top: 14%;
+      --sun-scale: 1.05;
     }
 
     html,
@@ -70,11 +83,11 @@
 
     .wave-text {
       background: linear-gradient(90deg,
-          var(--text) 0%,
-          var(--text) 40%,
-          var(--accent) 50%,
-          var(--text) 60%,
-          var(--text) 100%);
+          var(--wave-a) 0%,
+          var(--wave-a) 38%,
+          var(--wave-b) 50%,
+          var(--wave-a) 62%,
+          var(--wave-a) 100%);
 
       background-size: 300% 100%;
 
@@ -85,9 +98,9 @@
       animation: wave-effect 6s linear infinite;
 
       text-shadow:
-        0 0 10px var(--glow),
-        0 0 20px var(--accent);
-      -webkit-text-stroke: 0.35px var(--line-soft);
+        0 0 12px var(--glow),
+        0 0 22px color-mix(in srgb, var(--accent) 55%, transparent);
+      -webkit-text-stroke: 0.22px color-mix(in srgb, var(--line-soft) 70%, transparent);
     }
 
     /* wave-text remains themed by palette & accent */
@@ -145,7 +158,7 @@
       pointer-events: none;
       z-index: 3;
       opacity: 0.75;
-      filter: drop-shadow(0 0 10px var(--glow));
+      filter: drop-shadow(0 0 14px var(--moon-halo, var(--glow)));
       transition: opacity 1.2s ease, transform 1.2s ease, filter 1.2s ease;
     }
 
@@ -157,9 +170,9 @@
       background:
         radial-gradient(circle at 30% 35%,
           transparent 60%,
-          var(--line) 61%,
-          var(--line) 63%,
-          var(--line-soft) 66%,
+          var(--moon-rim, var(--line)) 61%,
+          var(--moon-rim, var(--line)) 63%,
+          var(--moon-rim-soft, var(--line-soft)) 66%,
           transparent 70%);
     }
 
@@ -172,8 +185,8 @@
       background:
         radial-gradient(circle at 32% 38%,
           transparent 60%,
-          var(--line-soft) 61%,
-          var(--line) 64%,
+          var(--moon-rim-soft, var(--line-soft)) 61%,
+          var(--moon-rim, var(--line)) 64%,
           transparent 70%);
     }
 
@@ -191,14 +204,7 @@
       opacity: 0;
       background: radial-gradient(circle at 30% 30%, var(--sun-core, #FFD66A) 0%, var(--sun-mid, #FF9E4A) 45%, transparent 70%);
       filter: drop-shadow(0 0 40px var(--sun-glow, rgba(255,158,74,0.18)));
-      transition: opacity 1.2s ease, transform 1.2s ease, left 1.2s ease, top 1.2s ease, filter 1.2s ease;
-    }
-
-    /* gentle bobbing while visible */
-    @keyframes sun-bob {
-      0% { transform: translate(-50%, 0) scale(1); }
-      50% { transform: translate(-50%, -8px) scale(1.02); }
-      100% { transform: translate(-50%, 0) scale(1); }
+      transition: opacity 1.2s ease, filter 1.2s ease, left 2s ease-out, top 2s ease-out, transform 2s ease-out;
     }
 
     @keyframes moon-bob {
@@ -207,9 +213,20 @@
       100% { transform: translateY(0) rotate(0); }
     }
 
-    /* Sky-phase visibility rules */
-    [data-sky="day"] .sun { opacity: 1; top: 10%; left: 80%; transform: translate(-50%, 0) scale(1.05); --sun-core: #FFF2B5; --sun-mid: #FFD66A; --sun-glow: rgba(255,215,120,0.16); animation: sun-bob 8s ease-in-out infinite; }
-    [data-sky="sunset"] .sun { opacity: 1; top: 44%; left: 60%; transform: translate(-50%, 0) scale(0.9); --sun-core: #FFD66A; --sun-mid: #FF9E4A; --sun-glow: rgba(255,160,110,0.22); }
+    /* Sun position: --sun-left / --sun-top / --sun-scale from clock (same TZ as palettes) */
+    [data-sky="day"] .sun {
+      opacity: 1;
+      left: var(--sun-left);
+      top: var(--sun-top);
+      transform: translate(-50%, 0) scale(var(--sun-scale));
+    }
+
+    [data-sky="sunset"] .sun {
+      opacity: 1;
+      left: var(--sun-left);
+      top: var(--sun-top);
+      transform: translate(-50%, 0) scale(var(--sun-scale));
+    }
     [data-sky="indigo"] .sun,
     [data-sky="night"] .sun { opacity: 0; transform: translate(-50%, -10%) scale(0.7); }
 
@@ -267,9 +284,11 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at center,
+      /* Wide, soft falloff — avoids harsh vertical “columns” at the sides */
+      background: radial-gradient(ellipse 130% 115% at 50% 48%,
           transparent 0%,
-          transparent 55%,
+          transparent 58%,
+          color-mix(in srgb, var(--vignette) 72%, transparent) 85%,
           var(--vignette) 100%);
     }
 
@@ -298,14 +317,18 @@
     }
 
     /* ─────────────────────────────────────────────────────────────
-       ANIMATED BORDERS (monochrome)
+       ANIMATED BORDERS — edge segments + traveling beams (Bluerra-style)
+       Colors track palette via --line / --line-soft / --glow
        ───────────────────────────────────────────────────────────── */
 
     .border-segments {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       pointer-events: none;
-      z-index: 5;
+      z-index: 6;
     }
 
     .border-top,
@@ -313,102 +336,203 @@
     .border-bottom,
     .border-left {
       position: absolute;
-      opacity: 0.9;
+      box-shadow: 0 0 10px var(--glow);
+      animation: border-glow 4.5s ease-in-out infinite;
+      transition: box-shadow 1s ease, filter 1s ease;
     }
 
     .border-top {
       top: 0;
       left: 0;
       right: 0;
-      height: 1px;
-      background: linear-gradient(90deg,
-          transparent 0%, transparent 25%,
-          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
-          transparent 75%, transparent 100%);
-      background-size: 300% 100%;
-      box-shadow: 0 0 12px var(--glow), 0 0 10px var(--accent);
-      animation: moveH 11s linear infinite;
+      height: 3px;
     }
 
     .border-right {
       top: 0;
       right: 0;
       bottom: 0;
-      width: 1px;
-      background: linear-gradient(180deg,
-          transparent 0%, transparent 25%,
-          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
-          transparent 75%, transparent 100%);
-      background-size: 100% 300%;
-      box-shadow: -6px 0 16px var(--glow), 0 0 10px var(--accent);
-      animation: moveV 11s linear infinite 2.75s;
+      width: 3px;
     }
 
     .border-bottom {
       bottom: 0;
       left: 0;
       right: 0;
-      height: 1px;
-      background: linear-gradient(-90deg,
-          transparent 0%, transparent 25%,
-          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
-          transparent 75%, transparent 100%);
-      background-size: 300% 100%;
-      box-shadow: 0 -6px 16px var(--glow), 0 0 10px var(--accent);
-      animation: moveH 11s linear infinite 5.5s;
+      height: 3px;
     }
 
     .border-left {
       top: 0;
       left: 0;
       bottom: 0;
-      width: 1px;
-      background: linear-gradient(-180deg,
-          transparent 0%, transparent 25%,
-          var(--line-soft) 36%, var(--accent) 45%, var(--line) 50%, var(--accent) 55%, var(--line-soft) 62%,
-          transparent 75%, transparent 100%);
-      background-size: 100% 300%;
-      box-shadow: 6px 0 16px var(--glow), 0 0 10px var(--accent);
-      animation: moveV 11s linear infinite 8.25s;
+      width: 3px;
     }
 
-    .border-line-2.border-top {
-      animation-delay: 5.5s;
-      opacity: 0.55;
+    .border-top::after,
+    .border-right::after,
+    .border-bottom::after,
+    .border-left::after {
+      content: '';
+      position: absolute;
+      will-change: transform, opacity;
+      border-radius: 4px;
+      opacity: 0;
     }
 
-    .border-line-2.border-right {
-      animation-delay: 8.25s;
-      opacity: 0.55;
+    .border-top::after,
+    .border-bottom::after {
+      top: -1px;
+      bottom: -1px;
+      width: 15vw;
     }
 
-    .border-line-2.border-bottom {
+    .border-top::after {
+      left: 0;
+      background: linear-gradient(90deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-ltr 12s linear infinite;
+    }
+
+    .border-bottom::after {
+      right: 0;
+      background: linear-gradient(270deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-rtl 12s linear infinite;
+    }
+
+    .border-right::after,
+    .border-left::after {
+      left: -1px;
+      right: -1px;
+      height: 15vh;
+    }
+
+    .border-right::after {
+      top: 0;
+      background: linear-gradient(180deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-ttb 12s linear infinite;
+    }
+
+    .border-left::after {
+      bottom: 0;
+      background: linear-gradient(0deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-btt 12s linear infinite;
+    }
+
+    .border-line-1.border-top::after {
       animation-delay: 0s;
-      opacity: 0.55;
     }
 
-    .border-line-2.border-left {
-      animation-delay: 2.75s;
-      opacity: 0.55;
+    .border-line-1.border-right::after {
+      animation-delay: 3s;
     }
 
-    @keyframes moveH {
+    .border-line-1.border-bottom::after {
+      animation-delay: 6s;
+    }
+
+    .border-line-1.border-left::after {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-top::after {
+      animation-delay: 6s;
+    }
+
+    .border-line-2.border-right::after {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-bottom::after {
+      animation-delay: 0s;
+    }
+
+    .border-line-2.border-left::after {
+      animation-delay: 3s;
+    }
+
+    @keyframes snake-ltr {
       0% {
-        background-position: -100% 0;
+        transform: translateX(-15vw);
+        opacity: 1;
       }
 
+      25% {
+        transform: translateX(100vw);
+        opacity: 1;
+      }
+
+      25.01%,
       100% {
-        background-position: 200% 0;
+        transform: translateX(100vw);
+        opacity: 0;
       }
     }
 
-    @keyframes moveV {
+    @keyframes snake-ttb {
       0% {
-        background-position: 0 -100%;
+        transform: translateY(-15vh);
+        opacity: 1;
       }
 
+      25% {
+        transform: translateY(100vh);
+        opacity: 1;
+      }
+
+      25.01%,
       100% {
-        background-position: 0 200%;
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+    }
+
+    @keyframes snake-rtl {
+      0% {
+        transform: translateX(15vw);
+        opacity: 1;
+      }
+
+      25% {
+        transform: translateX(-100vw);
+        opacity: 1;
+      }
+
+      25.01%,
+      100% {
+        transform: translateX(-100vw);
+        opacity: 0;
+      }
+    }
+
+    @keyframes snake-btt {
+      0% {
+        transform: translateY(15vh);
+        opacity: 1;
+      }
+
+      25% {
+        transform: translateY(-100vh);
+        opacity: 1;
+      }
+
+      25.01%,
+      100% {
+        transform: translateY(-100vh);
+        opacity: 0;
+      }
+    }
+
+    @keyframes border-glow {
+
+      0%,
+      100% {
+        opacity: 0.75;
+        filter: drop-shadow(0 0 8px var(--glow));
+      }
+
+      50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 14px var(--glow)) drop-shadow(0 0 6px var(--line-soft));
       }
     }
 
@@ -440,18 +564,22 @@
       color: var(--text);
       text-shadow:
         0 0 10px var(--glow),
-        0 0 6px var(--accent);
+        0 0 8px color-mix(in srgb, var(--accent) 45%, transparent);
       animation: titlePulse 4s ease-in-out infinite;
     }
 
     @keyframes titlePulse {
 
       0%, 100% {
-        text-shadow: 0 0 10px var(--glow), 0 0 6px var(--accent);
+        text-shadow:
+          0 0 10px var(--glow),
+          0 0 8px color-mix(in srgb, var(--accent) 45%, transparent);
       }
 
       50% {
-        text-shadow: 0 0 16px var(--glow), 0 0 10px var(--accent);
+        text-shadow:
+          0 0 14px var(--glow),
+          0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
       }
     }
 
@@ -470,7 +598,9 @@
       line-height: 1.9;
       margin: 1.2rem 0 0;
       color: var(--text-dim);
-      text-shadow: 0 0 12px var(--glow);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 22%, transparent),
+        0 0 8px var(--glow);
       letter-spacing: 0.05em;
     }
 
@@ -485,7 +615,9 @@
       font-size: 1.6rem;
       transition: all 0.25s ease;
       position: relative;
-      text-shadow: 0 0 8px var(--glow);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--icon) 35%, transparent),
+        0 0 10px var(--glow);
     }
 
     .icons a:hover {
@@ -537,12 +669,16 @@
     .click-counter p {
       margin: 0;
       color: var(--text-dim);
-      text-shadow: 0 0 10px var(--glow);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 20%, transparent),
+        0 0 8px var(--glow);
     }
 
     #clickCount {
       color: var(--text);
-      text-shadow: 0 0 10px var(--glow);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 25%, transparent),
+        0 0 10px var(--glow);
     }
 
     footer {
@@ -556,7 +692,9 @@
       line-height: 2;
       color: var(--text-dim);
       letter-spacing: 0.08em;
-      text-shadow: 0 0 10px var(--glow);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 18%, transparent),
+        0 0 8px var(--glow);
     }
 
     footer a {
@@ -658,10 +796,12 @@
       display: inline-block;
       white-space: nowrap;
       overflow: hidden;
-      border-right: 2px solid var(--line);
+      border-right: 2px solid color-mix(in srgb, var(--accent) 55%, var(--line));
       padding-right: 6px;
       color: var(--text);
-      text-shadow: 0 0 14px var(--glow);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 30%, transparent),
+        0 0 12px var(--glow);
       letter-spacing: 0.15em;
       font-size: 1.25rem;
     }
@@ -708,7 +848,18 @@
       .border-top,
       .border-right,
       .border-bottom,
-      .border-left,
+      .border-left {
+        animation: none !important;
+      }
+
+      .border-top::after,
+      .border-right::after,
+      .border-bottom::after,
+      .border-left::after {
+        animation: none !important;
+        opacity: 0 !important;
+      }
+
       .crt-overlay::before,
       body::before,
       h1,
@@ -741,7 +892,7 @@
     </div>
   </div>
 
-  <!-- Animated borders -->
+  <!-- Animated borders: dual traveling beams on fixed edge segments (same pattern as Bluerra) -->
   <div class="border-segments" aria-hidden="true">
     <div class="border-top border-line-1"></div>
     <div class="border-right border-line-1"></div>
@@ -757,7 +908,7 @@
   <!-- Main content -->
   <div class="container">
     <h1 id="username" class="wave-text" onclick="playClickSound()">MiloHakai</h1>
-    <p>Student and occasional streamer from Italy.</p>
+    <p>Game Designer and occasional streamer from Italy.</p>
 
     <div id="clickCounter" class="click-counter" style="display:none;">
       <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
@@ -920,7 +1071,13 @@
       }
 
       function draw(t) {
+        const skyPhase = document.documentElement.getAttribute('data-sky');
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        if (skyPhase === 'day') {
+          shooting = null;
+          requestAnimationFrame(draw);
+          return;
+        }
         for (const s of stars) drawStar(s, t);
         maybeShoot();
         requestAnimationFrame(draw);
@@ -1083,10 +1240,140 @@
     })();
 
     /* ------------------------------------------------------------------
-       Time-based sky palettes (Central Europe - Europe/Rome)
-       - applies CSS variables for palette and updates starfield density
+       Time-based sky palettes (Europe/Rome clock, Napoli sun geometry)
+       - Official sunrise/sunset (−0.833°), civil dawn/dusk (−6°), etc.
+       - Same class of times as published alba/tramonto tables (e.g. Napoli).
        ------------------------------------------------------------------ */
     (function () {
+      /** Observer: Napoli (Campania). Civil times use Europe/Rome. */
+      const SKY_LAT = 40.8518;
+      const SKY_LON = 14.2681;
+
+      /*
+       * Minimal SunCalc core (BSD-2-Clause, Vladimir Agafonkin).
+       * https://github.com/mourner/suncalc — formulas from https://aa.quae.nl/en/reken/zonpositie.html
+       */
+      const SC_PI = Math.PI,
+        SC_sin = Math.sin,
+        SC_cos = Math.cos,
+        SC_tan = Math.tan,
+        SC_asin = Math.asin,
+        SC_atan = Math.atan2,
+        SC_acos = Math.acos,
+        SC_rad = SC_PI / 180,
+        SC_dayMs = 1000 * 60 * 60 * 24,
+        SC_J1970 = 2440588,
+        SC_J2000 = 2451545,
+        SC_e = SC_rad * 23.4397;
+
+      function SC_toJulian(date) { return date.valueOf() / SC_dayMs - 0.5 + SC_J1970; }
+      function SC_fromJulian(j) { return new Date((j + 0.5 - SC_J1970) * SC_dayMs); }
+      function SC_toDays(date) { return SC_toJulian(date) - SC_J2000; }
+
+      function SC_rightAscension(l, b) {
+        return SC_atan(SC_sin(l) * SC_cos(SC_e) - SC_tan(b) * SC_sin(SC_e), SC_cos(l));
+      }
+      function SC_declination(l, b) {
+        return SC_asin(SC_sin(b) * SC_cos(SC_e) + SC_cos(b) * SC_sin(SC_e) * SC_sin(l));
+      }
+      function SC_siderealTime(d, lw) { return SC_rad * (280.16 + 360.9856235 * d) - lw; }
+      function SC_solarMeanAnomaly(d) { return SC_rad * (357.5291 + 0.98560028 * d); }
+
+      function SC_eclipticLongitude(M) {
+        const C = SC_rad * (1.9148 * SC_sin(M) + 0.02 * SC_sin(2 * M) + 0.0003 * SC_sin(3 * M));
+        const P = SC_rad * 102.9372;
+        return M + C + P + SC_PI;
+      }
+
+      function SC_sunCoords(d) {
+        const M = SC_solarMeanAnomaly(d);
+        const L = SC_eclipticLongitude(M);
+        return { dec: SC_declination(L, 0), ra: SC_rightAscension(L, 0) };
+      }
+
+      const SC_J0 = 0.0009;
+      function SC_julianCycle(d, lw) { return Math.round(d - SC_J0 - lw / (2 * SC_PI)); }
+      function SC_approxTransit(Ht, lw, n) { return SC_J0 + (Ht + lw) / (2 * SC_PI) + n; }
+      function SC_solarTransitJ(ds, M, L) { return SC_J2000 + ds + 0.0053 * SC_sin(M) - 0.0069 * SC_sin(2 * L); }
+      function SC_hourAngle(h, phi, d) {
+        return SC_acos((SC_sin(h) - SC_sin(phi) * SC_sin(d)) / (SC_cos(phi) * SC_cos(d)));
+      }
+      function SC_observerAngle(height) { return -2.076 * Math.sqrt(height || 0) / 60; }
+
+      function SC_getSetJ(h, lw, phi, dec, n, M, L) {
+        const w = SC_hourAngle(h, phi, dec);
+        const a = SC_approxTransit(w, lw, n);
+        return SC_solarTransitJ(a, M, L);
+      }
+
+      const SC_SUN_EVENTS = [
+        [-0.833, 'sunrise', 'sunset'],
+        [-6, 'dawn', 'dusk'],
+        [-12, 'nauticalDawn', 'nauticalDusk'],
+        [-18, 'nightEnd', 'night']
+      ];
+
+      function astroGetTimes(date, lat, lng, height) {
+        height = height || 0;
+        const lw = SC_rad * -lng;
+        const phi = SC_rad * lat;
+        const dh = SC_observerAngle(height);
+        const d = SC_toDays(date);
+        const n = SC_julianCycle(d, lw);
+        const ds = SC_approxTransit(0, lw, n);
+        const M = SC_solarMeanAnomaly(ds);
+        const L = SC_eclipticLongitude(M);
+        const dec = SC_declination(L, 0);
+        const Jnoon = SC_solarTransitJ(ds, M, L);
+        const result = { solarNoon: SC_fromJulian(Jnoon), nadir: SC_fromJulian(Jnoon - 0.5) };
+        for (let i = 0; i < SC_SUN_EVENTS.length; i++) {
+          const ev = SC_SUN_EVENTS[i];
+          const h0 = (ev[0] + dh) * SC_rad;
+          const Jset = SC_getSetJ(h0, lw, phi, dec, n, M, L);
+          const Jrise = Jnoon - (Jset - Jnoon);
+          result[ev[1]] = SC_fromJulian(Jrise);
+          result[ev[2]] = SC_fromJulian(Jset);
+        }
+        return result;
+      }
+
+      function getRomeDateKey(d) {
+        return new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Rome',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).format(d || new Date());
+      }
+
+      let sunInstCache = { key: '', data: null };
+      function getCachedSunInstants(refDate) {
+        const ref = refDate || new Date();
+        const key = getRomeDateKey(ref);
+        if (sunInstCache.key !== key || !sunInstCache.data) {
+          sunInstCache = { key, data: astroGetTimes(ref, SKY_LAT, SKY_LON, 0) };
+        }
+        return sunInstCache.data;
+      }
+
+      /** Minutes before official sunset when “sunset” palette begins; after dusk for indigo. */
+      const SUN_BAND = { dayFadeBeforeSet: 22, civilAfterDusk: 28, indigoAfterNautical: 52 };
+
+      function pickPaletteFromInstant(now) {
+        const st = getCachedSunInstants(now);
+        const t = now.getTime();
+        const rise = st.sunrise.getTime();
+        const set = st.sunset.getTime();
+        const dusk = st.dusk.getTime();
+        const nav = st.nauticalDusk.getTime();
+        const MIN = 60 * 1000;
+        if (t < rise) return 'night';
+        if (t < set - SUN_BAND.dayFadeBeforeSet * MIN) return 'day';
+        if (t < dusk + SUN_BAND.civilAfterDusk * MIN) return 'sunset';
+        if (t < nav + SUN_BAND.indigoAfterNautical * MIN) return 'indigo';
+        return 'night';
+      }
+
       function hexToRgb(hex) {
         if (!hex) return '';
         hex = hex.replace('#', '').trim();
@@ -1100,56 +1387,68 @@
 
       const palettes = {
         day: {
-          bg: '#F9FBFF', bg2: '#CFEFFF',
-          text: '#0F1720', textDim: 'rgba(15,23,32,0.6)',
-          line: 'rgba(15,23,32,0.9)', lineSoft: 'rgba(15,23,32,0.45)',
-          glow: 'rgba(63,191,102,0.12)',
-          skyTop: '#7FC0F4', skyMid: '#CFEFFF', skyBottom: '#F9FBFF',
-          accent: '#3FBF66', icon: 'rgba(63,191,102,0.95)', starRgb: '0,0,0', starDensity: 0.25,
-          bandStrong: 'rgba(15,23,32,0.10)', bandSoft: 'rgba(15,23,32,0.05)',
-          mist: 'rgba(15,23,32,0.02)', dust: 'rgba(15,23,32,0.06)',
-          vignette: 'rgba(0,0,0,0.06)', scanline: 'rgba(0,0,0,0.04)',
-          flicker: 'rgba(0,0,0,0.006)',
-          waveA: '#0F1720', waveB: '#F9FBFF'
+          bg: '#EEF6FF', bg2: '#D8ECFF',
+          text: '#2a4a62', textDim: 'rgba(42, 74, 98, 0.78)',
+          line: 'rgba(34, 62, 86, 0.92)', lineSoft: 'rgba(34, 62, 86, 0.48)',
+          glow: 'rgba(90, 178, 210, 0.26)',
+          skyTop: '#5BA8E8', skyMid: '#B8DDFA', skyBottom: '#EEF6FF',
+          accent: '#5cba9e', icon: 'rgba(48, 145, 118, 0.96)', starRgb: '0,0,0', starDensity: 0,
+          bandStrong: 'rgba(7,16,24,0.08)', bandSoft: 'rgba(7,16,24,0.04)',
+          mist: 'rgba(7,16,24,0.02)', dust: 'rgba(7,16,24,0.05)',
+          vignette: 'rgba(0,0,0,0.05)', scanline: 'rgba(0,0,0,0.035)',
+          flicker: 'rgba(0,0,0,0.004)',
+          waveA: '#2a4a62', waveB: '#f0c46a',
+          sunCore: '#fff8e6', sunMid: '#ffe08a', sunGlow: 'rgba(255, 210, 130, 0.48)',
+          moonRim: 'rgba(200, 220, 245, 0.45)', moonRimSoft: 'rgba(160, 195, 230, 0.32)',
+          moonHalo: 'rgba(120, 175, 220, 0.22)'
         },
         sunset: {
           bg: '#3F2A6B', bg2: '#8E6FBF',
-          text: '#FFF5EE', textDim: 'rgba(255,245,232,0.65)',
-          line: 'rgba(255,255,255,0.95)', lineSoft: 'rgba(255,255,255,0.4)',
-          glow: 'rgba(255,199,168,0.12)',
+          text: '#fff8f2', textDim: 'rgba(255, 248, 242, 0.84)',
+          line: 'rgba(255, 255, 255, 0.96)', lineSoft: 'rgba(255, 232, 220, 0.55)',
+          glow: 'rgba(255, 205, 188, 0.30)',
           skyTop: '#3F2A6B', skyMid: '#C9B6E1', skyBottom: '#FFC7A8',
-          accent: '#FFC7A8', icon: '#FFC7A8', starRgb: '255,255,255', starDensity: 0.6,
+          accent: '#ffd4c4', icon: 'rgba(255, 214, 200, 0.98)', starRgb: '255,255,255', starDensity: 0.6,
           bandStrong: 'rgba(255,199,168,0.10)', bandSoft: 'rgba(255,199,168,0.04)',
           mist: 'rgba(255,199,168,0.02)', dust: 'rgba(255,199,168,0.06)',
-          vignette: 'rgba(0,0,0,0.18)', scanline: 'rgba(0,0,0,0.08)',
+          vignette: 'rgba(0,0,0,0.13)', scanline: 'rgba(0,0,0,0.08)',
           flicker: 'rgba(0,0,0,0.006)',
-          waveA: '#FFF5EE', waveB: '#C9B6E1'
+          waveA: '#fff8f2', waveB: '#ffb89e',
+          sunCore: '#ffe8c8', sunMid: '#ff9f6e', sunGlow: 'rgba(255, 155, 110, 0.44)',
+          moonRim: 'rgba(255, 248, 238, 0.78)', moonRimSoft: 'rgba(255, 215, 195, 0.5)',
+          moonHalo: 'rgba(255, 185, 155, 0.32)'
         },
         indigo: {
           bg: '#2D2E6A', bg2: '#7B63B3',
-          text: '#F4F2FF', textDim: 'rgba(244,242,255,0.65)',
-          line: 'rgba(255,255,255,0.92)', lineSoft: 'rgba(255,255,255,0.4)',
-          glow: 'rgba(123,99,179,0.14)',
+          text: '#faf7ff', textDim: 'rgba(250, 247, 255, 0.86)',
+          line: 'rgba(255, 255, 255, 0.95)', lineSoft: 'rgba(230, 220, 255, 0.52)',
+          glow: 'rgba(198, 185, 255, 0.32)',
           skyTop: '#2D2E6A', skyMid: '#7B63B3', skyBottom: '#C7D0FF',
-          accent: '#FFB4A3', icon: '#FFB4A3', starRgb: '255,255,255', starDensity: 0.95,
+          accent: '#ffc9be', icon: 'rgba(255, 205, 195, 0.98)', starRgb: '255,255,255', starDensity: 0.95,
           bandStrong: 'rgba(244,242,255,0.08)', bandSoft: 'rgba(244,242,255,0.04)',
           mist: 'rgba(244,242,255,0.02)', dust: 'rgba(244,242,255,0.06)',
-          vignette: 'rgba(0,0,0,0.10)', scanline: 'rgba(0,0,0,0.10)',
+          vignette: 'rgba(0,0,0,0.07)', scanline: 'rgba(0,0,0,0.10)',
           flicker: 'rgba(255,255,255,0.006)',
-          waveA: '#F4F2FF', waveB: '#7B63B3'
+          waveA: '#faf7ff', waveB: '#c5b4ff',
+          sunCore: '#2a2438', sunMid: '#1a1524', sunGlow: 'rgba(0,0,0,0)',
+          moonRim: 'rgba(252, 250, 255, 0.92)', moonRimSoft: 'rgba(195, 188, 245, 0.52)',
+          moonHalo: 'rgba(160, 148, 225, 0.45)'
         },
         night: {
           bg: '#050505', bg2: '#070707',
-          text: 'rgba(245,245,245,0.92)', textDim: 'rgba(245,245,245,0.6)',
-          line: 'rgba(255,255,255,0.9)', lineSoft: 'rgba(255,255,255,0.45)',
-          glow: 'rgba(255,255,255,0.40)',
+          text: '#f0edff', textDim: 'rgba(220, 226, 255, 0.84)',
+          line: 'rgba(255, 252, 255, 0.94)', lineSoft: 'rgba(228, 224, 255, 0.52)',
+          glow: 'rgba(188, 196, 255, 0.40)',
           skyTop: '#050505', skyMid: '#070707', skyBottom: '#121214',
-          accent: '#3B3A2F', icon: 'rgba(255,255,255,0.85)', starRgb: '255,255,255', starDensity: 1.4,
+          accent: '#d4c4ff', icon: 'rgba(210, 216, 255, 0.92)', starRgb: '255,255,255', starDensity: 1.4,
           bandStrong: 'rgba(255,255,255,0.20)', bandSoft: 'rgba(255,255,255,0.08)',
           mist: 'rgba(255,255,255,0.06)', dust: 'rgba(255,255,255,0.12)',
-          vignette: 'rgba(0,0,0,0.55)', scanline: 'rgba(0,0,0,0.18)',
+          vignette: 'rgba(0,0,0,0.38)', scanline: 'rgba(0,0,0,0.16)',
           flicker: 'rgba(255,255,255,0.006)',
-          waveA: '#ffffff', waveB: '#000000'
+          waveA: '#f8f6ff', waveB: '#c4b5fd',
+          sunCore: '#1f1c28', sunMid: '#121018', sunGlow: 'rgba(0,0,0,0)',
+          moonRim: 'rgba(252, 250, 255, 0.96)', moonRimSoft: 'rgba(205, 200, 238, 0.58)',
+          moonHalo: 'rgba(150, 142, 210, 0.5)'
         }
       };
 
@@ -1185,6 +1484,13 @@
         root.setProperty('--star-density', String(p.starDensity || 1));
         // icon color
         if (p.icon) root.setProperty('--icon', p.icon);
+        // sun / moon / sky rim light (keeps celestial bodies in palette family)
+        if (p.sunCore != null) root.setProperty('--sun-core', p.sunCore);
+        if (p.sunMid != null) root.setProperty('--sun-mid', p.sunMid);
+        if (p.sunGlow != null) root.setProperty('--sun-glow', p.sunGlow);
+        if (p.moonRim != null) root.setProperty('--moon-rim', p.moonRim);
+        if (p.moonRimSoft != null) root.setProperty('--moon-rim-soft', p.moonRimSoft);
+        if (p.moonHalo != null) root.setProperty('--moon-halo', p.moonHalo);
 
         document.documentElement.setAttribute('data-sky', name);
 
@@ -1205,31 +1511,60 @@
         } else {
           window.__sky = Object.assign(window.__sky || {}, { starDensity: p.starDensity || 1, starRgb: rgb });
         }
+
+        updateSunFromClock();
       }
 
-      function getCETParts() {
+      /**
+       * Sun disk from Napoli sunrise→sunset (day) or sunset-band (civil twilight window).
+       */
+      function updateSunFromClock() {
+        const root = document.documentElement.style;
+        const sky = document.documentElement.getAttribute('data-sky');
+        if (sky !== 'day' && sky !== 'sunset') {
+          root.removeProperty('--sun-left');
+          root.removeProperty('--sun-top');
+          root.removeProperty('--sun-scale');
+          return;
+        }
+
         const now = new Date();
-        const tz = 'Europe/Rome';
-        // hour/minute in CET/CEST
-        const hourStr = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour12: false, hour: 'numeric' }).format(now);
-        const minuteStr = new Intl.DateTimeFormat('en-US', { timeZone: tz, minute: '2-digit' }).format(now);
-        const hour = parseInt(hourStr, 10);
-        const minute = parseInt(minuteStr, 10);
-        return { hour, minute };
+        const nowT = now.getTime();
+        const st = getCachedSunInstants(now);
+        const MIN = 60 * 1000;
+        const rise = st.sunrise.getTime();
+        const set = st.sunset.getTime();
+        const dusk = st.dusk.getTime();
+
+        if (sky === 'day') {
+          const span = Math.max(1, set - rise);
+          let t = (nowT - rise) / span;
+          t = Math.max(0, Math.min(1, t));
+          const sinBand = Math.pow(Math.sin(Math.PI * t), 2);
+          const left = 7 + t * 86;
+          const top = 23 - 15 * sinBand;
+          const scale = 1.0 + 0.07 * sinBand;
+          root.setProperty('--sun-left', left.toFixed(2) + '%');
+          root.setProperty('--sun-top', top.toFixed(2) + '%');
+          root.setProperty('--sun-scale', scale.toFixed(3));
+          return;
+        }
+
+        const ss0 = set - SUN_BAND.dayFadeBeforeSet * MIN;
+        const ss1 = dusk + SUN_BAND.civilAfterDusk * MIN;
+        const span = Math.max(1, ss1 - ss0);
+        let u = (nowT - ss0) / span;
+        u = Math.max(0, Math.min(1, u));
+        const left = 88 - u * 28;
+        const top = 14 + u * 42;
+        const scale = 1.02 - u * 0.22;
+        root.setProperty('--sun-left', left.toFixed(2) + '%');
+        root.setProperty('--sun-top', top.toFixed(2) + '%');
+        root.setProperty('--sun-scale', scale.toFixed(3));
       }
 
       function choosePaletteByTime() {
-        const { hour, minute } = getCETParts();
-        const total = (Number(hour) || 0) * 60 + (Number(minute) || 0);
-        let name = 'night';
-        // Day: 06:00 — 18:29 (switch to sunset at 18:30)
-        if (total >= 6 * 60 && total < (18 * 60 + 30)) name = 'day';
-        // Sunset: 18:30 — 19:59
-        else if (total >= (18 * 60 + 30) && total < 20 * 60) name = 'sunset';
-        // Indigo: 20:00 — 21:59
-        else if (total >= 20 * 60 && total < 22 * 60) name = 'indigo';
-        else name = 'night';
-        applyPalette(name);
+        applyPalette(pickPaletteFromInstant(new Date()));
       }
 
       // initial apply and periodic refresh (every minute)
@@ -1238,6 +1573,9 @@
 
       // expose for testing / manual override
       window.applySkyPalette = applyPalette;
+      window.updateSunFromClock = updateSunFromClock;
+      window.getCachedSunInstants = getCachedSunInstants;
+      window.pickPaletteFromInstant = pickPaletteFromInstant;
     })();
   </script>
 </body>
