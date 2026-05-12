@@ -38,7 +38,7 @@
       color: var(--text-dark);
       transition: background 0.5s ease, color 0.5s ease;
       position: relative;
-      background-image: url('background.jpg');
+      background-image: url('./images/background.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -70,7 +70,7 @@
     }
 
     body.rampage {
-      background-image: url('./1cbc3479-5b28-441d-8b18-e21f1c878949.png');
+      background-image: url('./images/1cbc3479-5b28-441d-8b18-e21f1c878949.png');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
@@ -604,17 +604,17 @@
 
   <audio id="backgroundAudio" preload="auto" loop>
     <source src="./bgm.flac" type="audio/flac">
-    <source src="./bgm.mp3" type="audio/mpeg">
+    <source src="./audio/bgm.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
   <audio id="rampageAudio" preload="auto" loop>
-    <source src="./rampage-bgm.mp3" type="audio/mpeg">
+    <source src="./audio/rampage-bgm.mp3" type="audio/mpeg">
     <source src="./rampage-bgm.ogg" type="audio/ogg">
   </audio>
 
   <audio id="clickSound" preload="auto">
-    <source src="./click-sound.mp3" type="audio/mpeg">
+    <source src="./audio/click-sound.mp3" type="audio/mpeg">
     <source src="./click-sound.ogg" type="audio/ogg">
     Your browser does not support the audio element.
   </audio>
@@ -664,7 +664,7 @@
       document.body.classList.add('rampage');
 
       username.classList.remove('wave-text');
-      username.innerHTML = '<img src="./cubeilushi.gif" alt="cubeilushi" class="title-gif">';
+      username.innerHTML = '<img src="./images/cubeilushi.gif" alt="cubeilushi" class="title-gif">';
       username.setAttribute('aria-label', 'Rampage mode activated');
 
       subtitle.textContent = 'You clicked too much. You have unleashed the cube.';
@@ -685,7 +685,7 @@
         const vy = (Math.random() * 5 + 2) * (Math.random() > 0.5 ? 1 : -1);
         const rotationSpeed = (Math.random() * 6) - 3;
 
-        cube.src = './cubeilushiReal.gif';
+        cube.src = './images/cubeilushiReal.gif';
         cube.className = 'chaos-cube';
         cube.style.width = size + 'px';
         cube.style.height = size + 'px';

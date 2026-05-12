@@ -9,22 +9,9 @@
     crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap"
     rel="stylesheet">
-  <style>
-    :root {
-      /* Hair palette — dark navy base, steel-blue mid, icy pale highlight */
-      --bg-dark: #0e0f1c;
-      --bg-light: #d6e8f5;
-      --text-dark: #e8f4fb;
-      --text-light: #0e1828;
-      --pastel-blue: #89c4e1;
-      --pastel-blue-light: #b8dff2;
-      --pastel-blue-dark: #5a9abf;
-      --border-color-dark: var(--pastel-blue);
-      --border-color-light: var(--pastel-blue-dark);
-      --glow-color-dark: rgba(137, 196, 225, 0.8);
-      --glow-color-light: rgba(90, 154, 191, 0.8);
-    }
+  <link rel="stylesheet" href="./styles/style.css" />
 
+  <style>
     html,
     body {
       margin: 0;
@@ -41,7 +28,7 @@
       color: var(--text-dark);
       transition: background-color 0.5s ease, color 0.5s ease;
       position: relative;
-      background-image: url('./background.png');
+      background-image: url('./images/background.png');
       background-size: cover;
       background-position: top center;
       background-repeat: no-repeat;
@@ -959,11 +946,10 @@
 
     }
   </style>
-</head>
 
 <body>
   <div id="intro-screen" aria-hidden="true">
-    <img src="./logo.png" alt="Bluerra-Sai intro logo" class="intro-logo">
+    <img src="./images/logo.png" alt="Bluerra-Sai intro logo" class="intro-logo">
   </div>
 
   <div class="page-shell">
@@ -985,7 +971,8 @@
 
     <div class="container">
       <div class="logo-wrapper">
-        <img src="./logo.png" id="username" class="logo" onclick="handleNameClick()" alt="Bluerra-Sai Logo">
+        <img src="./images/logo.png" id="username" class="logo" onclick="handleNameClick()"
+          alt="Bluerra-Sai Logo">
       </div>
 
       <p id="description">Visual artist and Musician.</p>
@@ -1026,94 +1013,17 @@
   </div>
 
   <audio id="backgroundAudio" preload="auto" loop>
-    <source src="./bgm.mp3" type="audio/mpeg">
+    <source src="./audio/bgm.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
   <audio id="clickSound" preload="auto">
-    <source src="./click-sound.mp3" type="audio/mpeg">
-    <source src="./click-sound.ogg" type="audio/ogg">
+    <source src="./audio/click-sound.mp3" type="audio/mpeg">
+    <source src="./audio/click-sound.ogg" type="audio/ogg">
     Your browser does not support the audio element.
   </audio>
 
-  <script>
-    let nameClickCount = 0;
-    const maxClicks = 5;
-
-    function handleNameClick() {
-      nameClickCount++;
-      playClickSound();
-
-      const descriptionEl = document.getElementById('description');
-      const easterEggEl = document.getElementById('easter-egg-text');
-
-      if (nameClickCount === 1) {
-        descriptionEl.style.display = 'none';
-        easterEggEl.style.display = 'block';
-        easterEggEl.textContent = 'boop!';
-        easterEggEl.classList.remove('warning');
-      } else if (nameClickCount >= maxClicks) {
-        easterEggEl.textContent = 'Okay buddy, that\'s enough!';
-        easterEggEl.classList.add('warning');
-      }
-
-      setTimeout(() => {
-        if (nameClickCount < maxClicks) {
-          nameClickCount = 0;
-          descriptionEl.style.display = 'block';
-          easterEggEl.style.display = 'none';
-          easterEggEl.classList.remove('warning');
-        }
-      }, 3000);
-    }
-
-    function toggleTheme() {
-      const html = document.documentElement;
-      const current = html.getAttribute("data-theme");
-      html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
-    }
-
-    function playClickSound() {
-      const clickSound = document.getElementById('clickSound');
-      clickSound.currentTime = 0;
-      clickSound.play().catch(error => {
-        console.log('Click sound could not be played:', error);
-      });
-    }
-
-    const audio = document.getElementById('backgroundAudio');
-
-    function startBackgroundAudio() {
-      audio.play().catch(error => {
-        console.log('Audio autoplay prevented:', error);
-        document.addEventListener('click', function () {
-          if (audio.paused) {
-            audio.play().catch(err => console.log('Audio play failed:', err));
-          }
-        }, { once: true });
-      });
-    }
-
-    audio.volume = 0.15;
-    const clickSound = document.getElementById('clickSound');
-    clickSound.volume = 0.3;
-
-    window.addEventListener('load', () => {
-      startBackgroundAudio();
-      setTimeout(() => {
-        const intro = document.getElementById('intro-screen');
-        if (intro) {
-          intro.setAttribute('aria-hidden', 'true');
-        }
-      }, 2300);
-    });
-
-    document.addEventListener('click', function () {
-      if (audio.paused) {
-        startBackgroundAudio();
-      }
-    }, { once: true });
-  </script>
+  <script src="./scripts/main.js"></script>
 </body>
 
 </html>
