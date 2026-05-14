@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OutOfTune</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Press+Start+2P&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&family=VT323&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-dark: #00080f;
+            --primary: #f0f4ff;
+            --accent: #7c9cff;
+            --accent-glow: rgba(124, 156, 255, 0.22);
+            --text-main: #e8eef9;
+            --text-muted: rgba(180, 196, 224, 0.85);
+            --dark-gray: #152040;
+            --glow: rgba(140, 170, 255, 0.38);
+            --text-dim: rgba(220, 228, 255, 0.82);
+            --line: rgba(240, 245, 255, 0.92);
+            --line-soft: rgba(160, 185, 255, 0.55);
+            --wave-a: #f8fbff;
+            --wave-b: #5c7cff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .pixel-font { font-family: 'VT323', monospace; }
+        .mono-font { font-family: 'JetBrains Mono', monospace; }
+
+        #constellation-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: default;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #constellation-container canvas {
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .content-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+            padding-left: 24px;
+            z-index: 10;
+        }
+
+        .brand-section {
+            position: relative;
+            z-index: 20;
+        }
+
+        .logo-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        #globe-target {
+            position: fixed;
+            left: -15vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 56vw;
+            height: 56vw;
+            max-width: 500px;
+            max-height: 500px;
+            min-width: 340px;
+            min-height: 340px;
+            z-index: 1;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .brand-section h1.wave-text {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(2.4rem, 3.8vw, 3.2rem);
+            margin: 0;
+            line-height: 1.02;
+            letter-spacing: 0;
+            cursor: default;
+            user-select: none;
+            background: linear-gradient(90deg,
+                    var(--wave-a) 0%,
+                    var(--wave-a) 38%,
+                    var(--wave-b) 50%,
+                    var(--wave-a) 62%,
+                    var(--wave-a) 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: wave-effect 6s linear infinite, titlePulse 4s ease-in-out infinite;
+            text-shadow:
+                0 0 12px var(--glow),
+                0 0 22px color-mix(in srgb, var(--accent) 55%, transparent);
+            -webkit-text-stroke: 0.22px color-mix(in srgb, var(--line-soft) 70%, transparent);
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 40%, transparent)); }
+            50% { filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 55%, transparent)) drop-shadow(0 0 6px var(--line-soft)); }
+        }
+
+        @keyframes wave-effect {
+            0% { background-position: 200% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        .status-badge { display: none; }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 300;
+            max-width: 320px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Terminal Lyrics */
+        .lyrics-container {
+            position: fixed;
+            left: 24px;
+            bottom: 24px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            width: min(340px, 42vw);
+        }
+
+        .track-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.48rem;
+            color: rgba(235, 245, 255, 0.42);
+            letter-spacing: 0.04em;
+        }
+
+        .lyric-line {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.54rem;
+            color: rgba(235, 245, 255, 0.48);
+            line-height: 1.35;
+            min-height: 1.2em;
+            overflow-wrap: anywhere;
+        }
+
+        .lyric-typed { display: inline; }
+
+        .lyric-caret {
+            display: inline-block;
+            width: 0.5ch;
+            margin-left: 1px;
+            color: rgba(180, 210, 255, 0.65);
+            animation: caretBlink 0.65s step-end infinite;
+            vertical-align: baseline;
+        }
+
+        .lyric-caret[hidden] { display: none; }
+
+        @keyframes caretBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .footer-right {
+            position: fixed;
+            right: 32px;
+            bottom: 24px;
+            z-index: 100;
+            font-family: 'Press Start 2P', monospace;
+            color: rgba(220, 228, 255, 0.38);
+            font-size: 0.48rem;
+            letter-spacing: 0.5px;
+            line-height: 1.75;
+            text-align: right;
+        }
+
+        /* Member Carousel */
+        .member-carousel {
+            position: fixed;
+            right: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: fit-content;
+        }
+
+        .carousel-inner {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .carousel-text {
+            text-align: right;
+            cursor: pointer;
+        }
+
+        .carousel-text:hover .member-hint {
+            opacity: 1;
+        }
+
+        .member-category {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.45rem;
+            color: rgba(180, 196, 224, 0.5);
+            letter-spacing: 0.1em;
+            margin-bottom: 5px;
+        }
+
+        .member-name {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--primary);
+        }
+
+        .member-name.animate {
+            animation: memberSwitch 0.45s ease-out;
+        }
+
+        @keyframes memberSwitch {
+            0% { opacity: 0; transform: translateX(8px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        .member-hint {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.38rem;
+            color: rgba(180, 196, 224, 0.45);
+            margin-top: 6px;
+            letter-spacing: 0.03em;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Mini site modal */
+        .mini-site-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 250;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(6px);
+            padding: 20px;
+        }
+
+        .mini-site-modal.open {
+            display: flex;
+        }
+
+        .mini-site-panel {
+            width: min(92vw, 1120px);
+            height: min(88vh, 820px);
+            max-width: 1120px;
+            max-height: 88vh;
+            border-radius: 18px;
+            overflow: hidden;
+            background: rgba(8, 12, 22, 0.96);
+            box-shadow: 0 22px 90px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(160, 190, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mini-site-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 20px;
+            background: rgba(10, 18, 42, 0.95);
+            border-bottom: 1px solid rgba(160, 190, 255, 0.12);
+            flex-shrink: 0;
+        }
+
+        .mini-site-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .mini-site-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            color: rgba(150, 180, 255, 0.6);
+            letter-spacing: 0.01em;
+        }
+
+        .mini-site-actions {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* Colored text links, no boxes */
+        .mini-site-action-link {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.15s ease;
+            letter-spacing: 0.02em;
+        }
+
+        .mini-site-action-link.open-full {
+            color: #7cbaff;
+        }
+
+        .mini-site-action-link.close-btn {
+            color: #ff7c9c;
+        }
+
+        .mini-site-action-link:hover {
+            opacity: 0.75;
+        }
+
+        .mini-site-frame-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: #050714;
+        }
+
+        /* Scaled down more — 78% scale so more of the page is visible */
+        .mini-site-frame {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 128%;
+            height: 128%;
+            transform: translateX(-50%) scale(0.78);
+            transform-origin: top center;
+            border: none;
+            background: #050714;
+        }
+
+        .carousel-arrows {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .carousel-nav {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(180, 196, 224, 0.45);
+            padding: 6px 8px;
+            line-height: 1;
+            transition: color 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-nav:hover {
+            color: var(--primary);
+        }
+
+        .carousel-nav svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        /* Splash */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 18px;
+            background: var(--bg-dark);
+            cursor: pointer;
+            transition: opacity 0.75s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .disclaimer-panel {
+            max-width: 22rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .disclaimer-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.48rem, 1.05vw, 0.62rem);
+            line-height: 1.65;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            text-shadow:
+                0 0 12px var(--glow),
+                0 0 20px color-mix(in srgb, var(--accent) 45%, transparent);
+            margin: 0 0 1rem;
+        }
+
+        .disclaimer-body {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.34rem, 0.78vw, 0.44rem);
+            line-height: 1.9;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .disclaimer-body p {
+            margin: 0 0 0.85rem;
+        }
+
+        .disclaimer-body p:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .disclaimer-hint {
+            font-family: 'Press Start 2P', monospace;
+            margin: 1.35rem 0 0;
+            font-size: clamp(0.3rem, 0.7vw, 0.38rem);
+            letter-spacing: 0.09em;
+            color: color-mix(in srgb, var(--accent) 72%, var(--text-muted));
+            text-shadow: 0 0 14px var(--accent-glow);
+            opacity: 0;
+            animation: disclaimerHintIn 0.85s ease forwards;
+            animation-delay: 0.65s;
+        }
+
+        @keyframes disclaimerHintIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .brand-section h1.wave-text {
+                animation: none;
+                -webkit-text-fill-color: var(--primary);
+                background: none;
+            }
+            .lyric-caret { animation: none; opacity: 0.75; }
+            .disclaimer-hint { animation: none; opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper { padding-left: 5%; }
+            .brand-section h1.wave-text { font-size: 3.5rem; }
+            #globe-target { width: 250px; height: 250px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="constellation-container"></div>
+
+    <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="disclaimer-heading"
+        aria-describedby="disclaimer-desc">
+        <div class="disclaimer-panel" id="disclaimer-desc">
+            <div class="disclaimer-main">
+                <h2 id="disclaimer-heading" class="disclaimer-title">Welcome to OutOfTune</h2>
+                <div class="disclaimer-body">
+                    <p>This is an open source project — made for creators, streamers, and friends.</p>
+                    <p>Share ideas, fork the code, and build together. Be respectful in community spaces.</p>
+                    <p>Background audio will start when you continue.</p>
+                </div>
+            </div>
+            <p class="disclaimer-hint">Click or tap anywhere to continue</p>
+        </div>
+    </div>
+
+    <main class="content-wrapper">
+        <section class="brand-section">
+            <div class="logo-container">
+                <div id="globe-target"></div>
+                <h1 class="wave-text">OutOfTune</h1>
+            </div>
+            <p class="subtitle">Open source — built for creators & friends.</p>
+        </section>
+    </main>
+
+    <div class="lyrics-container">
+        <div id="track-name" class="track-title">Loading track…</div>
+        <div class="lyric-line" id="lyric-line-box">
+            <span class="lyric-typed" id="lyric-output"></span><span class="lyric-caret" id="lyric-caret" hidden>|</span>
+        </div>
+    </div>
+
+    <div class="member-carousel">
+        <div class="carousel-inner">
+            <div class="carousel-text" id="carousel-display">
+                <div class="member-category" id="member-category">FOUNDERS</div>
+                <div class="member-name" id="member-name">Bluerra</div>
+                <div class="member-hint">view profile ↗</div>
+            </div>
+            <div class="carousel-arrows">
+                <button class="carousel-nav carousel-up" aria-label="Previous member">
+                    <i data-lucide="chevron-up"></i>
+                </button>
+                <button class="carousel-nav carousel-down" aria-label="Next member">
+                    <i data-lucide="chevron-down"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mini-site-modal" class="mini-site-modal" aria-hidden="true">
+        <div class="mini-site-panel" role="dialog" aria-modal="true" aria-labelledby="mini-site-title">
+            <div class="mini-site-toolbar">
+                <div>
+                    <div id="mini-site-title" class="mini-site-title">Preview</div>
+                    <div id="mini-site-url" class="mini-site-url"></div>
+                </div>
+                <div class="mini-site-actions">
+                    <button type="button" id="mini-site-open-full" class="mini-site-action-link open-full">open full page ↗</button>
+                    <button type="button" id="mini-site-close" class="mini-site-action-link close-btn">close ✕</button>
+                </div>
+            </div>
+            <div class="mini-site-frame-wrapper">
+                <iframe id="mini-site-iframe" class="mini-site-frame" src="about:blank" title="Profile preview"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-right">
+        <div class="footer-copy">© 2026 - OutOfTune</div>
+    </div>
+
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="pointer-sfx" preload="auto">
+        <source src="assets/audio/pointer.wav" type="audio/wav">
+    </audio>
+    <audio id="nameSwap-sfx" preload="auto">
+        <source src="assets/audio/nameSwap.wav" type="audio/wav">
+    </audio>
+    <audio id="confirm-sfx" preload="auto">
+        <source src="assets/audio/confirm.wav" type="audio/wav">
+    </audio>
+
+    <script type="text/plain" id="lrc-embedded">
+[id: aixsnraf]
+[ar: tokyona]
+[al: Cold Lilac Bloom Core, Pt. 1]
+[ti: Perpetual Descent]
+[length: 04:48]
+
+[00:21.14]Mmm, guess I'm better off alone
+[00:24.06]Drove by your home and saw that nobody was home now
+[00:27.67]Yeah, I got it on my own
+[00:29.28]Independent chink, I buy my own silicone now
+[00:32.85]Guess I'm be-be-be, al-al-al-al
+[00:34.57]Dro-dro-dro-dro house and now that nobo-bo-bo home now
+[00:38.18]Yeah, I got it on my own
+[00:39.79]Independent chink, I buy my own silicone now
+[00:42.71]
+[01:24.73]Wish we never met
+[01:27.54]I do not love you, I said what I said
+[01:30.49]I will not forget
+[01:32.97]Don't call me up now, I am not your friend
+[01:35.72]Wish we never met
+[01:38.27]I do not love you, I said what I said
+[01:41.13]I will not forget
+[01:43.87]Don't call me up now, I am not your friend
+[01:46.41]Wish we never met
+[01:48.98]I do not love you, I said what I said
+[01:51.74]I will not forget
+[01:54.37]Don't call me up now, I am not your friend
+[01:57.17]Wish we never met
+[01:59.81]I do not love you, I said what I said
+[02:02.40]I will not forget
+[02:05.14]Don't call me up now, I am not your friend
+[02:11.63]Woah, oh
+[02:16.97]Woah, oh
+[02:22.22]Woah, oh
+[02:27.63]Woah
+[02:32.95]Woah, oh
+[02:38.23]Woah, oh
+[02:43.69]Woah, oh
+[02:48.99]Woah
+[02:50.50]Wish we never met
+[02:52.76]I do not love you, I said what I said
+[02:55.57]I will not forget
+[02:58.04]Don't call me up now, I am not your friend
+[03:01.14]Wish we never met
+[03:03.65]I do not love you, I said what I said
+[03:06.02]I will not forget
+[03:08.88]Don't call me up now, I am not your friend
+[03:11.69]Wish we never met
+[03:14.20]I do not love you, I said what I said
+[03:16.75]I will not forget
+[03:19.70]Don't call me up now, I am not your friend
+[03:22.77]Wish we never met
+[03:24.87]I do not love you, I said what I said
+[03:27.58]I will not forget
+[03:29.97]Don't call me up now, I am not your friend
+[03:54.63]Told me, you love me
+[03:56.90]Then left me on read, yeah
+[03:59.64]You played on my emotions
+[04:01.90]And now I'm on the edge
+[04:05.12]Told me, you love me
+[04:07.14]Then left me on read, yeah
+[04:10.25]You played on my emotions
+[04:12.94]And now I'm on the edge
+[04:22.31]
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // Member Carousel
+            const allMembers = [
+                { display: 'Bluerra',     path: 'bluerra',     category: 'FOUNDERS' },
+                { display: 'MiloHakai',   path: 'milohakai',   category: 'FOUNDERS' },
+                { display: 'Umilushi',    path: 'umilushi',    category: 'COLLABORATORS' },
+                { display: 'Lavender',    path: 'lavender',    category: 'COLLABORATORS' },
+                { display: 'Cinnovabun',  path: 'cinnovabun',  category: 'COLLABORATORS' },
+                { display: 'Reyvonlune', path: 'reyvonlune',  category: 'COLLABORATORS' },
+                { display: 'Visceral',    path: 'visceral',    category: 'COLLABORATORS' },
+                { display: 'Wicadev',     path: 'wicadev',     category: 'COLLABORATORS' },
+                { display: 'Karakule',    path: 'karakule',    category: 'COLLABORATORS' },
+                { display: 'Shotokiii',   path: 'shotokiii',   category: 'COLLABORATORS' },
+            ];
+
+            let currentMemberIndex = 0;
+            const memberNameEl     = document.getElementById('member-name');
+            const memberCategoryEl = document.getElementById('member-category');
+            const carouselDisplay  = document.getElementById('carousel-display');
+            const carouselUp       = document.querySelector('.carousel-up');
+            const carouselDown     = document.querySelector('.carousel-down');
+
+            function updateMemberDisplay(index) {
+                currentMemberIndex = (index + allMembers.length) % allMembers.length;
+                const member = allMembers[currentMemberIndex];
+
+                memberNameEl.classList.remove('animate');
+                void memberNameEl.offsetWidth;
+                memberNameEl.classList.add('animate');
+
+                memberNameEl.textContent     = member.display;
+                memberCategoryEl.textContent = member.category;
+            }
+
+            function emitMemberAction(actionType, member) {
+                window.dispatchEvent(new CustomEvent(actionType, {
+                    detail: { member }
+                }));
+            }
+
+            carouselUp.addEventListener('click', () => {
+                updateMemberDisplay(currentMemberIndex - 1);
+                emitMemberAction('nameSwap', allMembers[currentMemberIndex]);
+                playNameSwap();
+            });
+            carouselDown.addEventListener('click', () => {
+                updateMemberDisplay(currentMemberIndex + 1);
+                emitMemberAction('nameSwap', allMembers[currentMemberIndex]);
+                playNameSwap();
+            });
+
+            // FIX: play confirm sound first, then open modal
+            carouselDisplay.addEventListener('click', () => {
+                const member = allMembers[currentMemberIndex];
+                emitMemberAction('confirm', member);
+                // Play confirm sound, open modal after the sound fires (or immediately if it fails)
+                playSound(confirmSfx, () => {});
+                openMiniSitePreview(member);
+            });
+
+            const carouselArrows = document.querySelectorAll('.carousel-nav');
+            carouselArrows.forEach((arrow) => {
+                arrow.addEventListener('mouseenter', () => playSound(pointerSfx));
+            });
+            carouselDisplay.addEventListener('mouseenter', () => playSound(pointerSfx));
+
+            // hint fade on hover over whole carousel
+            const carouselRoot = document.querySelector('.member-carousel');
+            const hint = document.querySelector('.member-hint');
+            carouselRoot.addEventListener('mouseenter', () => hint.style.opacity = '1');
+            carouselRoot.addEventListener('mouseleave', () => hint.style.opacity = '0');
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp') {
+                    updateMemberDisplay(currentMemberIndex - 1);
+                    playNameSwap();
+                }
+                if (e.key === 'ArrowDown') {
+                    updateMemberDisplay(currentMemberIndex + 1);
+                    playNameSwap();
+                }
+                if (e.key === 'Enter') {
+                    const member = allMembers[currentMemberIndex];
+                    emitMemberAction('confirm', member);
+                    playSound(confirmSfx, () => {});
+                    openMiniSitePreview(member);
+                }
+            });
+
+            updateMemberDisplay(0);
+
+            const miniSiteModal    = document.getElementById('mini-site-modal');
+            const miniSiteIframe   = document.getElementById('mini-site-iframe');
+            const miniSiteTitle    = document.getElementById('mini-site-title');
+            const miniSiteUrlEl    = document.getElementById('mini-site-url');
+            const miniSiteOpenFull = document.getElementById('mini-site-open-full');
+            const miniSiteClose    = document.getElementById('mini-site-close');
+
+            // Track whether the base page audio was playing before opening
+            let baseAudioWasPlaying = false;
+            let currentMemberUrl = '';
+
+            function openMiniSitePreview(member) {
+                const url = `./external-pages/${member.path}/index.html`;
+                currentMemberUrl = url;
+
+                // Pause base page audio, remember state
+                baseAudioWasPlaying = !audio.paused;
+                if (baseAudioWasPlaying) {
+                    audio.pause();
+                }
+
+                miniSiteTitle.textContent  = member.display;
+                miniSiteUrlEl.textContent  = `https://outoftune.dev/${member.path}`;
+                miniSiteIframe.src         = url;
+                miniSiteOpenFull.onclick   = () => { window.location.href = url; };
+
+                miniSiteModal.classList.add('open');
+                miniSiteModal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeMiniSitePreview() {
+                miniSiteModal.classList.remove('open');
+                miniSiteModal.setAttribute('aria-hidden', 'true');
+
+                // Clear iframe (stops any audio playing inside it)
+                miniSiteIframe.src = 'about:blank';
+
+                // Resume base audio only if it was playing before
+                if (baseAudioWasPlaying) {
+                    audio.play().catch(() => {});
+                }
+
+                baseAudioWasPlaying = false;
+                currentMemberUrl = '';
+            }
+
+            miniSiteClose.addEventListener('click', closeMiniSitePreview);
+            miniSiteModal.addEventListener('click', (event) => {
+                if (event.target === miniSiteModal) closeMiniSitePreview();
+            });
+
+            // Audio & Lyrics
+            const overlay     = document.getElementById('overlay');
+            const audio       = document.getElementById('bgm');
+            const pointerSfx  = document.getElementById('pointer-sfx');
+            const nameSwapSfx = document.getElementById('nameSwap-sfx');
+            const confirmSfx  = document.getElementById('confirm-sfx');
+            const lyricOutput = document.getElementById('lyric-output');
+            const lyricCaret  = document.getElementById('lyric-caret');
+            const trackName   = document.getElementById('track-name');
+
+            function playSound(sound, onComplete) {
+                if (!sound) {
+                    if (typeof onComplete === 'function') onComplete();
+                    return;
+                }
+                try {
+                    sound.currentTime = 0;
+                    const playPromise = sound.play();
+                    if (onComplete && playPromise && typeof playPromise.then === 'function') {
+                        playPromise.then(() => {
+                            sound.addEventListener('ended', onComplete, { once: true });
+                        }).catch(() => { if (typeof onComplete === 'function') onComplete(); });
+                    } else if (onComplete) {
+                        sound.addEventListener('ended', onComplete, { once: true });
+                    }
+                } catch (err) {
+                    if (typeof onComplete === 'function') onComplete();
+                }
+            }
+
+            function playNameSwap() {
+                playSound(nameSwapSfx);
+            }
+
+            let lyricsPromise = Promise.resolve();
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+            const fallbackLyrics = [
+                { time: 0,  text: "System initialized" },
+                { time: 4,  text: "Connecting to the void…" },
+                { time: 8,  text: "Iceberg drifts in digital blue" },
+                { time: 13, text: "Cold light reflections" },
+                { time: 18, text: "Synchronizing the deep" }
+            ];
+            let lyrics = fallbackLyrics.slice();
+            let committedLyricLine = '';
+            let trackTitle = 'Perpetual Descent — Tokyona';
+
+            trackName.textContent   = trackTitle;
+            lyricOutput.textContent = 'Continue from the welcome screen to play · lyrics sync to audio';
+
+            let cancelTyping = null;
+
+            function displayArtistName(raw) {
+                const a = (raw || '').trim();
+                if (!a) return a;
+                if (a === a.toLowerCase()) return a.charAt(0).toUpperCase() + a.slice(1);
+                return a;
+            }
+
+            function formatTrackDisplay(title, artist) {
+                if (!title && !artist) return '';
+                const t = (title || '').trim();
+                const a = displayArtistName(artist);
+                if (t && a) return `${t} by ${a}`;
+                return t || a;
+            }
+
+            function setLyricTyped(full) {
+                if (cancelTyping) { cancelTyping(); cancelTyping = null; }
+                if (reducedMotion.matches) {
+                    lyricOutput.textContent = full;
+                    if (lyricCaret) lyricCaret.hidden = true;
+                    return;
+                }
+                let i = 0;
+                lyricOutput.textContent = '';
+                if (lyricCaret) lyricCaret.hidden = false;
+                const tid = window.setInterval(() => {
+                    if (i >= full.length) {
+                        window.clearInterval(tid);
+                        if (lyricCaret) lyricCaret.hidden = true;
+                        cancelTyping = null;
+                        return;
+                    }
+                    lyricOutput.textContent += full[i++];
+                }, 28);
+                cancelTyping = () => {
+                    window.clearInterval(tid);
+                    lyricOutput.textContent = full;
+                    if (lyricCaret) lyricCaret.hidden = true;
+                };
+            }
+
+            audio.addEventListener('timeupdate', () => {
+                const time = audio.currentTime;
+                let activeIndex = -1;
+                for (let i = 0; i < lyrics.length; i++) {
+                    if (lyrics[i].time <= time) activeIndex = i;
+                    else break;
+                }
+                const raw  = activeIndex >= 0 ? lyrics[activeIndex].text : '';
+                const next = raw.trim() || '♪';
+                if (next !== committedLyricLine) {
+                    committedLyricLine = next;
+                    setLyricTyped(committedLyricLine);
+                }
+            });
+
+            async function dismissSplash() {
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                overlay.classList.add('hidden');
+                overlay.setAttribute('aria-hidden', 'true');
+                audio.volume = 0.35;
+                audio.play().catch((err) => console.warn('Audio play:', err));
+                try { await lyricsPromise; } catch (_) {}
+            }
+
+            overlay.addEventListener('pointerup', () => dismissSplash(), { passive: true });
+            overlay.addEventListener('touchend', (e) => { e.preventDefault(); dismissSplash(); }, { passive: false });
+            document.addEventListener('keydown', (e) => {
+                if (overlay.classList.contains('hidden')) return;
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                    e.preventDefault();
+                    dismissSplash();
+                }
+            });
+
+            function directoryBaseHref() {
+                const href = window.location.href.split('#')[0];
+                const u = new URL(href);
+                if (u.protocol === 'file:') {
+                    const clean = href.split('?')[0];
+                    const lastSlash = clean.lastIndexOf('/');
+                    const tail = clean.slice(lastSlash + 1);
+                    if (tail.includes('.')) return clean.slice(0, lastSlash + 1);
+                    return clean.endsWith('/') ? clean : `${clean}/`;
+                }
+                let path = u.pathname;
+                if (!path.endsWith('/')) {
+                    const slash = path.lastIndexOf('/');
+                    const last  = path.slice(slash + 1);
+                    if (last.includes('.')) path = path.slice(0, slash + 1);
+                    else path += '/';
+                }
+                return `${u.origin}${path}`;
+            }
+
+            async function loadLyrics() {
+                let text = '';
+                try {
+                    const response = await fetch(new URL('song.lrc', directoryBaseHref()).href, { cache: 'no-store' });
+                    if (response.ok) text = await response.text();
+                } catch (_) {}
+
+                if (!text.trim()) {
+                    const embedded = document.getElementById('lrc-embedded');
+                    if (embedded) text = embedded.textContent.trim();
+                }
+
+                if (!text.trim()) { console.warn('song.lrc not loaded.'); return; }
+
+                try {
+                    const parsed = parseLRC(text);
+                    if (parsed.lines.length) {
+                        lyrics = parsed.lines;
+                        committedLyricLine = '';
+                        const disp = formatTrackDisplay(parsed.title, parsed.artist);
+                        if (disp) { trackTitle = disp; trackName.textContent = trackTitle; }
+                    }
+                } catch (error) { console.warn('Failed to parse LRC:', error); }
+            }
+
+            function parseLRC(content) {
+                const lines = [];
+                let title = '', artist = '';
+                content.split(/\r?\n/).forEach((rawLine) => {
+                    const line = rawLine.trim();
+                    if (!line) return;
+                    const ti = line.match(/^\[ti:\s*(.+?)\]\s*$/i);
+                    if (ti) { title = ti[1].trim(); return; }
+                    const ar = line.match(/^\[ar:\s*(.+?)\]\s*$/i);
+                    if (ar) { artist = ar[1].trim(); return; }
+                    if (/^\[(?:id|al|length|offset|by|re|ver):/i.test(line)) return;
+                    const timeRe = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+                    const stampMatches = [...line.matchAll(timeRe)];
+                    if (!stampMatches.length) return;
+                    const text = line.replace(/\[\d{1,2}:\d{2}(?:\.\d{1,3})?\]/g, '').trim();
+                    stampMatches.forEach((match) => {
+                        const minutes = parseInt(match[1], 10);
+                        const seconds = parseInt(match[2], 10);
+                        let frac = 0;
+                        if (match[3] !== undefined) {
+                            const f = match[3], n = parseInt(f, 10);
+                            if (f.length === 3) frac = n / 1000;
+                            else if (f.length === 2) frac = n / 100;
+                            else frac = n / 10;
+                        }
+                        lines.push({ time: minutes * 60 + seconds + frac, text });
+                    });
+                });
+                lines.sort((a, b) => a.time - b.time);
+                return { lines, title, artist };
+            }
+
+            lyricsPromise = loadLyrics();
+            try { initBackgrounds(); } catch (err) { console.warn('WebGL background failed:', err); }
+        });
+
+        function initBackgrounds() {
+            function safeSize(el, fallbackW, fallbackH) {
+                const w = Math.max(1, el.offsetWidth  || el.clientWidth  || fallbackW || 1);
+                const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
+                return { w, h, aspect: w / h };
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            // Globe
+            const globeBox = document.getElementById('globe-target');
+            const gScene   = new THREE.Scene();
+            const gs       = safeSize(globeBox, 400, 400);
+            const gCam     = new THREE.PerspectiveCamera(75, gs.aspect, 0.1, 1000);
+            const gRen     = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            gRen.setPixelRatio(dpr);
+            gRen.setSize(gs.w, gs.h);
+            globeBox.appendChild(gRen.domElement);
+
+            const globe = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(2.5, 3),
+                new THREE.MeshBasicMaterial({ color: 0xc0e0ff, wireframe: true, transparent: true, opacity: 0.90 })
+            );
+            gScene.add(globe);
+            gCam.position.z = 4.2;
+
+            // Background terrain
+            const cBox   = document.getElementById('constellation-container');
+            const cScene = new THREE.Scene();
+            cScene.fog   = new THREE.FogExp2(0x001030, 0.003);
+
+            const dirLight1 = new THREE.DirectionalLight(0x3355bb, 1.2);
+            dirLight1.position.set(20, 30, 10);
+            cScene.add(dirLight1);
+            const dirLight2 = new THREE.DirectionalLight(0x1a2a77, 0.7);
+            dirLight2.position.set(-15, 20, -8);
+            cScene.add(dirLight2);
+            const dirLight3 = new THREE.DirectionalLight(0x080e30, 0.4);
+            dirLight3.position.set(0, -10, 5);
+            cScene.add(dirLight3);
+            cScene.add(new THREE.AmbientLight(0x050818, 0.6));
+
+            const cs   = safeSize(cBox, window.innerWidth, window.innerHeight);
+            const cCam = new THREE.PerspectiveCamera(60, cs.aspect, 0.1, 400);
+            cCam.position.set(20, 24, 28);
+            cCam.lookAt(0, 6, 0);
+
+            const cRen = new THREE.WebGLRenderer({ alpha: false, antialias: true, powerPreference: 'high-performance' });
+            cRen.setPixelRatio(dpr);
+            cRen.setSize(cs.w, cs.h);
+            cRen.setClearColor(0x00080f, 1);
+            cRen.shadowMap.enabled = true;
+            cRen.shadowMap.type    = THREE.PCFSoftShadowMap;
+            cBox.appendChild(cRen.domElement);
+
+            let planeGeo = new THREE.PlaneGeometry(120, 120, 80, 80);
+            planeGeo = planeGeo.toNonIndexed();
+            planeGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+
+            const posAttr = planeGeo.attributes.position;
+            const vCount  = posAttr.count;
+            const base    = new Float32Array(vCount * 3);
+            for (let i = 0; i < vCount; i++) {
+                base[i*3]   = posAttr.getX(i);
+                base[i*3+1] = posAttr.getY(i);
+                base[i*3+2] = posAttr.getZ(i);
+            }
+
+            const colorArr  = new Float32Array(vCount * 3);
+            const colorAttr = new THREE.BufferAttribute(colorArr, 3);
+            planeGeo.setAttribute('color', colorAttr);
+
+            const planeMat  = new THREE.MeshLambertMaterial({ vertexColors: true, fog: true, side: THREE.DoubleSide, transparent: true, opacity: 0.97 });
+            const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+            planeMesh.castShadow = planeMesh.receiveShadow = true;
+            cScene.add(planeMesh);
+
+            const wireMat  = new THREE.MeshBasicMaterial({ color: 0x0d1a3a, wireframe: true, fog: true, transparent: true, opacity: 0.06 });
+            const wireMesh = new THREE.Mesh(planeGeo, wireMat);
+            wireMesh.position.y = 0.1;
+            cScene.add(wireMesh);
+
+            // Floating elements
+            const floatingElements = [];
+            const orbitalRings = [
+                { radius: 22, speed: 0.00045, height: 2.4,  elementCount: 6 },
+                { radius: 35, speed: 0.00032, height: 3.2, elementCount: 8 },
+                { radius: 50, speed: 0.00021, height: 2.0, elementCount: 6 },
+            ];
+
+            const d20Material = new THREE.MeshStandardMaterial({
+                color: 0x8faeff,
+                emissive: 0x1d3f7a,
+                roughness: 0.22,
+                metalness: 0.28,
+                flatShading: true,
+                transparent: true,
+                opacity: 0.88,
+            });
+            const d20EdgeMaterial = new THREE.LineBasicMaterial({ color: 0xc8e2ff, transparent: true, opacity: 0.45 });
+
+            orbitalRings.forEach((ring) => {
+                for (let i = 0; i < ring.elementCount; i++) {
+                    const size = 0.28 + Math.random() * 0.10;
+                    const geometry = new THREE.IcosahedronGeometry(size, 1);
+                    const mesh = new THREE.Mesh(geometry, d20Material);
+                    const edgeLines = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), d20EdgeMaterial);
+                    mesh.add(edgeLines);
+                    const angleOffset = (i / ring.elementCount) * Math.PI * 2;
+                    mesh.position.set(Math.cos(angleOffset) * ring.radius, ring.height, Math.sin(angleOffset) * ring.radius);
+                    mesh.userData = {
+                        ringRadius: ring.radius,
+                        ringSpeed: ring.speed,
+                        baseAngle: angleOffset,
+                        baseY: ring.height,
+                        seaFloat: true,
+                        seaOffset: 1.6 + Math.random() * 0.5,
+                        bobSpeed: 0.004 + Math.random() * 0.004,
+                        bobOffset: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.007,
+                        swayPhase: Math.random() * Math.PI * 2,
+                    };
+                    floatingElements.push(mesh);
+                    cScene.add(mesh);
+                }
+            });
+
+            const innerClusterCount = 4;
+            for (let i = 0; i < innerClusterCount; i++) {
+                const size = 0.24 + Math.random() * 0.08;
+                const geo = new THREE.IcosahedronGeometry(size, 1);
+                const mesh = new THREE.Mesh(geo, d20Material);
+                const angle = (i / innerClusterCount) * Math.PI * 2;
+                const radius = 12 + Math.sin(i * 0.9) * 1.8;
+                mesh.position.set(Math.cos(angle) * radius, 5.2 + Math.sin(angle * 1.3) * 0.7, Math.sin(angle) * radius);
+                mesh.rotation.set(Math.random() * 0.5, Math.random() * Math.PI, Math.random() * 0.5);
+                mesh.userData = {
+                    ringRadius: radius,
+                    ringSpeed: 0.00028 + Math.random() * 0.00016,
+                    baseAngle: angle + Math.random() * 0.12,
+                    baseY: mesh.position.y,
+                    seaFloat: true,
+                    seaOffset: 1.3 + Math.random() * 0.5,
+                    bobSpeed: 0.004 + Math.random() * 0.003,
+                    bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.008,
+                    swayPhase: Math.random() * Math.PI * 2,
+                    menuOrbit: false,
+                };
+                floatingElements.push(mesh);
+                cScene.add(mesh);
+            }
+
+            const outerClusterCount = 6;
+            for (let i = 0; i < outerClusterCount; i++) {
+                const size = 0.18 + Math.random() * 0.06;
+                const geo = new THREE.BoxGeometry(size, size, size);
+                const mesh = new THREE.Mesh(geo, d20Material);
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 62 + Math.random() * 18;
+                mesh.position.set(Math.cos(angle) * radius, 4.2 + Math.random() * 2.0, Math.sin(angle) * radius);
+                mesh.rotation.set(Math.random() * 0.6, Math.random() * Math.PI, Math.random() * 0.6);
+                mesh.userData = {
+                    scattered: true,
+                    radius,
+                    baseAngle: angle,
+                    baseY: mesh.position.y,
+                    seaFloat: true,
+                    seaOffset: 1.4 + Math.random() * 0.5,
+                    speed: 0.00012 + Math.random() * 0.0001,
+                    bobSpeed: 0.003 + Math.random() * 0.003,
+                    bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.006,
+                };
+                floatingElements.push(mesh);
+                cScene.add(mesh);
+            }
+
+            const roundParticles = [];
+            const roundMat = new THREE.MeshBasicMaterial({
+                color: 0xe6f3ff,
+                transparent: true,
+                opacity: 0.82,
+            });
+
+            for (let i = 0; i < 16; i++) {
+                const mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.06 + Math.random() * 0.06, 10, 10),
+                    roundMat
+                );
+                mesh.position.set(
+                    (Math.random() - 0.5) * 90,
+                    3.2 + Math.random() * 6.4,
+                    (Math.random() - 0.5) * 90
+                );
+                mesh.userData = {
+                    driftX: Math.random() * 0.002 - 0.001,
+                    driftZ: Math.random() * 0.002 - 0.001,
+                    bobSpeed: 0.003 + Math.random() * 0.003,
+                    bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.006,
+                    baseY: mesh.position.y,
+                    seaFloat: true,
+                    seaOffset: 1.2 + Math.random() * 0.6,
+                };
+                roundParticles.push(mesh);
+                floatingElements.push(mesh);
+                cScene.add(mesh);
+            }
+
+            const particleCount = 200;
+            const particleGeo   = new THREE.BufferGeometry();
+            const pPos = new Float32Array(particleCount * 3);
+            const pCol = new Float32Array(particleCount * 3);
+            const pColor = new THREE.Color(0x7c9cff);
+            for (let i = 0; i < particleCount; i++) {
+                pPos[i*3]   = (Math.random() - 0.5) * 200;
+                pPos[i*3+1] = Math.random() * 50;
+                pPos[i*3+2] = (Math.random() - 0.5) * 200;
+                pCol[i*3]   = pColor.r;
+                pCol[i*3+1] = pColor.g;
+                pCol[i*3+2] = pColor.b;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+            particleGeo.setAttribute('color',    new THREE.BufferAttribute(pCol, 3));
+            const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ size: 0.5, vertexColors: true, transparent: true, opacity: 0.6, fog: true }));
+            cScene.add(particles);
+
+            let mouseX = 0, mouseY = 0, smoothMX = 0, smoothMY = 0, mouseInfluence = 0;
+
+            function handleMouseMove(clientX, clientY) {
+                mouseX = (clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(clientY / window.innerHeight) * 2 + 1;
+                mouseInfluence = 1;
+            }
+
+            cBox.addEventListener('mousemove', (e) => handleMouseMove(e.clientX, e.clientY));
+            cBox.addEventListener('touchmove', (e) => { if (e.touches[0]) handleMouseMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+            cBox.addEventListener('mouseleave', () => { mouseInfluence = 0; });
+
+            function sampleSurf(x, z, t) {
+                let y = 0;
+                y += Math.sin(x * 0.10 - t * 0.30) * 1.5;
+                y += Math.sin(x * 0.07 - t * 0.22 + z * 0.02) * 0.8;
+                y += Math.sin(x * 0.18 - z * 0.06 - t * 0.40) * 0.35;
+                y += Math.sin(x * 0.04 - t * 0.12) * 0.5;
+                y += Math.sin(z * 0.09 + t * 0.08) * 0.2;
+                const dx = x - smoothMX * 20, dz = z - smoothMY * 20;
+                y += Math.exp(-Math.sqrt(dx*dx + dz*dz) * 0.015) * mouseInfluence * 1.5;
+                return y * 2.2;
+            }
+
+            let tField = 0;
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                globe.rotation.y += 0.002;
+                globe.rotation.x += 0.001;
+                gRen.render(gScene, gCam);
+
+                tField   += 0.004;
+                smoothMX += (mouseX - smoothMX) * 0.05;
+                smoothMY += (mouseY - smoothMY) * 0.05;
+                mouseInfluence *= 0.98;
+
+                const arr = posAttr.array;
+                for (let i = 0; i < vCount; i++) {
+                    arr[i*3+1] = sampleSurf(base[i*3], base[i*3+2], tField);
+                }
+                posAttr.needsUpdate = true;
+
+                const triCount = vCount / 3;
+                for (let t = 0; t < triCount; t++) {
+                    const i0 = t*3, i1 = i0+1, i2 = i0+2;
+                    const y0 = arr[i0*3+1], y1 = arr[i1*3+1], y2 = arr[i2*3+1];
+                    const fy = (y0+y1+y2)/3;
+                    const h  = Math.max(0, Math.min(1, (fy+4.0)/8.0));
+                    const slope = Math.min(1, Math.max(Math.abs(y0-y1), Math.abs(y1-y2), Math.abs(y0-y2)) / 2.5);
+                    const highlight = (fy > 1.8 && slope > 1.2) ? 0.12 : 0.0;
+                    const r = 0.010 + h*0.035 + slope*0.045 + highlight*0.6;
+                    const g = 0.015 + h*0.045 + slope*0.060 + highlight*0.7;
+                    const b = 0.090 + h*0.150 + slope*0.250 + highlight*1.0;
+                    colorArr[i0*3]=r; colorArr[i0*3+1]=g; colorArr[i0*3+2]=b;
+                    colorArr[i1*3]=r; colorArr[i1*3+1]=g; colorArr[i1*3+2]=b;
+                    colorArr[i2*3]=r; colorArr[i2*3+1]=g; colorArr[i2*3+2]=b;
+                }
+                colorAttr.needsUpdate = true;
+
+                floatingElements.forEach((el) => {
+                    const d = el.userData;
+                    if (d.scattered) {
+                        const angle = d.baseAngle + tField * d.speed;
+                        el.position.x = Math.cos(angle) * d.radius + Math.sin(tField * 0.12 + d.bobOffset) * 0.8;
+                        el.position.z = Math.sin(angle) * d.radius + Math.cos(tField * 0.11 + d.bobOffset) * 0.8;
+                        if (d.seaFloat) {
+                            el.position.y = sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.3;
+                        } else {
+                            el.position.y = d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9;
+                        }
+                    } else if (d.ringRadius !== undefined) {
+                        const baseSpeed = d.menuOrbit ? d.ringSpeed * 0.8 : d.ringSpeed;
+                        const angle = d.baseAngle + tField * baseSpeed;
+                        el.position.x = Math.cos(angle) * d.ringRadius;
+                        el.position.z = Math.sin(angle) * d.ringRadius;
+                        if (d.menuOrbit) {
+                            el.position.x += Math.sin(tField * 0.18 + d.swayPhase) * 1.3;
+                            el.position.z += Math.cos(tField * 0.14 + d.swayPhase) * 1.3;
+                        }
+                        if (d.seaFloat) {
+                            el.position.y = sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.28;
+                        } else {
+                            el.position.y = d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9 + (d.menuOrbit ? Math.cos(tField * 0.16 + d.swayPhase) * 0.45 : 0);
+                        }
+                    } else {
+                        el.position.x += d.driftX;
+                        el.position.z += d.driftZ;
+                        if (d.seaFloat) {
+                            el.position.y = sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.3;
+                        } else {
+                            el.position.y = d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.8;
+                        }
+                    }
+                    el.rotation.x += d.rotSpeed;
+                    el.rotation.y += d.rotSpeed * 0.7;
+                    el.rotation.z += d.rotSpeed * 0.5;
+                });
+
+                const particlePos = particles.geometry.attributes.position.array;
+                for (let i = 0; i < particleCount; i++) {
+                    particlePos[i*3+1] += Math.sin(tField * 0.5 + i * 0.1) * 0.01;
+                    if (particlePos[i*3+1] > 60) particlePos[i*3+1] = 0;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+
+                cCam.position.x = smoothMX * 4;
+                cCam.position.z = smoothMY * 4;
+                cCam.position.y = 24 + Math.sin(tField * 0.18) * 1.5;
+                cCam.lookAt(smoothMX * 2, 6, smoothMY * 2);
+
+                wireMat.opacity    = 0.04 + Math.sin(tField * 0.5) * 0.02;
+                dirLight1.intensity = 1.2 + Math.sin(tField * 0.4) * 0.25;
+                dirLight2.intensity = 0.7 + Math.cos(tField * 0.6) * 0.15;
+                dirLight3.intensity = 0.4 + Math.sin(tField * 0.3 + 1.2) * 0.10;
+
+                cRen.render(cScene, cCam);
+            }
+
+            function layoutBgCanvas() {
+                const s = safeSize(cBox, window.innerWidth, window.innerHeight);
+                cCam.aspect = s.aspect;
+                cCam.updateProjectionMatrix();
+                cRen.setSize(s.w, s.h);
+            }
+
+            window.addEventListener('resize', () => {
+                layoutBgCanvas();
+                const gs2 = safeSize(globeBox, 400, 400);
+                gCam.aspect = gs2.aspect;
+                gCam.updateProjectionMatrix();
+                gRen.setSize(gs2.w, gs2.h);
+            });
+
+            if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(() => layoutBgCanvas()).observe(cBox);
+            }
+            requestAnimationFrame(() => layoutBgCanvas());
+
+            animate();
+        }
+    </script>
+</body>
+
+</html>

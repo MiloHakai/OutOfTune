@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>MiloHakai</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* --- Palette: pastel moonlight default (night) --- */
+      --bg: #050505;
+      --bg2: #070707;
+      --text: #f2f0ff;
+      --text-dim: rgba(220, 226, 255, 0.82);
+      --line: rgba(255, 250, 255, 0.92);
+      --line-soft: rgba(230, 228, 255, 0.55);
+      --glow: rgba(190, 198, 255, 0.38);
+
+      /* Space plate */
+      --band-strong: rgba(255, 255, 255, 0.20);
+      --band-soft: rgba(255, 255, 255, 0.08);
+      --mist: rgba(255, 255, 255, 0.06);
+      --dust: rgba(255, 255, 255, 0.12);
+
+      /* CRT */
+      --scanline: rgba(0, 0, 0, 0.18);
+      --vignette: rgba(0, 0, 0, 0.4);
+
+      /* Dynamic sky variables (overridden by script at runtime) */
+      --sky-top: #050505;
+      --sky-mid: #070707;
+      --sky-bottom: #121214;
+      --accent: #d4c4ff;
+      --star-rgb: 255,255,255; /* r,g,b (no spaces required) */
+      --star-density: 1; /* multiplier for generated stars */
+      --wave-a: #f8f6ff;
+      --wave-b: #c4b5fd;
+      --flicker-overlay: rgba(255,255,255,0.006);
+      --icon: rgba(208, 214, 255, 0.9);
+
+      /* Sun / moon / sky washes (overridden per sky in palettes) */
+      --sun-core: #FFD66A;
+      --sun-mid: #FF9E4A;
+      --sun-glow: rgba(255, 170, 110, 0.28);
+      --moon-rim: rgba(248, 246, 255, 0.95);
+      --moon-rim-soft: rgba(198, 192, 235, 0.55);
+      --moon-halo: rgba(165, 158, 220, 0.45);
+
+      /* Sun placement from clock (Europe/Rome), set by script */
+      --sun-left: 50%;
+      --sun-top: 14%;
+      --sun-scale: 1.05;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* (Light theme overrides removed — site uses time-based palettes now) */
+
+    body {
+      position: relative;
+      background: var(--bg);
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       SPACE PLATE BACKGROUND (galaxy band + dithering + crescents)
+       ───────────────────────────────────────────────────────────── */
+
+    .wave-text {
+      background: linear-gradient(90deg,
+          var(--wave-a) 0%,
+          var(--wave-a) 38%,
+          var(--wave-b) 50%,
+          var(--wave-a) 62%,
+          var(--wave-a) 100%);
+
+      background-size: 300% 100%;
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      animation: wave-effect 6s linear infinite;
+
+      text-shadow:
+        0 0 12px var(--glow),
+        0 0 22px color-mix(in srgb, var(--accent) 55%, transparent);
+      -webkit-text-stroke: 0.22px color-mix(in srgb, var(--line-soft) 70%, transparent);
+    }
+
+    /* wave-text remains themed by palette & accent */
+
+    .space-plate {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 60%, var(--sky-bottom) 100%),
+        radial-gradient(ellipse at 50% 40%, var(--bg2), var(--bg));
+      transition: background 1.2s ease;
+    }
+
+    /* Galaxy band + soft mist */
+    .space-plate::before {
+      content: "";
+      position: absolute;
+      inset: -25%;
+      transform: rotate(-18deg) scale(1.25);
+      opacity: 0.98;
+
+      background:
+        radial-gradient(ellipse 170% 22% at 72% 62%,
+          var(--band-strong) 0%,
+          var(--band-soft) 38%,
+          var(--band-soft) 58%,
+          transparent 78%),
+
+        radial-gradient(ellipse 70% 45% at 18% 28%,
+          var(--mist) 0%,
+          transparent 72%),
+
+        radial-gradient(ellipse 60% 40% at 90% 84%,
+          var(--mist) 0%,
+          transparent 75%);
+    }
+
+    /* Dithering / grain */
+    .space-plate::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.22;
+      mix-blend-mode: screen;
+      background-image: radial-gradient(var(--dust) 1px, transparent 1px);
+      background-size: 2px 2px;
+    }
+
+    /* Crescent moons (pure CSS) */
+    .moon {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0.75;
+      filter: drop-shadow(0 0 14px var(--moon-halo, var(--glow)));
+      transition: opacity 1.2s ease, transform 1.2s ease, filter 1.2s ease;
+    }
+
+    .moon.big {
+      width: 220px;
+      height: 220px;
+      top: 10%;
+      left: 10%;
+      background:
+        radial-gradient(circle at 30% 35%,
+          transparent 60%,
+          var(--moon-rim, var(--line)) 61%,
+          var(--moon-rim, var(--line)) 63%,
+          var(--moon-rim-soft, var(--line-soft)) 66%,
+          transparent 70%);
+    }
+
+    .moon.small {
+      width: 110px;
+      height: 110px;
+      top: 32%;
+      left: 46%;
+      opacity: 0.55;
+      background:
+        radial-gradient(circle at 32% 38%,
+          transparent 60%,
+          var(--moon-rim-soft, var(--line-soft)) 61%,
+          var(--moon-rim, var(--line)) 64%,
+          transparent 70%);
+    }
+
+    /* Sun element (appears during day / moves at sunset) */
+    .sun {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      width: 220px;
+      height: 220px;
+      top: 12%;
+      left: 78%;
+      transform: translate(-50%, 0) scale(1);
+      opacity: 0;
+      background: radial-gradient(circle at 30% 30%, var(--sun-core, #FFD66A) 0%, var(--sun-mid, #FF9E4A) 45%, transparent 70%);
+      filter: drop-shadow(0 0 40px var(--sun-glow, rgba(255,158,74,0.18)));
+      transition: opacity 1.2s ease, filter 1.2s ease, left 2s ease-out, top 2s ease-out, transform 2s ease-out;
+    }
+
+    @keyframes moon-bob {
+      0% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-6px) rotate(0.2deg); }
+      100% { transform: translateY(0) rotate(0); }
+    }
+
+    /* Sun position: --sun-left / --sun-top / --sun-scale from clock (same TZ as palettes) */
+    [data-sky="day"] .sun {
+      opacity: 1;
+      left: var(--sun-left);
+      top: var(--sun-top);
+      transform: translate(-50%, 0) scale(var(--sun-scale));
+    }
+
+    [data-sky="sunset"] .sun {
+      opacity: 1;
+      left: var(--sun-left);
+      top: var(--sun-top);
+      transform: translate(-50%, 0) scale(var(--sun-scale));
+    }
+    [data-sky="indigo"] .sun,
+    [data-sky="night"] .sun { opacity: 0; transform: translate(-50%, -10%) scale(0.7); }
+
+    /* Moon visibility across phases */
+    [data-sky="day"] .moon { opacity: 0; transform: translateY(-28px) scale(0.9); filter: blur(0.6px); pointer-events: none; }
+    [data-sky="sunset"] .moon { opacity: 0.35; transform: translateY(-8px) scale(0.95); filter: blur(0); }
+    [data-sky="indigo"] .moon { opacity: 0.7; transform: translateY(-4px) scale(0.98); filter: blur(0); }
+    [data-sky="night"] .moon { opacity: 0.98; transform: translateY(0) scale(1); animation: moon-bob 12s ease-in-out infinite; }
+
+    /* Star canvas on top of plate, below UI */
+    #starCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       CRT OVERLAY
+       ───────────────────────────────────────────────────────────── */
+
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .crt-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg,
+          var(--scanline) 0px,
+          var(--scanline) 2px,
+          transparent 2px,
+          transparent 5px);
+      animation: scanScroll 10s linear infinite;
+    }
+
+    @keyframes scanScroll {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(5px);
+      }
+    }
+
+
+    .crt-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      /* Wide, soft falloff — avoids harsh vertical “columns” at the sides */
+      background: radial-gradient(ellipse 130% 115% at 50% 48%,
+          transparent 0%,
+          transparent 58%,
+          color-mix(in srgb, var(--vignette) 72%, transparent) 85%,
+          var(--vignette) 100%);
+    }
+
+    /* Subtle flicker */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--flicker-overlay);
+      pointer-events: none;
+      z-index: 998;
+      animation: flicker 6.5s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes flicker {
+
+      0%,
+      100% {
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 0.28;
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       ANIMATED BORDERS — edge segments + traveling beams (Bluerra-style)
+       Colors track palette via --line / --line-soft / --glow
+       ───────────────────────────────────────────────────────────── */
+
+    .border-segments {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .border-top,
+    .border-right,
+    .border-bottom,
+    .border-left {
+      position: absolute;
+      box-shadow: 0 0 10px var(--glow);
+      animation: border-glow 4.5s ease-in-out infinite;
+      transition: box-shadow 1s ease, filter 1s ease;
+    }
+
+    .border-top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .border-right {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 3px;
+    }
+
+    .border-bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .border-left {
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 3px;
+    }
+
+    .border-top::after,
+    .border-right::after,
+    .border-bottom::after,
+    .border-left::after {
+      content: '';
+      position: absolute;
+      will-change: transform, opacity;
+      border-radius: 4px;
+      opacity: 0;
+    }
+
+    .border-top::after,
+    .border-bottom::after {
+      top: -1px;
+      bottom: -1px;
+      width: 15vw;
+    }
+
+    .border-top::after {
+      left: 0;
+      background: linear-gradient(90deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-ltr 12s linear infinite;
+    }
+
+    .border-bottom::after {
+      right: 0;
+      background: linear-gradient(270deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-rtl 12s linear infinite;
+    }
+
+    .border-right::after,
+    .border-left::after {
+      left: -1px;
+      right: -1px;
+      height: 15vh;
+    }
+
+    .border-right::after {
+      top: 0;
+      background: linear-gradient(180deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-ttb 12s linear infinite;
+    }
+
+    .border-left::after {
+      bottom: 0;
+      background: linear-gradient(0deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+      animation: snake-btt 12s linear infinite;
+    }
+
+    .border-line-1.border-top::after {
+      animation-delay: 0s;
+    }
+
+    .border-line-1.border-right::after {
+      animation-delay: 3s;
+    }
+
+    .border-line-1.border-bottom::after {
+      animation-delay: 6s;
+    }
+
+    .border-line-1.border-left::after {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-top::after {
+      animation-delay: 6s;
+    }
+
+    .border-line-2.border-right::after {
+      animation-delay: 9s;
+    }
+
+    .border-line-2.border-bottom::after {
+      animation-delay: 0s;
+    }
+
+    .border-line-2.border-left::after {
+      animation-delay: 3s;
+    }
+
+    @keyframes snake-ltr {
+      0% {
+        transform: translateX(-15vw);
+        opacity: 1;
+      }
+
+      25% {
+        transform: translateX(100vw);
+        opacity: 1;
+      }
+
+      25.01%,
+      100% {
+        transform: translateX(100vw);
+        opacity: 0;
+      }
+    }
+
+    @keyframes snake-ttb {
+      0% {
+        transform: translateY(-15vh);
+        opacity: 1;
+      }
+
+      25% {
+        transform: translateY(100vh);
+        opacity: 1;
+      }
+
+      25.01%,
+      100% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+    }
+
+    @keyframes snake-rtl {
+      0% {
+        transform: translateX(15vw);
+        opacity: 1;
+      }
+
+      25% {
+        transform: translateX(-100vw);
+        opacity: 1;
+      }
+
+      25.01%,
+      100% {
+        transform: translateX(-100vw);
+        opacity: 0;
+      }
+    }
+
+    @keyframes snake-btt {
+      0% {
+        transform: translateY(15vh);
+        opacity: 1;
+      }
+
+      25% {
+        transform: translateY(-100vh);
+        opacity: 1;
+      }
+
+      25.01%,
+      100% {
+        transform: translateY(-100vh);
+        opacity: 0;
+      }
+    }
+
+    @keyframes border-glow {
+
+      0%,
+      100% {
+        opacity: 0.75;
+        filter: drop-shadow(0 0 8px var(--glow));
+      }
+
+      50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 14px var(--glow)) drop-shadow(0 0 6px var(--line-soft));
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       UI / CONTENT
+       ───────────────────────────────────────────────────────────── */
+
+    .container {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      display: inline-block;
+      line-height: 1.25;
+      color: var(--text);
+      text-shadow:
+        0 0 10px var(--glow),
+        0 0 8px color-mix(in srgb, var(--accent) 45%, transparent);
+      animation: titlePulse 4s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+
+      0%, 100% {
+        text-shadow:
+          0 0 10px var(--glow),
+          0 0 8px color-mix(in srgb, var(--accent) 45%, transparent);
+      }
+
+      50% {
+        text-shadow:
+          0 0 14px var(--glow),
+          0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
+      }
+    }
+
+    @keyframes wave-effect {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
+    }
+
+    p {
+      font-size: 0.72rem;
+      line-height: 1.9;
+      margin: 1.2rem 0 0;
+      color: var(--text-dim);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 22%, transparent),
+        0 0 8px var(--glow);
+      letter-spacing: 0.05em;
+    }
+
+    .icons {
+      display: flex;
+      gap: 2.2rem;
+      margin-top: 2rem;
+    }
+
+    .icons a {
+      color: var(--icon);
+      font-size: 1.6rem;
+      transition: all 0.25s ease;
+      position: relative;
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--icon) 35%, transparent),
+        0 0 10px var(--glow);
+    }
+
+    .icons a:hover {
+      color: var(--accent);
+      transform: translateY(-5px) scale(1.1);
+      text-shadow: 0 0 18px var(--accent);
+    }
+
+    .icons a::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--line) 100%);
+      box-shadow: 0 0 10px var(--accent);
+      transition: transform 0.25s ease;
+    }
+
+    .icons a:hover::after {
+      transform: translateX(-50%) scaleX(1);
+    }
+
+    /* Click counter */
+    .click-counter {
+      margin-top: 1.2rem;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+
+      font-size: 0.65rem;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    /* click-counter adapts to palette; removed static light-theme tweak */
+
+    .click-counter.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .click-counter p {
+      margin: 0;
+      color: var(--text-dim);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 20%, transparent),
+        0 0 8px var(--glow);
+    }
+
+    #clickCount {
+      color: var(--text);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 25%, transparent),
+        0 0 10px var(--glow);
+    }
+
+    footer {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.55rem;
+      text-align: center;
+      z-index: 10;
+      line-height: 2;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 18%, transparent),
+        0 0 8px var(--glow);
+    }
+
+    footer a {
+      color: var(--text-dim);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.25s;
+    }
+
+    footer a:hover {
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent);
+    }
+
+    footer a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--line) 100%);
+      transition: width 0.25s ease;
+    }
+
+    footer a:hover::after {
+      width: 100%;
+    }
+
+    /* Theme toggle removed — site uses time-driven palettes */
+
+    /* ─────────────────────────────────────────────────────────────
+       SPLASH (typing + click to enter)
+       ───────────────────────────────────────────────────────────── */
+
+    .splash-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.85s ease, visibility 0.85s ease;
+    }
+
+    .splash-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-content {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1rem;
+    }
+
+    .splash-ring {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 1px solid var(--line-soft);
+      animation: ringPulse 3.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .splash-ring:nth-child(2) {
+      width: 340px;
+      height: 340px;
+      animation-delay: 0.55s;
+    }
+
+    .splash-ring:nth-child(3) {
+      width: 480px;
+      height: 480px;
+      animation-delay: 1.1s;
+    }
+
+    @keyframes ringPulse {
+
+      0%,
+      100% {
+        opacity: 0.25;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.65;
+        transform: scale(1.03);
+      }
+    }
+
+    .typing-text {
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+      padding-right: 6px;
+      color: var(--text);
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 30%, transparent),
+        0 0 12px var(--glow);
+      letter-spacing: 0.15em;
+      font-size: 1.25rem;
+    }
+
+    .typing-text.typing {
+      animation: blinkCaret 0.75s step-end infinite;
+    }
+
+    @keyframes blinkCaret {
+
+      from,
+      to {
+        border-color: transparent;
+      }
+
+      50% {
+        border-color: var(--line);
+      }
+    }
+
+    .splash-hint {
+      font-size: 0.5rem;
+      color: var(--text-dim);
+      letter-spacing: 0.22em;
+      animation: hintBlink 2s ease-in-out infinite;
+    }
+
+
+    @keyframes hintBlink {
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 0.9;
+      }
+    }
+
+    /* Accessibility: reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+
+      .border-top,
+      .border-right,
+      .border-bottom,
+      .border-left {
+        animation: none !important;
+      }
+
+      .border-top::after,
+      .border-right::after,
+      .border-bottom::after,
+      .border-left::after {
+        animation: none !important;
+        opacity: 0 !important;
+      }
+
+      .crt-overlay::before,
+      body::before,
+      h1,
+      .splash-ring,
+      .splash-hint {
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Space plate background -->
+  <div class="space-plate" aria-hidden="true"></div>
+  <div class="sun" aria-hidden="true"></div>
+  <div class="moon big" aria-hidden="true"></div>
+  <div class="moon small" aria-hidden="true"></div>
+  <canvas id="starCanvas" aria-hidden="true"></canvas>
+
+  <!-- CRT overlay -->
+  <div class="crt-overlay" aria-hidden="true"></div>
+
+  <!-- Splash -->
+  <div class="splash-screen" id="splashScreen" role="dialog" aria-label="Welcome">
+    <div class="splash-content">
+      <div class="splash-ring"></div>
+      <div class="splash-ring"></div>
+      <div class="splash-ring"></div>
+      <div class="typing-text" id="splashTitle">MiloHakai</div>
+    </div>
+  </div>
+
+  <!-- Animated borders: dual traveling beams on fixed edge segments (same pattern as Bluerra) -->
+  <div class="border-segments" aria-hidden="true">
+    <div class="border-top border-line-1"></div>
+    <div class="border-right border-line-1"></div>
+    <div class="border-bottom border-line-1"></div>
+    <div class="border-left border-line-1"></div>
+    <div class="border-top border-line-2"></div>
+    <div class="border-right border-line-2"></div>
+    <div class="border-bottom border-line-2"></div>
+    <div class="border-left border-line-2"></div>
+  </div>
+
+
+  <!-- Main content -->
+  <div class="container">
+    <h1 id="username" class="wave-text" onclick="playClickSound()">MiloHakai</h1>
+    <p>Game Designer and occasional streamer from Italy.</p>
+
+    <div id="clickCounter" class="click-counter" style="display:none;">
+      <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
+    </div>
+
+    <div class="icons">
+      <a href="https://discord.gg/mhfnh6j9uQ" title="Discord" target="_blank" rel="noopener"><i
+          class="fab fa-discord"></i></a>
+      <a href="https://github.com/MiloHakai" title="GitHub" target="_blank" rel="noopener"><i
+          class="fab fa-github"></i></a>
+      <a href="https://steamcommunity.com/id/5483625764" title="Steam" target="_blank" rel="noopener"><i
+          class="fab fa-steam"></i></a>
+      <a href="https://twitch.tv/MiloHakai" title="Twitch" target="_blank" rel="noopener"><i
+          class="fab fa-twitch"></i></a>
+    </div>
+  </div>
+
+  <footer>
+    Copyright © 2026–present MiloHakai // OutOfTune<br>
+    Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank" rel="noopener">SpectraPulse</a>
+  </footer>
+
+  <!-- Background music tracks (one per phase) -->
+  <audio id="bgmDay" preload="auto" loop muted playsinline>
+    <source src="./audio/bgm-day.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="bgmSunset" preload="auto" loop muted playsinline>
+    <source src="./audio/bgm-sunset.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="bgmNight" preload="auto" loop muted playsinline>
+    <source src="./audio/bgm-night.mp3" type="audio/mpeg">
+  </audio>
+
+  <audio id="clickSound" preload="auto">
+    <source src="./audio/click-sound.mp3" type="audio/mpeg">
+    <source src="./click-sound.ogg" type="audio/ogg">
+  </audio>
+
+  <script>
+    /* Theme switching removed — site uses time-based palettes */
+
+    /* ─────────────────────────────────────────────────────────────
+       STARFIELD (monochrome) + occasional shooting star
+       ───────────────────────────────────────────────────────────── */
+    (function () {
+      const canvas = document.getElementById('starCanvas');
+      const ctx = canvas.getContext('2d', { alpha: true });
+      let W = 0, H = 0;
+      let stars = [];
+      let shooting = null;
+
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = canvas.width = Math.floor(window.innerWidth * dpr);
+        H = canvas.height = Math.floor(window.innerHeight * dpr);
+        canvas.style.width = window.innerWidth + "px";
+        canvas.style.height = window.innerHeight + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
+        initStars();
+      }
+
+      function rand(min, max) { return min + Math.random() * (max - min); }
+
+      function initStars() {
+        stars = [];
+        const area = window.innerWidth * window.innerHeight;
+        const css = getComputedStyle(document.documentElement);
+        const multiplier = (window.__sky && window.__sky.starDensity) || parseFloat(css.getPropertyValue('--star-density')) || 1;
+        const count = Math.min(Math.floor(area / 2600 * multiplier), 900);
+
+        for (let i = 0; i < count; i++) {
+          const r = Math.random();
+          stars.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            size: r < 0.70 ? rand(0.35, 0.9) : r < 0.93 ? rand(0.9, 1.3) : rand(1.3, 1.9),
+            a: rand(0.20, 0.90),
+            tw: rand(0.004, 0.010),
+            off: rand(0, Math.PI * 2),
+            spike: Math.random() < 0.016
+          });
+        }
+      }
+
+      function starColor(alpha) {
+        const css = getComputedStyle(document.documentElement);
+        const rgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
+        return `rgba(${rgb},${alpha})`;
+      }
+
+      function drawStar(s, t) {
+        const twinkle = Math.sin(t * s.tw * 60 + s.off);
+        const a = s.a * (0.75 + 0.25 * twinkle);
+        const sz = s.size * (0.9 + 0.1 * twinkle);
+
+        if (s.spike) {
+          ctx.save();
+          ctx.translate(s.x, s.y);
+          ctx.strokeStyle = starColor(a);
+          ctx.lineWidth = 0.6;
+          const len = sz * 3.6;
+          for (let i = 0; i < 4; i++) {
+            ctx.save();
+            ctx.rotate(i * Math.PI / 4);
+            ctx.globalAlpha = (i < 2 ? 1 : 0.55);
+            ctx.beginPath();
+            ctx.moveTo(0, -len); ctx.lineTo(0, len);
+            ctx.stroke();
+            ctx.restore();
+          }
+          ctx.restore();
+        }
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, sz, 0, Math.PI * 2);
+        ctx.fillStyle = starColor(a);
+        ctx.fill();
+
+        if (s.spike) {
+          const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, sz * 5);
+            const css = getComputedStyle(document.documentElement);
+            const starRgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
+            g.addColorStop(0, `rgba(${starRgb},${a * 0.22})`);
+          g.addColorStop(1, 'transparent');
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, sz * 5, 0, Math.PI * 2);
+          ctx.fillStyle = g;
+          ctx.fill();
+        }
+      }
+
+      function maybeShoot() {
+        if (!shooting && Math.random() < 0.0028) {
+          shooting = {
+            x: Math.random() * window.innerWidth * 0.65,
+            y: Math.random() * window.innerHeight * 0.35,
+            vx: rand(7, 12),
+            vy: rand(2.5, 5),
+            life: 1
+          };
+        }
+        if (shooting) {
+          const css = getComputedStyle(document.documentElement);
+          const rgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
+          ctx.strokeStyle = `rgba(${rgb},${shooting.life * 0.55})`;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(shooting.x, shooting.y);
+          ctx.lineTo(shooting.x - shooting.vx * 10, shooting.y - shooting.vy * 10);
+          ctx.stroke();
+
+          shooting.x += shooting.vx;
+          shooting.y += shooting.vy;
+          shooting.life -= 0.03;
+
+          if (shooting.life <= 0 || shooting.x > window.innerWidth || shooting.y > window.innerHeight) {
+            shooting = null;
+          }
+        }
+      }
+
+      function draw(t) {
+        const skyPhase = document.documentElement.getAttribute('data-sky');
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        if (skyPhase === 'day') {
+          shooting = null;
+          requestAnimationFrame(draw);
+          return;
+        }
+        for (const s of stars) drawStar(s, t);
+        maybeShoot();
+        requestAnimationFrame(draw);
+      }
+
+      /* expose a small API to update sky / star settings from outside this closure */
+      window.__starfield = {
+        setSkyVars(vars) {
+          window.__sky = Object.assign(window.__sky || {}, vars || {});
+          if (typeof initStars === 'function') initStars();
+        }
+      };
+
+      window.addEventListener('resize', resize);
+      resize();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ─────────────────────────────────────────────────────────────
+       CLICK COUNTER + SOUND
+       ───────────────────────────────────────────────────────────── */
+    let clickCount = 0;
+    const clickCounter = document.getElementById('clickCounter');
+    const clickCountSpan = document.getElementById('clickCount');
+
+    function playClickSound() {
+      const s = document.getElementById('clickSound');
+      if (s) {
+        s.currentTime = 0;
+        s.play().catch(() => { });
+      }
+      clickCount++;
+      clickCountSpan.textContent = clickCount;
+      if (clickCount === 1) {
+        clickCounter.style.display = 'block';
+        setTimeout(() => clickCounter.classList.add('show'), 10);
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       BACKGROUND AUDIO MANAGER
+       - manages three tracks (day, sunset/indigo, night) with crossfade
+       - primes tracks and unmutes on first user gesture
+       ───────────────────────────────────────────────────────────── */
+    (function () {
+      const tracks = {
+        day: document.getElementById('bgmDay'),
+        sunset: document.getElementById('bgmSunset'),
+        night: document.getElementById('bgmNight')
+      };
+
+      const DEFAULT_VOLUME = 0.22;
+      let current = null;
+
+      function ensureTrack(t) {
+        if (!t) return;
+        t.loop = true;
+        t.preload = 'auto';
+        t.volume = 0;
+        t.muted = true;
+        t.play().catch(() => { });
+      }
+
+      function ensureAll() {
+        Object.values(tracks).forEach(ensureTrack);
+      }
+
+      function fadeTo(el, to, ms = 900) {
+        if (!el) return;
+        el.muted = false;
+        // ensure a sane numeric start volume
+        const start = (typeof el.volume === 'number') ? el.volume : 0;
+        if (ms <= 0) {
+          const v = Math.max(0, Math.min(1, to));
+          try { el.volume = v; } catch (e) { }
+          if (v === 0) try { el.pause(); } catch (e) { }
+          return;
+        }
+        const startT = performance.now();
+        function clamp(v) { return Math.max(0, Math.min(1, v)); }
+        function step(now) {
+          const t = Math.min(1, (now - startT) / Math.max(1, ms));
+          const v = start + (to - start) * t;
+          try { el.volume = clamp(v); } catch (e) { }
+          if (t < 1) requestAnimationFrame(step);
+          else {
+            try { el.volume = clamp(to); } catch (e) { }
+            if (Math.abs(clamp(to)) < 1e-6) try { el.pause(); } catch (e) { }
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      function setFor(paletteName) {
+        const map = { day: 'day', sunset: 'sunset', indigo: 'sunset', night: 'night' };
+        const key = map[paletteName] || 'night';
+        if (current === key) return;
+        const newT = tracks[key];
+        const oldT = current ? tracks[current] : null;
+        current = key;
+        if (newT) {
+          try { newT.play().catch(() => { }); } catch (e) { }
+          fadeTo(newT, DEFAULT_VOLUME);
+        }
+        if (oldT && oldT !== newT) fadeTo(oldT, 0);
+      }
+
+      // expose manager
+      window.__bgmManager = { setFor, ensureAll, tracks };
+
+      // prime tracks now (muted) and wait for user gesture to fully enable
+      ensureAll();
+
+      const onFirstGesture = () => {
+        Object.values(tracks).forEach(t => {
+          if (!t) return;
+          t.muted = false;
+          try { t.play().catch(() => { }); } catch (e) { }
+        });
+        // if there's already a selected track, fade it up
+        if (current && tracks[current]) fadeTo(tracks[current], DEFAULT_VOLUME, 700);
+      };
+
+      ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(ev =>
+        document.addEventListener(ev, onFirstGesture, { once: true, capture: true })
+      );
+    })();
+
+    /* ─────────────────────────────────────────────────────────────
+       SPLASH typing + hide
+       ───────────────────────────────────────────────────────────── */
+    (function () {
+      const splash = document.getElementById('splashScreen');
+      const splashTitle = document.getElementById('splashTitle');
+      const mainTitle = document.getElementById('username');
+      const text = (mainTitle && mainTitle.textContent.trim()) || 'MiloHakai';
+
+      function typeText(el, str, delay, done) {
+        el.textContent = '';
+        el.classList.add('typing');
+        let i = 0;
+        const t = setInterval(() => {
+          el.textContent += str[i++];
+          if (i >= str.length) {
+            clearInterval(t);
+            el.classList.remove('typing');
+            if (done) done();
+          }
+        }, delay);
+      }
+
+      function hide() {
+        if (splash) splash.classList.add('hidden');
+      }
+
+      if (splash && splashTitle) {
+        typeText(splashTitle, text, 75, () => setTimeout(hide, 900));
+        splash.addEventListener('pointerdown', hide, { once: true });
+      }
+    })();
+
+    /* ------------------------------------------------------------------
+       Time-based sky palettes (Europe/Rome clock, Napoli sun geometry)
+       - Official sunrise/sunset (−0.833°), civil dawn/dusk (−6°), etc.
+       - Same class of times as published alba/tramonto tables (e.g. Napoli).
+       ------------------------------------------------------------------ */
+    (function () {
+      const SKY_LAT = 40.8518;
+      const SKY_LON = 14.2681;
+
+      /*
+       * Minimal SunCalc core (BSD-2-Clause, Vladimir Agafonkin).
+       * https://github.com/mourner/suncalc — formulas from https://aa.quae.nl/en/reken/zonpositie.html
+       */
+      const SC_PI = Math.PI,
+        SC_sin = Math.sin,
+        SC_cos = Math.cos,
+        SC_tan = Math.tan,
+        SC_asin = Math.asin,
+        SC_atan = Math.atan2,
+        SC_acos = Math.acos,
+        SC_rad = SC_PI / 180,
+        SC_dayMs = 1000 * 60 * 60 * 24,
+        SC_J1970 = 2440588,
+        SC_J2000 = 2451545,
+        SC_e = SC_rad * 23.4397;
+
+      function SC_toJulian(date) { return date.valueOf() / SC_dayMs - 0.5 + SC_J1970; }
+      function SC_fromJulian(j) { return new Date((j + 0.5 - SC_J1970) * SC_dayMs); }
+      function SC_toDays(date) { return SC_toJulian(date) - SC_J2000; }
+
+      function SC_rightAscension(l, b) {
+        return SC_atan(SC_sin(l) * SC_cos(SC_e) - SC_tan(b) * SC_sin(SC_e), SC_cos(l));
+      }
+      function SC_declination(l, b) {
+        return SC_asin(SC_sin(b) * SC_cos(SC_e) + SC_cos(b) * SC_sin(SC_e) * SC_sin(l));
+      }
+      function SC_siderealTime(d, lw) { return SC_rad * (280.16 + 360.9856235 * d) - lw; }
+      function SC_solarMeanAnomaly(d) { return SC_rad * (357.5291 + 0.98560028 * d); }
+
+      function SC_eclipticLongitude(M) {
+        const C = SC_rad * (1.9148 * SC_sin(M) + 0.02 * SC_sin(2 * M) + 0.0003 * SC_sin(3 * M));
+        const P = SC_rad * 102.9372;
+        return M + C + P + SC_PI;
+      }
+
+      function SC_sunCoords(d) {
+        const M = SC_solarMeanAnomaly(d);
+        const L = SC_eclipticLongitude(M);
+        return { dec: SC_declination(L, 0), ra: SC_rightAscension(L, 0) };
+      }
+
+      const SC_J0 = 0.0009;
+      function SC_julianCycle(d, lw) { return Math.round(d - SC_J0 - lw / (2 * SC_PI)); }
+      function SC_approxTransit(Ht, lw, n) { return SC_J0 + (Ht + lw) / (2 * SC_PI) + n; }
+      function SC_solarTransitJ(ds, M, L) { return SC_J2000 + ds + 0.0053 * SC_sin(M) - 0.0069 * SC_sin(2 * L); }
+      function SC_hourAngle(h, phi, d) {
+        return SC_acos((SC_sin(h) - SC_sin(phi) * SC_sin(d)) / (SC_cos(phi) * SC_cos(d)));
+      }
+      function SC_observerAngle(height) { return -2.076 * Math.sqrt(height || 0) / 60; }
+
+      function SC_getSetJ(h, lw, phi, dec, n, M, L) {
+        const w = SC_hourAngle(h, phi, dec);
+        const a = SC_approxTransit(w, lw, n);
+        return SC_solarTransitJ(a, M, L);
+      }
+
+      const SC_SUN_EVENTS = [
+        [-0.833, 'sunrise', 'sunset'],
+        [-6, 'dawn', 'dusk'],
+        [-12, 'nauticalDawn', 'nauticalDusk'],
+        [-18, 'nightEnd', 'night']
+      ];
+
+      function astroGetTimes(date, lat, lng, height) {
+        height = height || 0;
+        const lw = SC_rad * -lng;
+        const phi = SC_rad * lat;
+        const dh = SC_observerAngle(height);
+        const d = SC_toDays(date);
+        const n = SC_julianCycle(d, lw);
+        const ds = SC_approxTransit(0, lw, n);
+        const M = SC_solarMeanAnomaly(ds);
+        const L = SC_eclipticLongitude(M);
+        const dec = SC_declination(L, 0);
+        const Jnoon = SC_solarTransitJ(ds, M, L);
+        const result = { solarNoon: SC_fromJulian(Jnoon), nadir: SC_fromJulian(Jnoon - 0.5) };
+        for (let i = 0; i < SC_SUN_EVENTS.length; i++) {
+          const ev = SC_SUN_EVENTS[i];
+          const h0 = (ev[0] + dh) * SC_rad;
+          const Jset = SC_getSetJ(h0, lw, phi, dec, n, M, L);
+          const Jrise = Jnoon - (Jset - Jnoon);
+          result[ev[1]] = SC_fromJulian(Jrise);
+          result[ev[2]] = SC_fromJulian(Jset);
+        }
+        return result;
+      }
+
+      function getRomeDateKey(d) {
+        return new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Europe/Rome',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).format(d || new Date());
+      }
+
+      let sunInstCache = { key: '', data: null };
+      function getCachedSunInstants(refDate) {
+        const ref = refDate || new Date();
+        const key = getRomeDateKey(ref);
+        if (sunInstCache.key !== key || !sunInstCache.data) {
+          sunInstCache = { key, data: astroGetTimes(ref, SKY_LAT, SKY_LON, 0) };
+        }
+        return sunInstCache.data;
+      }
+
+      /** Minutes before official sunset when “sunset” palette begins; after dusk for indigo. */
+      const SUN_BAND = { dayFadeBeforeSet: 22, civilAfterDusk: 28, indigoAfterNautical: 52 };
+
+      function pickPaletteFromInstant(now) {
+        const st = getCachedSunInstants(now);
+        const t = now.getTime();
+        const rise = st.sunrise.getTime();
+        const set = st.sunset.getTime();
+        const dusk = st.dusk.getTime();
+        const nav = st.nauticalDusk.getTime();
+        const MIN = 60 * 1000;
+        if (t < rise) return 'night';
+        if (t < set - SUN_BAND.dayFadeBeforeSet * MIN) return 'day';
+        if (t < dusk + SUN_BAND.civilAfterDusk * MIN) return 'sunset';
+        if (t < nav + SUN_BAND.indigoAfterNautical * MIN) return 'indigo';
+        return 'night';
+      }
+
+      function hexToRgb(hex) {
+        if (!hex) return '';
+        hex = hex.replace('#', '').trim();
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        const int = parseInt(hex, 16);
+        const r = (int >> 16) & 255;
+        const g = (int >> 8) & 255;
+        const b = int & 255;
+        return `${r},${g},${b}`;
+      }
+
+      const palettes = {
+        day: {
+          bg: '#EEF6FF', bg2: '#D8ECFF',
+          text: '#2a4a62', textDim: 'rgba(42, 74, 98, 0.78)',
+          line: 'rgba(34, 62, 86, 0.92)', lineSoft: 'rgba(34, 62, 86, 0.48)',
+          glow: 'rgba(90, 178, 210, 0.26)',
+          skyTop: '#5BA8E8', skyMid: '#B8DDFA', skyBottom: '#EEF6FF',
+          accent: '#5cba9e', icon: 'rgba(48, 145, 118, 0.96)', starRgb: '0,0,0', starDensity: 0,
+          bandStrong: 'rgba(7,16,24,0.08)', bandSoft: 'rgba(7,16,24,0.04)',
+          mist: 'rgba(7,16,24,0.02)', dust: 'rgba(7,16,24,0.05)',
+          vignette: 'rgba(0,0,0,0.05)', scanline: 'rgba(0,0,0,0.035)',
+          flicker: 'rgba(0,0,0,0.004)',
+          waveA: '#2a4a62', waveB: '#f0c46a',
+          sunCore: '#fff8e6', sunMid: '#ffe08a', sunGlow: 'rgba(255, 210, 130, 0.48)',
+          moonRim: 'rgba(200, 220, 245, 0.45)', moonRimSoft: 'rgba(160, 195, 230, 0.32)',
+          moonHalo: 'rgba(120, 175, 220, 0.22)'
+        },
+        sunset: {
+          bg: '#3F2A6B', bg2: '#8E6FBF',
+          text: '#fff8f2', textDim: 'rgba(255, 248, 242, 0.84)',
+          line: 'rgba(255, 255, 255, 0.96)', lineSoft: 'rgba(255, 232, 220, 0.55)',
+          glow: 'rgba(255, 205, 188, 0.30)',
+          skyTop: '#3F2A6B', skyMid: '#C9B6E1', skyBottom: '#FFC7A8',
+          accent: '#ffd4c4', icon: 'rgba(255, 214, 200, 0.98)', starRgb: '255,255,255', starDensity: 0.6,
+          bandStrong: 'rgba(255,199,168,0.10)', bandSoft: 'rgba(255,199,168,0.04)',
+          mist: 'rgba(255,199,168,0.02)', dust: 'rgba(255,199,168,0.06)',
+          vignette: 'rgba(0,0,0,0.13)', scanline: 'rgba(0,0,0,0.08)',
+          flicker: 'rgba(0,0,0,0.006)',
+          waveA: '#fff8f2', waveB: '#ffb89e',
+          sunCore: '#ffe8c8', sunMid: '#ff9f6e', sunGlow: 'rgba(255, 155, 110, 0.44)',
+          moonRim: 'rgba(255, 248, 238, 0.78)', moonRimSoft: 'rgba(255, 215, 195, 0.5)',
+          moonHalo: 'rgba(255, 185, 155, 0.32)'
+        },
+        indigo: {
+          bg: '#2D2E6A', bg2: '#7B63B3',
+          text: '#faf7ff', textDim: 'rgba(250, 247, 255, 0.86)',
+          line: 'rgba(255, 255, 255, 0.95)', lineSoft: 'rgba(230, 220, 255, 0.52)',
+          glow: 'rgba(198, 185, 255, 0.32)',
+          skyTop: '#2D2E6A', skyMid: '#7B63B3', skyBottom: '#C7D0FF',
+          accent: '#ffc9be', icon: 'rgba(255, 205, 195, 0.98)', starRgb: '255,255,255', starDensity: 0.95,
+          bandStrong: 'rgba(244,242,255,0.08)', bandSoft: 'rgba(244,242,255,0.04)',
+          mist: 'rgba(244,242,255,0.02)', dust: 'rgba(244,242,255,0.06)',
+          vignette: 'rgba(0,0,0,0.07)', scanline: 'rgba(0,0,0,0.10)',
+          flicker: 'rgba(255,255,255,0.006)',
+          waveA: '#faf7ff', waveB: '#c5b4ff',
+          sunCore: '#2a2438', sunMid: '#1a1524', sunGlow: 'rgba(0,0,0,0)',
+          moonRim: 'rgba(252, 250, 255, 0.92)', moonRimSoft: 'rgba(195, 188, 245, 0.52)',
+          moonHalo: 'rgba(160, 148, 225, 0.45)'
+        },
+        night: {
+          bg: '#050505', bg2: '#070707',
+          text: '#f0edff', textDim: 'rgba(220, 226, 255, 0.84)',
+          line: 'rgba(255, 252, 255, 0.94)', lineSoft: 'rgba(228, 224, 255, 0.52)',
+          glow: 'rgba(188, 196, 255, 0.40)',
+          skyTop: '#050505', skyMid: '#070707', skyBottom: '#121214',
+          accent: '#d4c4ff', icon: 'rgba(210, 216, 255, 0.92)', starRgb: '255,255,255', starDensity: 1.4,
+          bandStrong: 'rgba(255,255,255,0.20)', bandSoft: 'rgba(255,255,255,0.08)',
+          mist: 'rgba(255,255,255,0.06)', dust: 'rgba(255,255,255,0.12)',
+          vignette: 'rgba(0,0,0,0.38)', scanline: 'rgba(0,0,0,0.16)',
+          flicker: 'rgba(255,255,255,0.006)',
+          waveA: '#f8f6ff', waveB: '#c4b5fd',
+          sunCore: '#1f1c28', sunMid: '#121018', sunGlow: 'rgba(0,0,0,0)',
+          moonRim: 'rgba(252, 250, 255, 0.96)', moonRimSoft: 'rgba(205, 200, 238, 0.58)',
+          moonHalo: 'rgba(150, 142, 210, 0.5)'
+        }
+      };
+
+      function applyPalette(name) {
+        const p = palettes[name];
+        if (!p) return;
+        const root = document.documentElement.style;
+        root.setProperty('--bg', p.bg);
+        root.setProperty('--bg2', p.bg2);
+        root.setProperty('--text', p.text);
+        root.setProperty('--text-dim', p.textDim);
+        root.setProperty('--line', p.line);
+        root.setProperty('--line-soft', p.lineSoft);
+        root.setProperty('--glow', p.glow);
+        root.setProperty('--sky-top', p.skyTop);
+        root.setProperty('--sky-mid', p.skyMid);
+        root.setProperty('--sky-bottom', p.skyBottom);
+        root.setProperty('--accent', p.accent || '');
+        // band / mist / dust / vignette / scanline / flicker
+        if (p.bandStrong) root.setProperty('--band-strong', p.bandStrong);
+        if (p.bandSoft) root.setProperty('--band-soft', p.bandSoft);
+        if (p.mist) root.setProperty('--mist', p.mist);
+        if (p.dust) root.setProperty('--dust', p.dust);
+        if (p.vignette) root.setProperty('--vignette', p.vignette);
+        if (p.scanline) root.setProperty('--scanline', p.scanline);
+        if (p.flicker) root.setProperty('--flicker-overlay', p.flicker);
+        // wave / title gradient
+        if (p.waveA) root.setProperty('--wave-a', p.waveA);
+        if (p.waveB) root.setProperty('--wave-b', p.waveB);
+        // ensure star-rgb is stored as r,g,b (no #)
+        const rgb = p.starRgb && p.starRgb.indexOf('#') === 0 ? hexToRgb(p.starRgb) : (p.starRgb || '255,255,255');
+        root.setProperty('--star-rgb', rgb);
+        root.setProperty('--star-density', String(p.starDensity || 1));
+        // icon color
+        if (p.icon) root.setProperty('--icon', p.icon);
+        // sun / moon / sky rim light (keeps celestial bodies in palette family)
+        if (p.sunCore != null) root.setProperty('--sun-core', p.sunCore);
+        if (p.sunMid != null) root.setProperty('--sun-mid', p.sunMid);
+        if (p.sunGlow != null) root.setProperty('--sun-glow', p.sunGlow);
+        if (p.moonRim != null) root.setProperty('--moon-rim', p.moonRim);
+        if (p.moonRimSoft != null) root.setProperty('--moon-rim-soft', p.moonRimSoft);
+        if (p.moonHalo != null) root.setProperty('--moon-halo', p.moonHalo);
+
+        document.documentElement.setAttribute('data-sky', name);
+
+        // instruct bgm manager to switch tracks for this palette (if available)
+        try { if (window.__bgmManager && typeof window.__bgmManager.setFor === 'function') window.__bgmManager.setFor(name); } catch (e) { }
+
+        // add a brief swap class to kick off any CSS keyframe wash if present
+        try {
+          const el = document.documentElement;
+          el.classList.add('palette-swap');
+          window.clearTimeout(el.__paletteSwapTimer);
+          el.__paletteSwapTimer = window.setTimeout(() => el.classList.remove('palette-swap'), 1400);
+        } catch (e) { }
+
+        // tell starfield to reinit with new density when available
+        if (window.__starfield && typeof window.__starfield.setSkyVars === 'function') {
+          window.__starfield.setSkyVars({ starDensity: p.starDensity || 1, starRgb: rgb });
+        } else {
+          window.__sky = Object.assign(window.__sky || {}, { starDensity: p.starDensity || 1, starRgb: rgb });
+        }
+
+        updateSunFromClock();
+      }
+
+      /**
+       * Sun disk from Napoli sunrise→sunset (day) or sunset-band (civil twilight window).
+       */
+      function updateSunFromClock() {
+        const root = document.documentElement.style;
+        const sky = document.documentElement.getAttribute('data-sky');
+        if (sky !== 'day' && sky !== 'sunset') {
+          root.removeProperty('--sun-left');
+          root.removeProperty('--sun-top');
+          root.removeProperty('--sun-scale');
+          return;
+        }
+
+        const now = new Date();
+        const nowT = now.getTime();
+        const st = getCachedSunInstants(now);
+        const MIN = 60 * 1000;
+        const rise = st.sunrise.getTime();
+        const set = st.sunset.getTime();
+        const dusk = st.dusk.getTime();
+
+        if (sky === 'day') {
+          const span = Math.max(1, set - rise);
+          let t = (nowT - rise) / span;
+          t = Math.max(0, Math.min(1, t));
+          const sinBand = Math.pow(Math.sin(Math.PI * t), 2);
+          const left = 7 + t * 86;
+          const top = 23 - 15 * sinBand;
+          const scale = 1.0 + 0.07 * sinBand;
+          root.setProperty('--sun-left', left.toFixed(2) + '%');
+          root.setProperty('--sun-top', top.toFixed(2) + '%');
+          root.setProperty('--sun-scale', scale.toFixed(3));
+          return;
+        }
+
+        const ss0 = set - SUN_BAND.dayFadeBeforeSet * MIN;
+        const ss1 = dusk + SUN_BAND.civilAfterDusk * MIN;
+        const span = Math.max(1, ss1 - ss0);
+        let u = (nowT - ss0) / span;
+        u = Math.max(0, Math.min(1, u));
+        const left = 88 - u * 28;
+        const top = 14 + u * 42;
+        const scale = 1.02 - u * 0.22;
+        root.setProperty('--sun-left', left.toFixed(2) + '%');
+        root.setProperty('--sun-top', top.toFixed(2) + '%');
+        root.setProperty('--sun-scale', scale.toFixed(3));
+      }
+
+      function choosePaletteByTime() {
+        applyPalette(pickPaletteFromInstant(new Date()));
+      }
+
+      // initial apply and periodic refresh (every minute)
+      choosePaletteByTime();
+      setInterval(choosePaletteByTime, 60 * 1000);
+
+      // expose for testing / manual override
+      window.applySkyPalette = applyPalette;
+      window.updateSunFromClock = updateSunFromClock;
+      window.getCachedSunInstants = getCachedSunInstants;
+      window.pickPaletteFromInstant = pickPaletteFromInstant;
+    })();
+  </script>
+</body>
+
+</html>

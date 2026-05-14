@@ -1,0 +1,61 @@
+:root {
+  /* base defaults (can be used as a fallback) */
+}
+
+/* Add one of these classes to the <html> element to preview a palette */
+
+.palette-day {
+  --bg: #F9FBFF; --bg2: #CFEFFF;
+  --text: #0F1720; --text-dim: rgba(15,23,32,0.6);
+  --line: rgba(15,23,32,0.9); --line-soft: rgba(15,23,32,0.45);
+  --glow: rgba(63,191,102,0.12);
+  --sky-top: #7FC0F4; --sky-mid: #CFEFFF; --sky-bottom: #F9FBFF;
+  --accent: #3FBF66; --icon: rgba(63,191,102,0.95);
+  --star-rgb: 0,0,0; --star-density: 0.25;
+  --band-strong: rgba(15,23,32,0.10); --band-soft: rgba(15,23,32,0.05);
+  --mist: rgba(15,23,32,0.02); --dust: rgba(15,23,32,0.06);
+  --vignette: rgba(0,0,0,0.06); --scanline: rgba(0,0,0,0.04);
+  --flicker-overlay: rgba(0,0,0,0.006);
+}
+
+.palette-sunset {
+  --bg: #3F2A6B; --bg2: #8E6FBF;
+  --text: #FFF5EE; --text-dim: rgba(255,245,232,0.65);
+  --line: rgba(255,255,255,0.95); --line-soft: rgba(255,255,255,0.4);
+  --glow: rgba(255,199,168,0.12);
+  --sky-top: #3F2A6B; --sky-mid: #C9B6E1; --sky-bottom: #FFC7A8;
+  --accent: #FFC7A8; --icon: #FFC7A8;
+  --star-rgb: 255,255,255; --star-density: 0.6;
+  --band-strong: rgba(255,199,168,0.10); --band-soft: rgba(255,199,168,0.04);
+  --mist: rgba(255,199,168,0.02); --dust: rgba(255,199,168,0.06);
+  --vignette: rgba(0,0,0,0.18); --scanline: rgba(0,0,0,0.08);
+  --flicker-overlay: rgba(0,0,0,0.006);
+}
+
+.palette-indigo {
+  --bg: #2D2E6A; --bg2: #7B63B3;
+  --text: #F4F2FF; --text-dim: rgba(244,242,255,0.65);
+  --line: rgba(255,255,255,0.92); --line-soft: rgba(255,255,255,0.4);
+  --glow: rgba(123,99,179,0.14);
+  --sky-top: #2D2E6A; --sky-mid: #7B63B3; --sky-bottom: #C7D0FF;
+  --accent: #FFB4A3; --icon: #FFB4A3;
+  --star-rgb: 255,255,255; --star-density: 0.95;
+  --band-strong: rgba(244,242,255,0.08); --band-soft: rgba(244,242,255,0.04);
+  --mist: rgba(244,242,255,0.02); --dust: rgba(244,242,255,0.06);
+  --vignette: rgba(0,0,0,0.10); --scanline: rgba(0,0,0,0.10);
+  --flicker-overlay: rgba(255,255,255,0.006);
+}
+
+.palette-night {
+  --bg: #050505; --bg2: #070707;
+  --text: rgba(245,245,245,0.92); --text-dim: rgba(245,245,245,0.6);
+  --line: rgba(255,255,255,0.9); --line-soft: rgba(255,255,255,0.45);
+  --glow: rgba(255,255,255,0.40);
+  --sky-top: #050505; --sky-mid: #070707; --sky-bottom: #121214;
+  --accent: #3B3A2F; --icon: rgba(255,255,255,0.85);
+  --star-rgb: 255,255,255; --star-density: 1.4;
+  --band-strong: rgba(255,255,255,0.20); --band-soft: rgba(255,255,255,0.08);
+  --mist: rgba(255,255,255,0.06); --dust: rgba(255,255,255,0.12);
+  --vignette: rgba(0,0,0,0.55); --scanline: rgba(0,0,0,0.18);
+  --flicker-overlay: rgba(255,255,255,0.006);
+}
