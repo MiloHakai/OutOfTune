@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YNO Radio - Yume 2kki Stream</title>
+  
+  <!-- Open Graph / Social Media Sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="YNO Radio - Yume 2kki Stream" />
+  <meta property="og:description" content="Stream your favorite Yume 2kki music on YNO Radio" />
+  <meta property="og:image" content="./images/logo.png" />
+  <meta property="og:url" content="" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="YNO Radio - Yume 2kki Stream" />
+  <meta name="twitter:description" content="Stream your favorite Yume 2kki music on YNO Radio" />
+  <meta name="twitter:image" content="./images/logo.png" />
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles/style.css" />
+
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- HEADER STILE YNO -->
+    <header class="yno-header">
+      <div class="logo-area">
+        <!-- LOGO IMMAGINE con Fallback automatico a Y2R -->
+        <img src="./images/2kki-logo.svg" alt="Logo" class="custom-logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
+        <div class="box-logo" id="fallbackLogo" style="display: none;">Y2R</div>
+        
+      </div>
+      <div class="header-icons">
+        <a href="https://github.com/MiloHakai/OutOfTune/tree/main/2kki-radio" target="_blank" class="login-btn"><i class="fab fa-github"></i> GitHub</a>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      
+      <!-- SCHERMATA GIOCO (SINISTRA) -->
+      <section class="game-section">
+
+        <!-- Finestra Gioco -->
+        <div class="game-screen yno-window">
+          <canvas id="oscilloscope"></canvas>
+          
+          <div class="game-content">
+            <div>
+              <h1 class="game-title" id="songTitle">Yume 2kki - Radio</h1>
+              <p class="game-subtitle" id="songSubTitle">Waiting for connection...</p>
+            </div>
+
+            <div class="game-menu yno-window" id="gameMenu">
+              <button class="menu-btn" id="playBtn">Play Stream</button>
+            </div>
+          </div>
+
+          <!-- Controlli minimi (Paura e Volume) visibili solo durante il play -->
+          <div class="mini-controls" id="miniControls">
+            <div class="volume-control">
+              <i class="fas fa-volume-up" style="text-shadow: 2px 2px 0 var(--window-shadow);"></i>
+              <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="65">
+            </div>
+            <button class="mini-btn" id="pauseBtn" title="Pause Stream">
+              <i class="fas fa-pause"></i>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SIDEBAR (DESTRA) -->
+      <section class="sidebar-section">
+        
+        <div class="status-header">
+          <div class="status-left">
+            <div class="status-dot" id="liveDot"></div>
+            <span id="connectionText">Disconnected</span>
+            <i class="fas fa-sync-alt refresh-btn" onclick="fetchStatus()"></i>
+          </div>
+          <div id="listenerCountText">0 Players Online</div>
+        </div>
+
+        <div class="yno-window" style="flex: 1; display: flex; flex-direction: column;">
+          
+          <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('queue')">Queue</button>
+            <button class="tab-btn" onclick="switchTab('stats')">Stats</button>
+            <button class="tab-btn" onclick="switchTab('links')">Links</button>
+          </div>
+
+          <div class="sidebar-content yno-window">
+            
+            <!-- TAB QUEUE -->
+            <div id="tab-queue" class="tab-pane active">
+              <div class="queue-list" id="queueContainer">
+                <div class="queue-item current">
+                  <div>Yume 2kki - Radio</div>
+                  <div class="q-artist">No memories recorded yet</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB STATS -->
+            <div id="tab-stats" class="tab-pane">
+              <div class="stat-row"><span>Mount</span> <span class="stat-val" id="mountValue">/yume.mp3</span></div>
+              <div class="stat-row"><span>Format</span> <span class="stat-val">MP3</span></div>
+            </div>
+
+            <!-- TAB LINKS -->
+            <div id="tab-links" class="tab-pane">
+              <p style="margin-top:0"><strong>Direct Stream URL:</strong></p>
+              <p style="word-break: break-all; color: var(--accent-cyan);">https://2kkiendpoint.outoftune.dev/yume.mp3</p>
+              <p style="font-size: 0.9rem; color: var(--text-dim);">You can paste this URL into VLC, Winamp, or any media player.</p>
+            </div>
+
+            <!-- FAKE CHAT FOOTER -->
+            <div class="fake-chat-box">
+              <div class="chat-tip">TIP: If you're playing on a PC, you can press the Play button to tune into the Nexus.</div>
+              <p style="margin:0; border-top: 1px solid var(--window-highlight); padding-top: 0.5rem;">Copy Stream URL to clipboard:</p>
+              <ul class="chat-rules">
+                <li>Direct endpoint link</li>
+                <li>Share with other wanderers</li>
+              </ul>
+              <div class="chat-input-area yno-window" style="padding: 0.3rem 0.8rem; margin-top: 0.5rem;">
+                <code id="copyArea" onclick="copyStreamUrl()">[ Click here to Copy ]</code>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Audio Element -->
+  <audio id="audio" crossorigin="anonymous" preload="none"></audio>
+
+  <script src="./scripts/main.js"></script>
+</body>
+</html>
