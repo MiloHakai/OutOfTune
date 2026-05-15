@@ -554,30 +554,29 @@
         }
 
         /* ─────────────────────────────────────────────────────
-           MOBILE OVERRIDES  (portrait phones ≤ 480px)
+           MOBILE & TABLET OVERRIDES (screens ≤ 1024px)
         ───────────────────────────────────────────────────── */
-        @media (max-width: 480px) {
+        @media (max-width: 1024px) {
 
-            /* Push brand content down a little so globe doesn't eat it */
+            /* Center content and hide globe for a clean mobile look, like Bluerra */
             .content-wrapper {
                 padding-left: 16px;
                 padding-right: 16px;
-                justify-content: flex-start;
-                padding-top: 36px;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                padding-top: 0;
             }
 
-            /* Globe: shrink and push further behind text */
+            .brand-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            /* Globe: completely hidden on mobile/tablet */
             #globe-target {
-                left: -30vw;
-                width: 90vw;
-                height: 90vw;
-                min-width: 0;
-                min-height: 0;
-                max-width: 340px;
-                max-height: 340px;
-                opacity: 0.28;
-                top: 15%;
-                transform: none;
+                display: none;
             }
 
             .brand-section h1.wave-text {
@@ -609,16 +608,37 @@
                 font-size: 0.44rem;
             }
 
-            /* ── Carousel: compact, right side ── */
+            /* ── Carousel: centered below the main text, sideways scroll ── */
             .member-carousel {
-                right: 10px;
-                top: auto;
-                bottom: 44px;
-                transform: none;
+                right: auto;
+                left: 50%;
+                top: calc(50% + 60px); /* Position it just below the centered brand text */
+                bottom: auto;
+                transform: translateX(-50%);
             }
 
             .carousel-inner {
-                gap: 8px;
+                flex-direction: column; /* Stack text above arrows */
+                align-items: center;
+                gap: 12px;
+            }
+
+            .carousel-text {
+                text-align: center; /* Center text instead of right-align */
+            }
+
+            .carousel-arrows {
+                flex-direction: row; /* Arrange arrows sideways */
+                gap: 24px;
+            }
+
+            /* Rotate vertical chevrons into horizontal chevrons */
+            .carousel-up {
+                transform: rotate(-90deg);
+            }
+
+            .carousel-down {
+                transform: rotate(-90deg);
             }
 
             .member-category {
@@ -633,16 +653,16 @@
                 display: none;
             }
 
-            /* no room on phones */
-
+            /* Touch-friendly navigation arrows */
             .carousel-nav {
-                min-width: 32px;
-                min-height: 32px;
+                min-width: 44px;
+                min-height: 44px;
+                padding: 10px;
             }
 
             .carousel-nav svg {
-                width: 16px;
-                height: 16px;
+                width: 20px;
+                height: 20px;
             }
 
             /* ── Footer ── */
@@ -727,39 +747,6 @@
             .footer-right {
                 bottom: 4px;
                 font-size: 0.38rem;
-            }
-        }
-
-        /* ─────────────────────────────────────────────────────
-           MEDIUM (tablets 481–768px)
-        ───────────────────────────────────────────────────── */
-        @media (min-width: 481px) and (max-width: 768px) {
-            .content-wrapper {
-                padding-left: 20px;
-            }
-
-            .brand-section h1.wave-text {
-                font-size: clamp(1.6rem, 5.5vw, 2.6rem);
-            }
-
-            #globe-target {
-                left: -18vw;
-                width: 64vw;
-                height: 64vw;
-                min-width: 200px;
-                min-height: 200px;
-                max-width: 380px;
-                max-height: 380px;
-                opacity: 0.40;
-            }
-
-            .member-carousel {
-                right: 14px;
-            }
-
-            .lyrics-container {
-                max-width: calc(55vw - 16px);
-                bottom: 32px;
             }
         }
 
