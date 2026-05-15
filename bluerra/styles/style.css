@@ -22,7 +22,8 @@ body {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  zoom: 0.95; /* Page zoom at 95% */
+  zoom: 0.97;
+  /* Page zoom at 97% */
 }
 
 body {
