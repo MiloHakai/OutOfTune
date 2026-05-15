@@ -46,13 +46,20 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
             background: var(--bg-dark);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Full-page container that handles both desktop and mobile */
+        body {
+            height: 100svh;
+            /* use svh so mobile browser chrome is accounted for */
         }
 
         .pixel-font {
@@ -63,6 +70,7 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
+        /* ── Background canvas ── */
         #constellation-container {
             position: fixed;
             inset: 0;
@@ -83,12 +91,13 @@
             height: 100% !important;
         }
 
+        /* ── Main layout ── */
         .content-wrapper {
             position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: 100vh;
+            height: 100svh;
             padding-left: 24px;
             z-index: 10;
         }
@@ -103,6 +112,7 @@
             display: inline-block;
         }
 
+        /* ── Globe ── */
         #globe-target {
             position: fixed;
             left: -15vw;
@@ -119,11 +129,12 @@
             pointer-events: none;
         }
 
+        /* ── Title ── */
         .brand-section h1.wave-text {
             font-family: 'Press Start 2P', monospace;
-            font-size: clamp(2.4rem, 3.8vw, 3.2rem);
+            font-size: clamp(1.5rem, 5vw, 3.2rem);
             margin: 0;
-            line-height: 1.02;
+            line-height: 1.1;
             letter-spacing: 0;
             cursor: default;
             user-select: none;
@@ -175,12 +186,12 @@
             font-size: 0.82rem;
             font-weight: 300;
             max-width: 320px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-top: 16px;
+            margin-bottom: 16px;
             line-height: 1.5;
         }
 
-        /* Terminal Lyrics */
+        /* ── Lyrics (bottom-left) ── */
         .lyrics-container {
             position: fixed;
             left: 24px;
@@ -189,7 +200,10 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
-            width: min(340px, 42vw);
+            /* Wide enough on desktop, constrained on mobile */
+            width: min(340px, calc(100vw - 48px));
+            /* On mobile keep it from overlapping the carousel */
+            max-width: calc(60vw - 24px);
         }
 
         .track-title {
@@ -237,23 +251,24 @@
             }
         }
 
+        /* ── Footer (bottom-right) ── */
         .footer-right {
             position: fixed;
-            right: 32px;
-            bottom: 24px;
+            right: 16px;
+            bottom: 12px;
             z-index: 100;
             font-family: 'Press Start 2P', monospace;
             color: rgba(220, 228, 255, 0.38);
-            font-size: 0.48rem;
+            font-size: 0.42rem;
             letter-spacing: 0.5px;
             line-height: 1.75;
             text-align: right;
         }
 
-        /* Member Carousel */
+        /* ── Member Carousel ── */
         .member-carousel {
             position: fixed;
-            right: 32px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 100;
@@ -263,7 +278,7 @@
         .carousel-inner {
             display: flex;
             align-items: center;
-            gap: 22px;
+            gap: 12px;
         }
 
         .carousel-text {
@@ -277,16 +292,18 @@
 
         .member-category {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.45rem;
+            font-size: 0.42rem;
             color: rgba(180, 196, 224, 0.5);
             letter-spacing: 0.1em;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .member-name {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
+            font-size: clamp(0.55rem, 2vw, 0.7rem);
             color: var(--primary);
+            /* prevent long names from wrapping badly */
+            white-space: nowrap;
         }
 
         .member-name.animate {
@@ -307,15 +324,15 @@
 
         .member-hint {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.38rem;
+            font-size: 0.35rem;
             color: rgba(180, 196, 224, 0.45);
-            margin-top: 6px;
+            margin-top: 5px;
             letter-spacing: 0.03em;
             opacity: 0;
             transition: opacity 0.2s ease;
         }
 
-        /* Mini site modal */
+        /* ── Mini-site modal ── */
         .mini-site-modal {
             position: fixed;
             inset: 0;
@@ -325,7 +342,7 @@
             justify-content: center;
             background: rgba(0, 0, 0, 0.82);
             backdrop-filter: blur(6px);
-            padding: 20px;
+            padding: 12px;
         }
 
         .mini-site-modal.open {
@@ -334,10 +351,8 @@
 
         .mini-site-panel {
             width: min(92vw, 1120px);
-            height: min(88vh, 820px);
-            max-width: 1120px;
-            max-height: 88vh;
-            border-radius: 18px;
+            height: min(88svh, 820px);
+            border-radius: 14px;
             overflow: hidden;
             background: rgba(8, 12, 22, 0.96);
             box-shadow: 0 22px 90px rgba(0, 0, 0, 0.35);
@@ -350,8 +365,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 14px;
-            padding: 14px 20px;
+            gap: 10px;
+            padding: 12px 16px;
             background: rgba(10, 18, 42, 0.95);
             border-bottom: 1px solid rgba(160, 190, 255, 0.12);
             flex-shrink: 0;
@@ -359,30 +374,34 @@
 
         .mini-site-title {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.82rem;
+            font-size: 0.72rem;
             letter-spacing: 0.06em;
             color: var(--primary);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .mini-site-url {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.62rem;
+            font-size: 0.56rem;
             color: rgba(150, 180, 255, 0.6);
             letter-spacing: 0.01em;
+            /* truncate long URLs on small screens */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 48vw;
         }
 
         .mini-site-actions {
             display: flex;
-            gap: 22px;
+            gap: 16px;
             align-items: center;
             flex-shrink: 0;
         }
 
-        /* Colored text links, no boxes */
         .mini-site-action-link {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.62rem;
+            font-size: 0.58rem;
             background: none;
             border: none;
             padding: 0;
@@ -390,6 +409,7 @@
             text-decoration: none;
             transition: opacity 0.15s ease;
             letter-spacing: 0.02em;
+            white-space: nowrap;
         }
 
         .mini-site-action-link.open-full {
@@ -411,7 +431,6 @@
             background: #050714;
         }
 
-        /* Scaled down more — 78% scale so more of the page is visible */
         .mini-site-frame {
             position: absolute;
             top: 0;
@@ -427,7 +446,7 @@
         .carousel-arrows {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             flex-shrink: 0;
         }
 
@@ -436,12 +455,15 @@
             border: none;
             cursor: pointer;
             color: rgba(180, 196, 224, 0.45);
-            padding: 6px 8px;
+            padding: 4px 6px;
             line-height: 1;
             transition: color 0.15s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            /* larger tap target on mobile */
+            min-width: 36px;
+            min-height: 36px;
         }
 
         .carousel-nav:hover {
@@ -454,7 +476,7 @@
             stroke-width: 2;
         }
 
-        /* Splash */
+        /* ── Splash overlay ── */
         .overlay {
             position: fixed;
             inset: 0;
@@ -531,6 +553,217 @@
             }
         }
 
+        /* ─────────────────────────────────────────────────────
+           MOBILE OVERRIDES  (portrait phones ≤ 480px)
+        ───────────────────────────────────────────────────── */
+        @media (max-width: 480px) {
+
+            /* Push brand content down a little so globe doesn't eat it */
+            .content-wrapper {
+                padding-left: 16px;
+                padding-right: 16px;
+                justify-content: flex-start;
+                padding-top: 36px;
+            }
+
+            /* Globe: shrink and push further behind text */
+            #globe-target {
+                left: -30vw;
+                width: 90vw;
+                height: 90vw;
+                min-width: 0;
+                min-height: 0;
+                max-width: 340px;
+                max-height: 340px;
+                opacity: 0.28;
+                top: 15%;
+                transform: none;
+            }
+
+            .brand-section h1.wave-text {
+                font-size: clamp(1.25rem, 8vw, 2rem);
+                line-height: 1.15;
+            }
+
+            .subtitle {
+                font-size: 0.75rem;
+                margin-top: 12px;
+                margin-bottom: 12px;
+                max-width: 100%;
+            }
+
+            /* ── Lyrics: bottom strip, full width minus carousel ── */
+            .lyrics-container {
+                left: 12px;
+                bottom: 44px;
+                /* sit above footer */
+                max-width: calc(58vw - 12px);
+                gap: 3px;
+            }
+
+            .track-title {
+                font-size: 0.40rem;
+            }
+
+            .lyric-line {
+                font-size: 0.44rem;
+            }
+
+            /* ── Carousel: compact, right side ── */
+            .member-carousel {
+                right: 10px;
+                top: auto;
+                bottom: 44px;
+                transform: none;
+            }
+
+            .carousel-inner {
+                gap: 8px;
+            }
+
+            .member-category {
+                font-size: 0.36rem;
+            }
+
+            .member-name {
+                font-size: 0.52rem;
+            }
+
+            .member-hint {
+                display: none;
+            }
+
+            /* no room on phones */
+
+            .carousel-nav {
+                min-width: 32px;
+                min-height: 32px;
+            }
+
+            .carousel-nav svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            /* ── Footer ── */
+            .footer-right {
+                right: 10px;
+                bottom: 6px;
+                font-size: 0.36rem;
+            }
+
+            /* ── Mini-site modal: full-screen ── */
+            .mini-site-modal {
+                padding: 0;
+            }
+
+            .mini-site-panel {
+                width: 100vw;
+                height: 100svh;
+                border-radius: 0;
+            }
+
+            .mini-site-toolbar {
+                padding: 10px 12px;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .mini-site-title {
+                font-size: 0.6rem;
+            }
+
+            .mini-site-url {
+                font-size: 0.48rem;
+                max-width: 55vw;
+            }
+
+            .mini-site-action-link {
+                font-size: 0.5rem;
+            }
+
+            .mini-site-actions {
+                gap: 12px;
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────
+           SMALL LANDSCAPE  (phones in landscape, short height)
+        ───────────────────────────────────────────────────── */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .content-wrapper {
+                padding-top: 12px;
+                justify-content: center;
+            }
+
+            #globe-target {
+                left: -10vw;
+                width: 46vw;
+                height: 46vw;
+                min-width: 0;
+                min-height: 0;
+                opacity: 0.35;
+            }
+
+            .brand-section h1.wave-text {
+                font-size: clamp(1rem, 4vh, 2rem);
+            }
+
+            .subtitle {
+                font-size: 0.7rem;
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+
+            .lyrics-container {
+                bottom: 30px;
+                max-width: 42vw;
+            }
+
+            .member-carousel {
+                right: 12px;
+            }
+
+            .footer-right {
+                bottom: 4px;
+                font-size: 0.38rem;
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────
+           MEDIUM (tablets 481–768px)
+        ───────────────────────────────────────────────────── */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .content-wrapper {
+                padding-left: 20px;
+            }
+
+            .brand-section h1.wave-text {
+                font-size: clamp(1.6rem, 5.5vw, 2.6rem);
+            }
+
+            #globe-target {
+                left: -18vw;
+                width: 64vw;
+                height: 64vw;
+                min-width: 200px;
+                min-height: 200px;
+                max-width: 380px;
+                max-height: 380px;
+                opacity: 0.40;
+            }
+
+            .member-carousel {
+                right: 14px;
+            }
+
+            .lyrics-container {
+                max-width: calc(55vw - 16px);
+                bottom: 32px;
+            }
+        }
+
+        /* ── Reduced motion ── */
         @media (prefers-reduced-motion: reduce) {
             .brand-section h1.wave-text {
                 animation: none;
@@ -546,21 +779,6 @@
             .disclaimer-hint {
                 animation: none;
                 opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .content-wrapper {
-                padding-left: 5%;
-            }
-
-            .brand-section h1.wave-text {
-                font-size: 3.5rem;
-            }
-
-            #globe-target {
-                width: 250px;
-                height: 250px;
             }
         }
     </style>
@@ -624,7 +842,7 @@
     <div id="mini-site-modal" class="mini-site-modal" aria-hidden="true">
         <div class="mini-site-panel" role="dialog" aria-modal="true" aria-labelledby="mini-site-title">
             <div class="mini-site-toolbar">
-                <div>
+                <div style="min-width:0;flex:1;">
                     <div id="mini-site-title" class="mini-site-title">Preview</div>
                     <div id="mini-site-url" class="mini-site-url"></div>
                 </div>
@@ -756,19 +974,15 @@
             function updateMemberDisplay(index) {
                 currentMemberIndex = (index + allMembers.length) % allMembers.length;
                 const member = allMembers[currentMemberIndex];
-
                 memberNameEl.classList.remove('animate');
                 void memberNameEl.offsetWidth;
                 memberNameEl.classList.add('animate');
-
                 memberNameEl.textContent = member.display;
                 memberCategoryEl.textContent = member.category;
             }
 
             function emitMemberAction(actionType, member) {
-                window.dispatchEvent(new CustomEvent(actionType, {
-                    detail: { member }
-                }));
+                window.dispatchEvent(new CustomEvent(actionType, { detail: { member } }));
             }
 
             carouselUp.addEventListener('click', () => {
@@ -782,36 +996,27 @@
                 playNameSwap();
             });
 
-            // FIX: play confirm sound first, then open modal
             carouselDisplay.addEventListener('click', () => {
                 const member = allMembers[currentMemberIndex];
                 emitMemberAction('confirm', member);
-                // Play confirm sound, open modal after the sound fires (or immediately if it fails)
                 playSound(confirmSfx, () => { });
                 openMiniSitePreview(member);
             });
 
             const carouselArrows = document.querySelectorAll('.carousel-nav');
-            carouselArrows.forEach((arrow) => {
-                arrow.addEventListener('mouseenter', () => playSound(pointerSfx));
-            });
+            carouselArrows.forEach((arrow) => { arrow.addEventListener('mouseenter', () => playSound(pointerSfx)); });
             carouselDisplay.addEventListener('mouseenter', () => playSound(pointerSfx));
 
-            // hint fade on hover over whole carousel
             const carouselRoot = document.querySelector('.member-carousel');
             const hint = document.querySelector('.member-hint');
-            carouselRoot.addEventListener('mouseenter', () => hint.style.opacity = '1');
-            carouselRoot.addEventListener('mouseleave', () => hint.style.opacity = '0');
+            if (hint) {
+                carouselRoot.addEventListener('mouseenter', () => hint.style.opacity = '1');
+                carouselRoot.addEventListener('mouseleave', () => hint.style.opacity = '0');
+            }
 
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowUp') {
-                    updateMemberDisplay(currentMemberIndex - 1);
-                    playNameSwap();
-                }
-                if (e.key === 'ArrowDown') {
-                    updateMemberDisplay(currentMemberIndex + 1);
-                    playNameSwap();
-                }
+                if (e.key === 'ArrowUp') { updateMemberDisplay(currentMemberIndex - 1); playNameSwap(); }
+                if (e.key === 'ArrowDown') { updateMemberDisplay(currentMemberIndex + 1); playNameSwap(); }
                 if (e.key === 'Enter') {
                     const member = allMembers[currentMemberIndex];
                     emitMemberAction('confirm', member);
@@ -822,6 +1027,7 @@
 
             updateMemberDisplay(0);
 
+            // Mini-site modal
             const miniSiteModal = document.getElementById('mini-site-modal');
             const miniSiteIframe = document.getElementById('mini-site-iframe');
             const miniSiteTitle = document.getElementById('mini-site-title');
@@ -829,25 +1035,18 @@
             const miniSiteOpenFull = document.getElementById('mini-site-open-full');
             const miniSiteClose = document.getElementById('mini-site-close');
 
-            // Track whether the base page audio was playing before opening
             let baseAudioWasPlaying = false;
             let currentMemberUrl = '';
 
             function openMiniSitePreview(member) {
                 const url = `./${member.path}/index.html`;
                 currentMemberUrl = url;
-
-                // Pause base page audio, remember state
                 baseAudioWasPlaying = !audio.paused;
-                if (baseAudioWasPlaying) {
-                    audio.pause();
-                }
-
+                if (baseAudioWasPlaying) audio.pause();
                 miniSiteTitle.textContent = member.display;
                 miniSiteUrlEl.textContent = `https://outoftune.dev/${member.path}`;
                 miniSiteIframe.src = url;
                 miniSiteOpenFull.onclick = () => { window.location.href = url; };
-
                 miniSiteModal.classList.add('open');
                 miniSiteModal.setAttribute('aria-hidden', 'false');
             }
@@ -855,15 +1054,8 @@
             function closeMiniSitePreview() {
                 miniSiteModal.classList.remove('open');
                 miniSiteModal.setAttribute('aria-hidden', 'true');
-
-                // Clear iframe (stops any audio playing inside it)
                 miniSiteIframe.src = 'about:blank';
-
-                // Resume base audio only if it was playing before
-                if (baseAudioWasPlaying) {
-                    audio.play().catch(() => { });
-                }
-
+                if (baseAudioWasPlaying) audio.play().catch(() => { });
                 baseAudioWasPlaying = false;
                 currentMemberUrl = '';
             }
@@ -887,38 +1079,30 @@
             const confirmSfx = document.getElementById('confirm-sfx');
             const backSfx = document.getElementById('back-sfx');
 
-            // Lower SFX volume so they don't overpower the BGM
             if (pointerSfx) pointerSfx.volume = 0.3;
             if (nameSwapSfx) nameSwapSfx.volume = 0.3;
             if (confirmSfx) confirmSfx.volume = 0.3;
             if (backSfx) backSfx.volume = 0.3;
+
             const lyricOutput = document.getElementById('lyric-output');
             const lyricCaret = document.getElementById('lyric-caret');
             const trackName = document.getElementById('track-name');
 
             function playSound(sound, onComplete) {
-                if (!sound) {
-                    if (typeof onComplete === 'function') onComplete();
-                    return;
-                }
+                if (!sound) { if (typeof onComplete === 'function') onComplete(); return; }
                 try {
                     sound.currentTime = 0;
                     const playPromise = sound.play();
                     if (onComplete && playPromise && typeof playPromise.then === 'function') {
-                        playPromise.then(() => {
-                            sound.addEventListener('ended', onComplete, { once: true });
-                        }).catch(() => { if (typeof onComplete === 'function') onComplete(); });
+                        playPromise.then(() => { sound.addEventListener('ended', onComplete, { once: true }); })
+                            .catch(() => { if (typeof onComplete === 'function') onComplete(); });
                     } else if (onComplete) {
                         sound.addEventListener('ended', onComplete, { once: true });
                     }
-                } catch (err) {
-                    if (typeof onComplete === 'function') onComplete();
-                }
+                } catch (err) { if (typeof onComplete === 'function') onComplete(); }
             }
 
-            function playNameSwap() {
-                playSound(nameSwapSfx);
-            }
+            function playNameSwap() { playSound(nameSwapSfx); }
 
             let lyricsPromise = Promise.resolve();
             const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -1177,7 +1361,6 @@
             wireMesh.position.y = 0.1;
             cScene.add(wireMesh);
 
-            // Floating elements
             const floatingElements = [];
             const orbitalRings = [
                 { radius: 22, speed: 0.00045, height: 2.4, elementCount: 6 },
@@ -1186,13 +1369,9 @@
             ];
 
             const d20Material = new THREE.MeshStandardMaterial({
-                color: 0x8faeff,
-                emissive: 0x1d3f7a,
-                roughness: 0.22,
-                metalness: 0.28,
-                flatShading: true,
-                transparent: true,
-                opacity: 0.88,
+                color: 0x8faeff, emissive: 0x1d3f7a,
+                roughness: 0.22, metalness: 0.28,
+                flatShading: true, transparent: true, opacity: 0.88,
             });
             const d20EdgeMaterial = new THREE.LineBasicMaterial({ color: 0xc8e2ff, transparent: true, opacity: 0.45 });
 
@@ -1206,16 +1385,11 @@
                     const angleOffset = (i / ring.elementCount) * Math.PI * 2;
                     mesh.position.set(Math.cos(angleOffset) * ring.radius, ring.height, Math.sin(angleOffset) * ring.radius);
                     mesh.userData = {
-                        ringRadius: ring.radius,
-                        ringSpeed: ring.speed,
-                        baseAngle: angleOffset,
-                        baseY: ring.height,
-                        seaFloat: true,
-                        seaOffset: 1.6 + Math.random() * 0.5,
-                        bobSpeed: 0.004 + Math.random() * 0.004,
-                        bobOffset: Math.random() * Math.PI * 2,
-                        rotSpeed: (Math.random() - 0.5) * 0.007,
-                        swayPhase: Math.random() * Math.PI * 2,
+                        ringRadius: ring.radius, ringSpeed: ring.speed,
+                        baseAngle: angleOffset, baseY: ring.height,
+                        seaFloat: true, seaOffset: 1.6 + Math.random() * 0.5,
+                        bobSpeed: 0.004 + Math.random() * 0.004, bobOffset: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.007, swayPhase: Math.random() * Math.PI * 2,
                     };
                     floatingElements.push(mesh);
                     cScene.add(mesh);
@@ -1232,16 +1406,11 @@
                 mesh.position.set(Math.cos(angle) * radius, 5.2 + Math.sin(angle * 1.3) * 0.7, Math.sin(angle) * radius);
                 mesh.rotation.set(Math.random() * 0.5, Math.random() * Math.PI, Math.random() * 0.5);
                 mesh.userData = {
-                    ringRadius: radius,
-                    ringSpeed: 0.00028 + Math.random() * 0.00016,
-                    baseAngle: angle + Math.random() * 0.12,
-                    baseY: mesh.position.y,
-                    seaFloat: true,
-                    seaOffset: 1.3 + Math.random() * 0.5,
-                    bobSpeed: 0.004 + Math.random() * 0.003,
-                    bobOffset: Math.random() * Math.PI * 2,
-                    rotSpeed: (Math.random() - 0.5) * 0.008,
-                    swayPhase: Math.random() * Math.PI * 2,
+                    ringRadius: radius, ringSpeed: 0.00028 + Math.random() * 0.00016,
+                    baseAngle: angle + Math.random() * 0.12, baseY: mesh.position.y,
+                    seaFloat: true, seaOffset: 1.3 + Math.random() * 0.5,
+                    bobSpeed: 0.004 + Math.random() * 0.003, bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.008, swayPhase: Math.random() * Math.PI * 2,
                     menuOrbit: false,
                 };
                 floatingElements.push(mesh);
@@ -1258,15 +1427,10 @@
                 mesh.position.set(Math.cos(angle) * radius, 4.2 + Math.random() * 2.0, Math.sin(angle) * radius);
                 mesh.rotation.set(Math.random() * 0.6, Math.random() * Math.PI, Math.random() * 0.6);
                 mesh.userData = {
-                    scattered: true,
-                    radius,
-                    baseAngle: angle,
-                    baseY: mesh.position.y,
-                    seaFloat: true,
-                    seaOffset: 1.4 + Math.random() * 0.5,
+                    scattered: true, radius, baseAngle: angle, baseY: mesh.position.y,
+                    seaFloat: true, seaOffset: 1.4 + Math.random() * 0.5,
                     speed: 0.00012 + Math.random() * 0.0001,
-                    bobSpeed: 0.003 + Math.random() * 0.003,
-                    bobOffset: Math.random() * Math.PI * 2,
+                    bobSpeed: 0.003 + Math.random() * 0.003, bobOffset: Math.random() * Math.PI * 2,
                     rotSpeed: (Math.random() - 0.5) * 0.006,
                 };
                 floatingElements.push(mesh);
@@ -1274,12 +1438,7 @@
             }
 
             const roundParticles = [];
-            const roundMat = new THREE.MeshBasicMaterial({
-                color: 0xe6f3ff,
-                transparent: true,
-                opacity: 0.82,
-            });
-
+            const roundMat = new THREE.MeshBasicMaterial({ color: 0xe6f3ff, transparent: true, opacity: 0.82 });
             for (let i = 0; i < 16; i++) {
                 const mesh = new THREE.Mesh(
                     new THREE.SphereGeometry(0.06 + Math.random() * 0.06, 10, 10),
@@ -1291,14 +1450,10 @@
                     (Math.random() - 0.5) * 90
                 );
                 mesh.userData = {
-                    driftX: Math.random() * 0.002 - 0.001,
-                    driftZ: Math.random() * 0.002 - 0.001,
-                    bobSpeed: 0.003 + Math.random() * 0.003,
-                    bobOffset: Math.random() * Math.PI * 2,
-                    rotSpeed: (Math.random() - 0.5) * 0.006,
-                    baseY: mesh.position.y,
-                    seaFloat: true,
-                    seaOffset: 1.2 + Math.random() * 0.6,
+                    driftX: Math.random() * 0.002 - 0.001, driftZ: Math.random() * 0.002 - 0.001,
+                    bobSpeed: 0.003 + Math.random() * 0.003, bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.006, baseY: mesh.position.y,
+                    seaFloat: true, seaOffset: 1.2 + Math.random() * 0.6,
                 };
                 roundParticles.push(mesh);
                 floatingElements.push(mesh);
@@ -1324,13 +1479,11 @@
             cScene.add(particles);
 
             let mouseX = 0, mouseY = 0, smoothMX = 0, smoothMY = 0, mouseInfluence = 0;
-
             function handleMouseMove(clientX, clientY) {
                 mouseX = (clientX / window.innerWidth) * 2 - 1;
                 mouseY = -(clientY / window.innerHeight) * 2 + 1;
                 mouseInfluence = 1;
             }
-
             cBox.addEventListener('mousemove', (e) => handleMouseMove(e.clientX, e.clientY));
             cBox.addEventListener('touchmove', (e) => { if (e.touches[0]) handleMouseMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
             cBox.addEventListener('mouseleave', () => { mouseInfluence = 0; });
@@ -1348,7 +1501,6 @@
             }
 
             let tField = 0;
-
             function animate() {
                 requestAnimationFrame(animate);
 
@@ -1390,11 +1542,9 @@
                         const angle = d.baseAngle + tField * d.speed;
                         el.position.x = Math.cos(angle) * d.radius + Math.sin(tField * 0.12 + d.bobOffset) * 0.8;
                         el.position.z = Math.sin(angle) * d.radius + Math.cos(tField * 0.11 + d.bobOffset) * 0.8;
-                        if (d.seaFloat) {
-                            el.position.y = sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.3;
-                        } else {
-                            el.position.y = d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9;
-                        }
+                        el.position.y = d.seaFloat
+                            ? sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.3
+                            : d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9;
                     } else if (d.ringRadius !== undefined) {
                         const baseSpeed = d.menuOrbit ? d.ringSpeed * 0.8 : d.ringSpeed;
                         const angle = d.baseAngle + tField * baseSpeed;
@@ -1404,19 +1554,15 @@
                             el.position.x += Math.sin(tField * 0.18 + d.swayPhase) * 1.3;
                             el.position.z += Math.cos(tField * 0.14 + d.swayPhase) * 1.3;
                         }
-                        if (d.seaFloat) {
-                            el.position.y = sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.28;
-                        } else {
-                            el.position.y = d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9 + (d.menuOrbit ? Math.cos(tField * 0.16 + d.swayPhase) * 0.45 : 0);
-                        }
+                        el.position.y = d.seaFloat
+                            ? sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.28
+                            : d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9 + (d.menuOrbit ? Math.cos(tField * 0.16 + d.swayPhase) * 0.45 : 0);
                     } else {
                         el.position.x += d.driftX;
                         el.position.z += d.driftZ;
-                        if (d.seaFloat) {
-                            el.position.y = sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.3;
-                        } else {
-                            el.position.y = d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.8;
-                        }
+                        el.position.y = d.seaFloat
+                            ? sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.3
+                            : d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.8;
                     }
                     el.rotation.x += d.rotSpeed;
                     el.rotation.y += d.rotSpeed * 0.7;
