@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OutOfTune</title>
+    <meta name="description" content="Open source project — built for creators, streamers, and friends.">
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="OutOfTune" />
+    <meta property="og:description" content="Open source project — built for creators, streamers, and friends." />
+    <meta property="og:url" content="https://outoftune.dev/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="OutOfTune" />
+    <meta name="twitter:description" content="Open source project — built for creators, streamers, and friends." />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -46,8 +55,13 @@
             width: 100vw;
         }
 
-        .pixel-font { font-family: 'VT323', monospace; }
-        .mono-font { font-family: 'JetBrains Mono', monospace; }
+        .pixel-font {
+            font-family: 'VT323', monospace;
+        }
+
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
 
         #constellation-container {
             position: fixed;
@@ -131,16 +145,30 @@
         }
 
         @keyframes titlePulse {
-            0%, 100% { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 40%, transparent)); }
-            50% { filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 55%, transparent)) drop-shadow(0 0 6px var(--line-soft)); }
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 40%, transparent));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 55%, transparent)) drop-shadow(0 0 6px var(--line-soft));
+            }
         }
 
         @keyframes wave-effect {
-            0% { background-position: 200% 0; }
-            100% { background-position: -100% 0; }
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
         }
 
-        .status-badge { display: none; }
+        .status-badge {
+            display: none;
+        }
 
         .subtitle {
             color: var(--text-muted);
@@ -180,7 +208,9 @@
             overflow-wrap: anywhere;
         }
 
-        .lyric-typed { display: inline; }
+        .lyric-typed {
+            display: inline;
+        }
 
         .lyric-caret {
             display: inline-block;
@@ -191,11 +221,20 @@
             vertical-align: baseline;
         }
 
-        .lyric-caret[hidden] { display: none; }
+        .lyric-caret[hidden] {
+            display: none;
+        }
 
         @keyframes caretBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
         }
 
         .footer-right {
@@ -255,8 +294,15 @@
         }
 
         @keyframes memberSwitch {
-            0% { opacity: 0; transform: translateX(8px); }
-            100% { opacity: 1; transform: translateX(0); }
+            0% {
+                opacity: 0;
+                transform: translateX(8px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .member-hint {
@@ -474,8 +520,15 @@
         }
 
         @keyframes disclaimerHintIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -484,14 +537,31 @@
                 -webkit-text-fill-color: var(--primary);
                 background: none;
             }
-            .lyric-caret { animation: none; opacity: 0.75; }
-            .disclaimer-hint { animation: none; opacity: 1; }
+
+            .lyric-caret {
+                animation: none;
+                opacity: 0.75;
+            }
+
+            .disclaimer-hint {
+                animation: none;
+                opacity: 1;
+            }
         }
 
         @media (max-width: 768px) {
-            .content-wrapper { padding-left: 5%; }
-            .brand-section h1.wave-text { font-size: 3.5rem; }
-            #globe-target { width: 250px; height: 250px; }
+            .content-wrapper {
+                padding-left: 5%;
+            }
+
+            .brand-section h1.wave-text {
+                font-size: 3.5rem;
+            }
+
+            #globe-target {
+                width: 250px;
+                height: 250px;
+            }
         }
     </style>
 </head>
@@ -528,7 +598,8 @@
     <div class="lyrics-container">
         <div id="track-name" class="track-title">Loading track…</div>
         <div class="lyric-line" id="lyric-line-box">
-            <span class="lyric-typed" id="lyric-output"></span><span class="lyric-caret" id="lyric-caret" hidden>|</span>
+            <span class="lyric-typed" id="lyric-output"></span><span class="lyric-caret" id="lyric-caret"
+                hidden>|</span>
         </div>
     </div>
 
@@ -558,12 +629,14 @@
                     <div id="mini-site-url" class="mini-site-url"></div>
                 </div>
                 <div class="mini-site-actions">
-                    <button type="button" id="mini-site-open-full" class="mini-site-action-link open-full">open full page ↗</button>
+                    <button type="button" id="mini-site-open-full" class="mini-site-action-link open-full">open full
+                        page ↗</button>
                     <button type="button" id="mini-site-close" class="mini-site-action-link close-btn">close ✕</button>
                 </div>
             </div>
             <div class="mini-site-frame-wrapper">
-                <iframe id="mini-site-iframe" class="mini-site-frame" src="about:blank" title="Profile preview"></iframe>
+                <iframe id="mini-site-iframe" class="mini-site-frame" src="about:blank"
+                    title="Profile preview"></iframe>
             </div>
         </div>
     </div>
@@ -583,6 +656,9 @@
     </audio>
     <audio id="confirm-sfx" preload="auto">
         <source src="assets/audio/confirm.wav" type="audio/wav">
+    </audio>
+    <audio id="back-sfx" preload="auto">
+        <source src="assets/audio/back.wav" type="audio/wav">
     </audio>
 
     <script type="text/plain" id="lrc-embedded">
@@ -658,24 +734,24 @@
 
             // Member Carousel
             const allMembers = [
-                { display: 'Bluerra',     path: 'bluerra',     category: 'FOUNDERS' },
-                { display: 'MiloHakai',   path: 'milohakai',   category: 'FOUNDERS' },
-                { display: 'Umilushi',    path: 'umilushi',    category: 'COLLABORATORS' },
-                { display: 'Lavender',    path: 'lavender',    category: 'COLLABORATORS' },
-                { display: 'Cinnovabun',  path: 'cinnovabun',  category: 'COLLABORATORS' },
-                { display: 'Reyvonlune', path: 'reyvonlune',  category: 'COLLABORATORS' },
-                { display: 'Visceral',    path: 'visceral',    category: 'COLLABORATORS' },
-                { display: 'Wicadev',     path: 'wicadev',     category: 'COLLABORATORS' },
-                { display: 'Karakule',    path: 'karakule',    category: 'COLLABORATORS' },
-                { display: 'Shotokiii',   path: 'shotokiii',   category: 'COLLABORATORS' },
+                { display: 'Bluerra', path: 'bluerra', category: 'FOUNDERS' },
+                { display: 'MiloHakai', path: 'milohakai', category: 'FOUNDERS' },
+                { display: 'Umilushi', path: 'umilushi', category: 'COLLABORATORS' },
+                { display: 'Lavender', path: 'lavender', category: 'COLLABORATORS' },
+                { display: 'Cinnovabun', path: 'cinnovabun', category: 'COLLABORATORS' },
+                { display: 'Reyvonlune', path: 'reyvonlune', category: 'COLLABORATORS' },
+                { display: 'Visceral', path: 'visceral', category: 'COLLABORATORS' },
+                { display: 'Wicadev', path: 'wicadev', category: 'COLLABORATORS' },
+                { display: 'Karakule', path: 'karakule', category: 'COLLABORATORS' },
+                { display: 'Shotokiii', path: 'shotokiii', category: 'COLLABORATORS' },
             ];
 
             let currentMemberIndex = 0;
-            const memberNameEl     = document.getElementById('member-name');
+            const memberNameEl = document.getElementById('member-name');
             const memberCategoryEl = document.getElementById('member-category');
-            const carouselDisplay  = document.getElementById('carousel-display');
-            const carouselUp       = document.querySelector('.carousel-up');
-            const carouselDown     = document.querySelector('.carousel-down');
+            const carouselDisplay = document.getElementById('carousel-display');
+            const carouselUp = document.querySelector('.carousel-up');
+            const carouselDown = document.querySelector('.carousel-down');
 
             function updateMemberDisplay(index) {
                 currentMemberIndex = (index + allMembers.length) % allMembers.length;
@@ -685,7 +761,7 @@
                 void memberNameEl.offsetWidth;
                 memberNameEl.classList.add('animate');
 
-                memberNameEl.textContent     = member.display;
+                memberNameEl.textContent = member.display;
                 memberCategoryEl.textContent = member.category;
             }
 
@@ -711,7 +787,7 @@
                 const member = allMembers[currentMemberIndex];
                 emitMemberAction('confirm', member);
                 // Play confirm sound, open modal after the sound fires (or immediately if it fails)
-                playSound(confirmSfx, () => {});
+                playSound(confirmSfx, () => { });
                 openMiniSitePreview(member);
             });
 
@@ -739,19 +815,19 @@
                 if (e.key === 'Enter') {
                     const member = allMembers[currentMemberIndex];
                     emitMemberAction('confirm', member);
-                    playSound(confirmSfx, () => {});
+                    playSound(confirmSfx, () => { });
                     openMiniSitePreview(member);
                 }
             });
 
             updateMemberDisplay(0);
 
-            const miniSiteModal    = document.getElementById('mini-site-modal');
-            const miniSiteIframe   = document.getElementById('mini-site-iframe');
-            const miniSiteTitle    = document.getElementById('mini-site-title');
-            const miniSiteUrlEl    = document.getElementById('mini-site-url');
+            const miniSiteModal = document.getElementById('mini-site-modal');
+            const miniSiteIframe = document.getElementById('mini-site-iframe');
+            const miniSiteTitle = document.getElementById('mini-site-title');
+            const miniSiteUrlEl = document.getElementById('mini-site-url');
             const miniSiteOpenFull = document.getElementById('mini-site-open-full');
-            const miniSiteClose    = document.getElementById('mini-site-close');
+            const miniSiteClose = document.getElementById('mini-site-close');
 
             // Track whether the base page audio was playing before opening
             let baseAudioWasPlaying = false;
@@ -767,10 +843,10 @@
                     audio.pause();
                 }
 
-                miniSiteTitle.textContent  = member.display;
-                miniSiteUrlEl.textContent  = `https://outoftune.dev/${member.path}`;
-                miniSiteIframe.src         = url;
-                miniSiteOpenFull.onclick   = () => { window.location.href = url; };
+                miniSiteTitle.textContent = member.display;
+                miniSiteUrlEl.textContent = `https://outoftune.dev/${member.path}`;
+                miniSiteIframe.src = url;
+                miniSiteOpenFull.onclick = () => { window.location.href = url; };
 
                 miniSiteModal.classList.add('open');
                 miniSiteModal.setAttribute('aria-hidden', 'false');
@@ -785,27 +861,40 @@
 
                 // Resume base audio only if it was playing before
                 if (baseAudioWasPlaying) {
-                    audio.play().catch(() => {});
+                    audio.play().catch(() => { });
                 }
 
                 baseAudioWasPlaying = false;
                 currentMemberUrl = '';
             }
 
-            miniSiteClose.addEventListener('click', closeMiniSitePreview);
+            miniSiteClose.addEventListener('click', () => {
+                playSound(document.getElementById('back-sfx'));
+                closeMiniSitePreview();
+            });
             miniSiteModal.addEventListener('click', (event) => {
-                if (event.target === miniSiteModal) closeMiniSitePreview();
+                if (event.target === miniSiteModal) {
+                    playSound(document.getElementById('back-sfx'));
+                    closeMiniSitePreview();
+                }
             });
 
             // Audio & Lyrics
-            const overlay     = document.getElementById('overlay');
-            const audio       = document.getElementById('bgm');
-            const pointerSfx  = document.getElementById('pointer-sfx');
+            const overlay = document.getElementById('overlay');
+            const audio = document.getElementById('bgm');
+            const pointerSfx = document.getElementById('pointer-sfx');
             const nameSwapSfx = document.getElementById('nameSwap-sfx');
-            const confirmSfx  = document.getElementById('confirm-sfx');
+            const confirmSfx = document.getElementById('confirm-sfx');
+            const backSfx = document.getElementById('back-sfx');
+
+            // Lower SFX volume so they don't overpower the BGM
+            if (pointerSfx) pointerSfx.volume = 0.3;
+            if (nameSwapSfx) nameSwapSfx.volume = 0.3;
+            if (confirmSfx) confirmSfx.volume = 0.3;
+            if (backSfx) backSfx.volume = 0.3;
             const lyricOutput = document.getElementById('lyric-output');
-            const lyricCaret  = document.getElementById('lyric-caret');
-            const trackName   = document.getElementById('track-name');
+            const lyricCaret = document.getElementById('lyric-caret');
+            const trackName = document.getElementById('track-name');
 
             function playSound(sound, onComplete) {
                 if (!sound) {
@@ -835,9 +924,9 @@
             const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
             const fallbackLyrics = [
-                { time: 0,  text: "System initialized" },
-                { time: 4,  text: "Connecting to the void…" },
-                { time: 8,  text: "Iceberg drifts in digital blue" },
+                { time: 0, text: "System initialized" },
+                { time: 4, text: "Connecting to the void…" },
+                { time: 8, text: "Iceberg drifts in digital blue" },
                 { time: 13, text: "Cold light reflections" },
                 { time: 18, text: "Synchronizing the deep" }
             ];
@@ -845,7 +934,7 @@
             let committedLyricLine = '';
             let trackTitle = 'Perpetual Descent — Tokyona';
 
-            trackName.textContent   = trackTitle;
+            trackName.textContent = trackTitle;
             lyricOutput.textContent = 'Continue from the welcome screen to play · lyrics sync to audio';
 
             let cancelTyping = null;
@@ -898,7 +987,7 @@
                     if (lyrics[i].time <= time) activeIndex = i;
                     else break;
                 }
-                const raw  = activeIndex >= 0 ? lyrics[activeIndex].text : '';
+                const raw = activeIndex >= 0 ? lyrics[activeIndex].text : '';
                 const next = raw.trim() || '♪';
                 if (next !== committedLyricLine) {
                     committedLyricLine = next;
@@ -912,7 +1001,7 @@
                 overlay.setAttribute('aria-hidden', 'true');
                 audio.volume = 0.35;
                 audio.play().catch((err) => console.warn('Audio play:', err));
-                try { await lyricsPromise; } catch (_) {}
+                try { await lyricsPromise; } catch (_) { }
             }
 
             overlay.addEventListener('pointerup', () => dismissSplash(), { passive: true });
@@ -938,7 +1027,7 @@
                 let path = u.pathname;
                 if (!path.endsWith('/')) {
                     const slash = path.lastIndexOf('/');
-                    const last  = path.slice(slash + 1);
+                    const last = path.slice(slash + 1);
                     if (last.includes('.')) path = path.slice(0, slash + 1);
                     else path += '/';
                 }
@@ -950,7 +1039,7 @@
                 try {
                     const response = await fetch(new URL('song.lrc', directoryBaseHref()).href, { cache: 'no-store' });
                     if (response.ok) text = await response.text();
-                } catch (_) {}
+                } catch (_) { }
 
                 if (!text.trim()) {
                     const embedded = document.getElementById('lrc-embedded');
@@ -1008,7 +1097,7 @@
 
         function initBackgrounds() {
             function safeSize(el, fallbackW, fallbackH) {
-                const w = Math.max(1, el.offsetWidth  || el.clientWidth  || fallbackW || 1);
+                const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
                 const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
                 return { w, h, aspect: w / h };
             }
@@ -1017,10 +1106,10 @@
 
             // Globe
             const globeBox = document.getElementById('globe-target');
-            const gScene   = new THREE.Scene();
-            const gs       = safeSize(globeBox, 400, 400);
-            const gCam     = new THREE.PerspectiveCamera(75, gs.aspect, 0.1, 1000);
-            const gRen     = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            const gScene = new THREE.Scene();
+            const gs = safeSize(globeBox, 400, 400);
+            const gCam = new THREE.PerspectiveCamera(75, gs.aspect, 0.1, 1000);
+            const gRen = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             gRen.setPixelRatio(dpr);
             gRen.setSize(gs.w, gs.h);
             globeBox.appendChild(gRen.domElement);
@@ -1033,9 +1122,9 @@
             gCam.position.z = 4.2;
 
             // Background terrain
-            const cBox   = document.getElementById('constellation-container');
+            const cBox = document.getElementById('constellation-container');
             const cScene = new THREE.Scene();
-            cScene.fog   = new THREE.FogExp2(0x001030, 0.003);
+            cScene.fog = new THREE.FogExp2(0x001030, 0.003);
 
             const dirLight1 = new THREE.DirectionalLight(0x3355bb, 1.2);
             dirLight1.position.set(20, 30, 10);
@@ -1048,7 +1137,7 @@
             cScene.add(dirLight3);
             cScene.add(new THREE.AmbientLight(0x050818, 0.6));
 
-            const cs   = safeSize(cBox, window.innerWidth, window.innerHeight);
+            const cs = safeSize(cBox, window.innerWidth, window.innerHeight);
             const cCam = new THREE.PerspectiveCamera(60, cs.aspect, 0.1, 400);
             cCam.position.set(20, 24, 28);
             cCam.lookAt(0, 6, 0);
@@ -1058,7 +1147,7 @@
             cRen.setSize(cs.w, cs.h);
             cRen.setClearColor(0x00080f, 1);
             cRen.shadowMap.enabled = true;
-            cRen.shadowMap.type    = THREE.PCFSoftShadowMap;
+            cRen.shadowMap.type = THREE.PCFSoftShadowMap;
             cBox.appendChild(cRen.domElement);
 
             let planeGeo = new THREE.PlaneGeometry(120, 120, 80, 80);
@@ -1066,24 +1155,24 @@
             planeGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
 
             const posAttr = planeGeo.attributes.position;
-            const vCount  = posAttr.count;
-            const base    = new Float32Array(vCount * 3);
+            const vCount = posAttr.count;
+            const base = new Float32Array(vCount * 3);
             for (let i = 0; i < vCount; i++) {
-                base[i*3]   = posAttr.getX(i);
-                base[i*3+1] = posAttr.getY(i);
-                base[i*3+2] = posAttr.getZ(i);
+                base[i * 3] = posAttr.getX(i);
+                base[i * 3 + 1] = posAttr.getY(i);
+                base[i * 3 + 2] = posAttr.getZ(i);
             }
 
-            const colorArr  = new Float32Array(vCount * 3);
+            const colorArr = new Float32Array(vCount * 3);
             const colorAttr = new THREE.BufferAttribute(colorArr, 3);
             planeGeo.setAttribute('color', colorAttr);
 
-            const planeMat  = new THREE.MeshLambertMaterial({ vertexColors: true, fog: true, side: THREE.DoubleSide, transparent: true, opacity: 0.97 });
+            const planeMat = new THREE.MeshLambertMaterial({ vertexColors: true, fog: true, side: THREE.DoubleSide, transparent: true, opacity: 0.97 });
             const planeMesh = new THREE.Mesh(planeGeo, planeMat);
             planeMesh.castShadow = planeMesh.receiveShadow = true;
             cScene.add(planeMesh);
 
-            const wireMat  = new THREE.MeshBasicMaterial({ color: 0x0d1a3a, wireframe: true, fog: true, transparent: true, opacity: 0.06 });
+            const wireMat = new THREE.MeshBasicMaterial({ color: 0x0d1a3a, wireframe: true, fog: true, transparent: true, opacity: 0.06 });
             const wireMesh = new THREE.Mesh(planeGeo, wireMat);
             wireMesh.position.y = 0.1;
             cScene.add(wireMesh);
@@ -1091,7 +1180,7 @@
             // Floating elements
             const floatingElements = [];
             const orbitalRings = [
-                { radius: 22, speed: 0.00045, height: 2.4,  elementCount: 6 },
+                { radius: 22, speed: 0.00045, height: 2.4, elementCount: 6 },
                 { radius: 35, speed: 0.00032, height: 3.2, elementCount: 8 },
                 { radius: 50, speed: 0.00021, height: 2.0, elementCount: 6 },
             ];
@@ -1217,20 +1306,20 @@
             }
 
             const particleCount = 200;
-            const particleGeo   = new THREE.BufferGeometry();
+            const particleGeo = new THREE.BufferGeometry();
             const pPos = new Float32Array(particleCount * 3);
             const pCol = new Float32Array(particleCount * 3);
             const pColor = new THREE.Color(0x7c9cff);
             for (let i = 0; i < particleCount; i++) {
-                pPos[i*3]   = (Math.random() - 0.5) * 200;
-                pPos[i*3+1] = Math.random() * 50;
-                pPos[i*3+2] = (Math.random() - 0.5) * 200;
-                pCol[i*3]   = pColor.r;
-                pCol[i*3+1] = pColor.g;
-                pCol[i*3+2] = pColor.b;
+                pPos[i * 3] = (Math.random() - 0.5) * 200;
+                pPos[i * 3 + 1] = Math.random() * 50;
+                pPos[i * 3 + 2] = (Math.random() - 0.5) * 200;
+                pCol[i * 3] = pColor.r;
+                pCol[i * 3 + 1] = pColor.g;
+                pCol[i * 3 + 2] = pColor.b;
             }
             particleGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-            particleGeo.setAttribute('color',    new THREE.BufferAttribute(pCol, 3));
+            particleGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
             const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ size: 0.5, vertexColors: true, transparent: true, opacity: 0.6, fog: true }));
             cScene.add(particles);
 
@@ -1254,7 +1343,7 @@
                 y += Math.sin(x * 0.04 - t * 0.12) * 0.5;
                 y += Math.sin(z * 0.09 + t * 0.08) * 0.2;
                 const dx = x - smoothMX * 20, dz = z - smoothMY * 20;
-                y += Math.exp(-Math.sqrt(dx*dx + dz*dz) * 0.015) * mouseInfluence * 1.5;
+                y += Math.exp(-Math.sqrt(dx * dx + dz * dz) * 0.015) * mouseInfluence * 1.5;
                 return y * 2.2;
             }
 
@@ -1267,31 +1356,31 @@
                 globe.rotation.x += 0.001;
                 gRen.render(gScene, gCam);
 
-                tField   += 0.004;
+                tField += 0.004;
                 smoothMX += (mouseX - smoothMX) * 0.05;
                 smoothMY += (mouseY - smoothMY) * 0.05;
                 mouseInfluence *= 0.98;
 
                 const arr = posAttr.array;
                 for (let i = 0; i < vCount; i++) {
-                    arr[i*3+1] = sampleSurf(base[i*3], base[i*3+2], tField);
+                    arr[i * 3 + 1] = sampleSurf(base[i * 3], base[i * 3 + 2], tField);
                 }
                 posAttr.needsUpdate = true;
 
                 const triCount = vCount / 3;
                 for (let t = 0; t < triCount; t++) {
-                    const i0 = t*3, i1 = i0+1, i2 = i0+2;
-                    const y0 = arr[i0*3+1], y1 = arr[i1*3+1], y2 = arr[i2*3+1];
-                    const fy = (y0+y1+y2)/3;
-                    const h  = Math.max(0, Math.min(1, (fy+4.0)/8.0));
-                    const slope = Math.min(1, Math.max(Math.abs(y0-y1), Math.abs(y1-y2), Math.abs(y0-y2)) / 2.5);
+                    const i0 = t * 3, i1 = i0 + 1, i2 = i0 + 2;
+                    const y0 = arr[i0 * 3 + 1], y1 = arr[i1 * 3 + 1], y2 = arr[i2 * 3 + 1];
+                    const fy = (y0 + y1 + y2) / 3;
+                    const h = Math.max(0, Math.min(1, (fy + 4.0) / 8.0));
+                    const slope = Math.min(1, Math.max(Math.abs(y0 - y1), Math.abs(y1 - y2), Math.abs(y0 - y2)) / 2.5);
                     const highlight = (fy > 1.8 && slope > 1.2) ? 0.12 : 0.0;
-                    const r = 0.010 + h*0.035 + slope*0.045 + highlight*0.6;
-                    const g = 0.015 + h*0.045 + slope*0.060 + highlight*0.7;
-                    const b = 0.090 + h*0.150 + slope*0.250 + highlight*1.0;
-                    colorArr[i0*3]=r; colorArr[i0*3+1]=g; colorArr[i0*3+2]=b;
-                    colorArr[i1*3]=r; colorArr[i1*3+1]=g; colorArr[i1*3+2]=b;
-                    colorArr[i2*3]=r; colorArr[i2*3+1]=g; colorArr[i2*3+2]=b;
+                    const r = 0.010 + h * 0.035 + slope * 0.045 + highlight * 0.6;
+                    const g = 0.015 + h * 0.045 + slope * 0.060 + highlight * 0.7;
+                    const b = 0.090 + h * 0.150 + slope * 0.250 + highlight * 1.0;
+                    colorArr[i0 * 3] = r; colorArr[i0 * 3 + 1] = g; colorArr[i0 * 3 + 2] = b;
+                    colorArr[i1 * 3] = r; colorArr[i1 * 3 + 1] = g; colorArr[i1 * 3 + 2] = b;
+                    colorArr[i2 * 3] = r; colorArr[i2 * 3 + 1] = g; colorArr[i2 * 3 + 2] = b;
                 }
                 colorAttr.needsUpdate = true;
 
@@ -1336,8 +1425,8 @@
 
                 const particlePos = particles.geometry.attributes.position.array;
                 for (let i = 0; i < particleCount; i++) {
-                    particlePos[i*3+1] += Math.sin(tField * 0.5 + i * 0.1) * 0.01;
-                    if (particlePos[i*3+1] > 60) particlePos[i*3+1] = 0;
+                    particlePos[i * 3 + 1] += Math.sin(tField * 0.5 + i * 0.1) * 0.01;
+                    if (particlePos[i * 3 + 1] > 60) particlePos[i * 3 + 1] = 0;
                 }
                 particles.geometry.attributes.position.needsUpdate = true;
 
@@ -1346,7 +1435,7 @@
                 cCam.position.y = 24 + Math.sin(tField * 0.18) * 1.5;
                 cCam.lookAt(smoothMX * 2, 6, smoothMY * 2);
 
-                wireMat.opacity    = 0.04 + Math.sin(tField * 0.5) * 0.02;
+                wireMat.opacity = 0.04 + Math.sin(tField * 0.5) * 0.02;
                 dirLight1.intensity = 1.2 + Math.sin(tField * 0.4) * 0.25;
                 dirLight2.intensity = 0.7 + Math.cos(tField * 0.6) * 0.15;
                 dirLight3.intensity = 0.4 + Math.sin(tField * 0.3 + 1.2) * 0.10;
