@@ -43,24 +43,36 @@ function playClickSound() {
 }
 
 const audio = document.getElementById('backgroundAudio');
-
-function startBackgroundAudio() {
-  audio.play().catch(error => {
-    console.log('Audio autoplay prevented:', error);
-    document.addEventListener('click', function () {
-      if (audio.paused) {
-        audio.play().catch(err => console.log('Audio play failed:', err));
-      }
-    }, { once: true });
+if (audio) {
+  audio.volume = 0.15;
+  audio.addEventListener('error', (e) => {
+    console.error("Audio error details:", audio.error);
   });
 }
 
-audio.volume = 0.15;
 const clickSound = document.getElementById('clickSound');
 clickSound.volume = 0.3;
 
+function startBackgroundAudio() {
+  // Resume AudioContext if suspended (required by browsers after user gesture)
+  if (window._audioCtx && window._audioCtx.state === 'suspended') {
+    window._audioCtx.resume();
+  }
+
+  audio.play().then(() => {
+    // Once playing, tell the globe to initialise its analyser
+    if (typeof window._globeInitAnalyser === 'function') {
+      window._globeInitAnalyser();
+    }
+  }).catch(error => {
+    console.log('Audio autoplay prevented:', error);
+  });
+}
+
+// Attempt autoplay on load; browsers will usually block this until a gesture
 window.addEventListener('load', () => {
   startBackgroundAudio();
+
   setTimeout(() => {
     const intro = document.getElementById('intro-screen');
     if (intro) {
@@ -69,8 +81,24 @@ window.addEventListener('load', () => {
   }, 2300);
 });
 
-document.addEventListener('click', function () {
-  if (audio.paused) {
+// Retry on first user interaction anywhere on the page
+document.addEventListener('click', function onFirstClick() {
+  // Early creation/resume of context to satisfy browser policies
+  if (typeof window.AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
+    if (!window._audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      window._audioCtx = new AC();
+    }
+    if (window._audioCtx.state === 'suspended') {
+      window._audioCtx.resume();
+    }
+  }
+
+  if (audio && audio.paused) {
     startBackgroundAudio();
+  }
+  // Always try to init the globe analyser on first click too
+  if (typeof window._globeInitAnalyser === 'function') {
+    window._globeInitAnalyser();
   }
 }, { once: true });

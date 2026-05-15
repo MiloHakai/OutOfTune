@@ -80,7 +80,7 @@
     </div>
   </div>
 
-  <audio id="backgroundAudio" preload="auto" loop>
+  <audio id="backgroundAudio" preload="auto" loop crossorigin="anonymous">
     <source src="./audio/bgm.mp3" type="audio/mpeg">
   </audio>
 
@@ -96,33 +96,51 @@
       const globeBox = document.getElementById('globe-target');
       if (!globeBox) return;
 
-      function safeSize(el, fallbackW, fallbackH) {
-        const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
-        const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
-        return { w, h, aspect: w / h };
-      }
+
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const gScene = new THREE.Scene();
-      const gs = safeSize(globeBox, 400, 400);
-      const gCam = new THREE.PerspectiveCamera(75, gs.aspect, 0.1, 1000);
+      const gCam = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
       const gRen = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       gRen.setPixelRatio(dpr);
-      gRen.setSize(gs.w, gs.h);
+      gRen.setSize(400, 400); // Temporary size, layoutGlobe will fix it immediately
       globeBox.appendChild(gRen.domElement);
 
-      const globe = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(2.5, 3),
-        new THREE.MeshBasicMaterial({ color: 0xc0e0ff, wireframe: true, transparent: true, opacity: 0.90 })
-      );
+      // Main wireframe globe (Slightly smaller radius to prevent overflow)
+      const globeGeo = new THREE.IcosahedronGeometry(1.8, 3);
+      const globeMat = new THREE.MeshBasicMaterial({
+        color: 0xc0e0ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.90
+      });
+      const globe = new THREE.Mesh(globeGeo, globeMat);
       gScene.add(globe);
-      gCam.position.z = 4.2;
+
+      // Inner glow sphere
+      const innerGeo = new THREE.SphereGeometry(1.7, 16, 16);
+      const innerMat = new THREE.MeshBasicMaterial({
+        color: 0x7cb9ff,
+        transparent: true,
+        opacity: 0.0,
+        side: THREE.BackSide
+      });
+      const innerGlow = new THREE.Mesh(innerGeo, innerMat);
+      gScene.add(innerGlow);
+
+
+
+      gCam.position.z = 5.2; // Further back to keep sphere in bounds
 
       function layoutGlobe() {
-        const s = safeSize(globeBox, 400, 400);
-        gCam.aspect = s.aspect;
+        const rect = globeBox.getBoundingClientRect();
+        const w = rect.width || globeBox.clientWidth || 400;
+        const h = rect.height || globeBox.clientHeight || 400;
+        const aspect = w / h;
+
+        gCam.aspect = aspect;
         gCam.updateProjectionMatrix();
-        gRen.setSize(s.w, s.h);
+        gRen.setSize(w, h, false);
       }
 
       window.addEventListener('resize', layoutGlobe);
@@ -131,12 +149,156 @@
       }
       layoutGlobe();
 
+      // Audio analysis state
+      let analyser = null;
+      let dataArray = null;
+      let audioInitialized = false;
+      let smoothBass = 0, smoothMid = 0, smoothHigh = 0, smoothEnergy = 0;
+
+      // Beat detection
+      let beatCooldown = 0;
+      let beatFlash = 0;
+      const BEAT_THRESHOLD = 0.32;
+
+      // Color lerp helper
+      function lerpColor(a, b, t) {
+        t = Math.max(0, Math.min(1, t));
+        const ar = (a >> 16) & 0xff, ag = (a >> 8) & 0xff, ab = a & 0xff;
+        const br = (b >> 16) & 0xff, bg = (b >> 8) & 0xff, bb = b & 0xff;
+        return (
+          (Math.round(ar + (br - ar) * t) << 16) |
+          (Math.round(ag + (bg - ag) * t) << 8) |
+          Math.round(ab + (bb - ab) * t)
+        );
+      }
+
+      // Called from main.js audio setup — wires analyser to the existing AudioContext
+      function initAnalyser(audioEl) {
+        if (audioInitialized) return;
+
+        // Browsers block audio analysis on the file:// protocol for security reasons.
+        // If we detect file://, we skip the analyser so the audio can at least play normally.
+        if (window.location.protocol === 'file:') {
+          console.warn("OutOfTune: Audio reactivity is disabled on file:// protocol due to browser security. Use a local server (like Live Server) to see the globe react!");
+          return;
+        }
+
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          // Use a global context so main.js can resume it
+          if (!window._audioCtx) {
+            window._audioCtx = new AudioContext();
+          }
+          
+          const source = window._audioCtx.createMediaElementSource(audioEl);
+          analyser = window._audioCtx.createAnalyser();
+          analyser.fftSize = 512;
+          analyser.smoothingTimeConstant = 0.8;
+          
+          // Connect source -> analyser -> destination
+          source.connect(analyser);
+          analyser.connect(window._audioCtx.destination);
+          
+          dataArray = new Uint8Array(analyser.frequencyBinCount);
+          audioInitialized = true;
+          console.log("OutOfTune: Audio analyser successfully connected.");
+
+          if (window._audioCtx.state === 'suspended') {
+            window._audioCtx.resume();
+          }
+        } catch (e) {
+          console.log('Audio analyser init failed:', e);
+        }
+      }
+
+      // Hook into the background audio element
+      const bgAudio = document.getElementById('backgroundAudio');
+      if (bgAudio) {
+        // Try on first play event
+        bgAudio.addEventListener('play', () => initAnalyser(bgAudio), { once: true });
+        // Also try immediately if already playing
+        if (!bgAudio.paused) initAnalyser(bgAudio);
+      }
+
+      // Expose so main.js click handler can trigger it too
+      window._globeInitAnalyser = () => {
+        if (bgAudio && !audioInitialized) initAnalyser(bgAudio);
+      };
+
       let tField = 0;
+
       function animate() {
         requestAnimationFrame(animate);
-        tField += 1;
-        globe.rotation.y = tField * 0.003;
-        globe.rotation.x = tField * 0.001;
+        tField++;
+
+        let bass = 0, mid = 0, high = 0;
+
+        if (analyser && dataArray) {
+          analyser.getByteFrequencyData(dataArray);
+          const binCount = dataArray.length;
+
+          // Bass: ~20–250 Hz (first ~12% of bins)
+          const bassEnd = Math.floor(binCount * 0.12);
+          for (let i = 0; i < bassEnd; i++) bass += dataArray[i];
+          bass = (bass / bassEnd) / 255;
+
+          // Mid: ~250–2000 Hz
+          const midEnd = Math.floor(binCount * 0.45);
+          for (let i = bassEnd; i < midEnd; i++) mid += dataArray[i];
+          mid = (mid / (midEnd - bassEnd)) / 255;
+
+          // High: ~2000 Hz+
+          for (let i = midEnd; i < binCount; i++) high += dataArray[i];
+          high = (high / (binCount - midEnd)) / 255;
+        }
+
+        // Faster, more responsive smoothing
+        const s = 0.15;
+        smoothBass += (bass - smoothBass) * s;
+        smoothMid += (mid - smoothMid) * s;
+        smoothHigh += (high - smoothHigh) * s;
+        smoothEnergy = (smoothBass + smoothMid + smoothHigh) / 3;
+
+        // Beat detection (Very subtle)
+        if (beatCooldown > 0) beatCooldown--;
+        if (bass > BEAT_THRESHOLD && beatCooldown === 0) {
+          beatFlash = 1.0;
+          beatCooldown = 24; 
+        }
+        beatFlash *= 0.85; 
+
+        // Idle ambient pulse (slower)
+        const idle = Math.sin(tField * 0.012) * 0.5 + 0.5;
+
+        // --- Rotation: slow and steady ---
+        globe.rotation.y += 0.002 + smoothMid * 0.01;
+        globe.rotation.x += 0.001 + smoothMid * 0.005;
+
+        // --- Breathing & Ripples (Slightly boosted) ---
+        // Using a mix of smooth and raw for better responsiveness
+        const breathing = 1.0 + (smoothBass * 0.38) + (mid * 0.12);
+        const ripple = Math.sin(tField * 0.05) * (high * 0.08);
+        
+        const targetScale = (analyser && smoothEnergy > 0.01) ? breathing + ripple : 1 + idle * 0.03;
+
+        // Apply smooth scale
+        globe.scale.x += (targetScale - globe.scale.x) * 0.12;
+        globe.scale.y += (targetScale - globe.scale.y) * 0.12;
+        globe.scale.z += (targetScale - globe.scale.z) * 0.12;
+
+        // --- Calm Color & Opacity ---
+        const colorT = Math.min(smoothEnergy * 1.8, 1);
+        globeMat.color.setHex(lerpColor(0x7cb9ff, 0xe0f0ff, colorT));
+
+        // Opacity follows the breathing/bass
+        globeMat.opacity = (analyser && smoothEnergy > 0.01) 
+          ? 0.58 + smoothBass * 0.32 + smoothEnergy * 0.1
+          : 0.65 + idle * 0.15;
+
+        // Inner glow 'pulses' deep within
+        innerMat.opacity = smoothBass * 0.35 + (bass * 0.1);
+        innerMat.color.setHex(lerpColor(0x4a8fcf, 0xa0d0ff, smoothBass));
+
         gRen.render(gScene, gCam);
       }
       animate();

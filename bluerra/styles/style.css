@@ -22,6 +22,7 @@ body {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+  zoom: 0.95; /* Page zoom at 95% */
 }
 
 body {
@@ -896,11 +897,11 @@ footer a:hover {
 
 @media (max-width: 600px) {
   .container {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 
   .logo {
-    width: 320px;
+    width: 240px;
   }
 
   .logo-wrapper {
@@ -974,14 +975,36 @@ footer a:hover {
   transform-origin: bottom;
 }
 
-.bar:nth-child(1) { height: 100%; animation-delay: 0.0s; }
-.bar:nth-child(2) { height: 60%; animation-delay: 0.2s; }
-.bar:nth-child(3) { height: 80%; animation-delay: 0.4s; }
-.bar:nth-child(4) { height: 40%; animation-delay: 0.1s; }
+.bar:nth-child(1) {
+  height: 100%;
+  animation-delay: 0.0s;
+}
+
+.bar:nth-child(2) {
+  height: 60%;
+  animation-delay: 0.2s;
+}
+
+.bar:nth-child(3) {
+  height: 80%;
+  animation-delay: 0.4s;
+}
+
+.bar:nth-child(4) {
+  height: 40%;
+  animation-delay: 0.1s;
+}
 
 @keyframes bounce {
-  0%, 100% { transform: scaleY(0.4); }
-  50% { transform: scaleY(1); }
+
+  0%,
+  100% {
+    transform: scaleY(0.4);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
 }
 
 .song-title {
@@ -992,6 +1015,7 @@ footer a:hover {
   white-space: nowrap;
   line-height: 1.2;
 }
+
 #globe-target {
   display: none;
   position: fixed;
@@ -1005,6 +1029,12 @@ footer a:hover {
   transform: translate(-50%, -50%);
 }
 
+#globe-target canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 @media (min-width: 769px) {
   .container {
     align-items: flex-start;
@@ -1014,10 +1044,10 @@ footer a:hover {
     width: 60vw;
     top: 0;
   }
-  
+
   .logo {
     margin: 0;
-    width: clamp(320px, 30vw, 480px);
+    width: clamp(280px, 26vw, 420px);
   }
 
   .content-group {
@@ -1027,7 +1057,8 @@ footer a:hover {
     text-align: center;
   }
 
-  p#description, .icons {
+  p#description,
+  .icons {
     text-align: center;
     align-self: center;
   }
@@ -1046,27 +1077,28 @@ footer a:hover {
   #globe-target {
     display: block;
     left: auto;
-    right: 6vw;
+    right: 5vw;
     transform: translateY(-50%);
-    width: 38vw;
-    height: 38vw;
-    max-width: 500px;
-    max-height: 500px;
-    min-width: 300px;
-    min-height: 300px;
+    width: 30vw;
+    height: 30vw;
+    max-width: 440px;
+    max-height: 440px;
+    min-width: 280px;
+    min-height: 280px;
     opacity: 0.7;
   }
 }
 
 @media (max-width: 600px) {
   .now-playing {
-    bottom: 55px; /* Added clearance above the footer */
+    bottom: 55px;
+    /* Added clearance above the footer */
     left: 50%;
     transform: translateX(-50%);
     width: 90vw;
     justify-content: center;
   }
-  
+
   .song-title {
     font-size: 0.45rem;
     overflow: hidden;
