@@ -115,11 +115,16 @@
         /* ── Globe ── */
         #globe-target {
             position: fixed;
-            left: -15vw;
+            /* Clamp left so the sphere doesn't drift too far on ultrawide screens.
+               At 16:9 (1920px) -15vw ≈ -288px which looks right.
+               At 21:9 (2560px) -15vw ≈ -384px — too much.
+               max() keeps it no further left than -288px regardless of viewport width. */
+            left: max(-288px, -15vw);
             top: 50%;
             transform: translateY(-50%);
-            width: 56vw;
-            height: 56vw;
+            /* Size: grow with viewport but cap earlier on wide screens */
+            width: min(56vw, 500px);
+            height: min(56vw, 500px);
             max-width: 500px;
             max-height: 500px;
             min-width: 340px;
@@ -751,6 +756,25 @@
             .footer-right {
                 bottom: 4px;
                 font-size: 0.38rem;
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────
+           ULTRAWIDE (21:9 and wider — aspect ratio > ~2.1)
+        ───────────────────────────────────────────────────── */
+        @media (min-aspect-ratio: 21/9) {
+            /* Keep the globe anchored near the left edge of the content, not the raw viewport */
+            #globe-target {
+                left: -180px;
+                width: 420px;
+                height: 420px;
+                min-width: 0;
+                min-height: 0;
+            }
+
+            /* Shift text content slightly right so it clears the globe comfortably */
+            .content-wrapper {
+                padding-left: clamp(24px, 4vw, 96px);
             }
         }
 
@@ -1842,6 +1866,13 @@
             function layoutBgCanvas() {
                 const s = safeSize(cBox, window.innerWidth, window.innerHeight);
                 cCam.aspect = s.aspect;
+                // On ultrawide the default 60° FOV exposes too much empty terrain.
+                // Increase FOV as the screen gets wider so the wave surface stays filled.
+                // 16:9 ≈ 1.78 → 60°  |  21:9 ≈ 2.33 → ~68°  |  capped at 75°
+                const baseAspect = 16 / 9;
+                cCam.fov = s.aspect > baseAspect
+                    ? Math.min(75, 60 + (s.aspect - baseAspect) * 14)
+                    : 60;
                 cCam.updateProjectionMatrix();
                 cRen.setSize(s.w, s.h);
             }
