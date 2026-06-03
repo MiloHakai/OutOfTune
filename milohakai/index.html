@@ -7,19 +7,13 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>MiloHakai</title>
-  <meta name="description" content="MiloHakai on OutOfTune — open source, built for creators & friends.">
-  <!-- Open Graph / Social Media Sharing -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="MiloHakai" />
-  <meta property="og:description" content="MiloHakai on OutOfTune — open source, built for creators & friends." />
-  <meta property="og:url" content="https://outoftune.dev/milohakai/" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="MiloHakai" />
-  <meta name="twitter:description" content="MiloHakai on OutOfTune — open source, built for creators & friends." />
 
+  <!-- External Styles & Icon Sets -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     crossorigin="anonymous" />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <!-- GOOGLE FONTS: Added Lexend for English/French lyrics readability alongside Noto Sans JP fallback and Press Start 2P for retro accents -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Lexend:wght@300;400&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -32,29 +26,32 @@
       --line-soft: rgba(230, 228, 255, 0.55);
       --glow: rgba(190, 198, 255, 0.38);
 
-      /* Space plate */
+      /* Layout offsets matching image_86448b.jpg */
+      --gutter: 20px;
+
+      /* Space plate background elements */
       --band-strong: rgba(255, 255, 255, 0.20);
       --band-soft: rgba(255, 255, 255, 0.08);
       --mist: rgba(255, 255, 255, 0.06);
       --dust: rgba(255, 255, 255, 0.12);
 
-      /* CRT */
+      /* CRT Overlays */
       --scanline: rgba(0, 0, 0, 0.18);
       --vignette: rgba(0, 0, 0, 0.4);
 
-      /* Dynamic sky variables (overridden by script at runtime) */
+      /* Dynamic sky variables (controlled by calendar scripts) */
       --sky-top: #050505;
       --sky-mid: #070707;
       --sky-bottom: #121214;
       --accent: #d4c4ff;
-      --star-rgb: 255,255,255; /* r,g,b (no spaces required) */
-      --star-density: 1; /* multiplier for generated stars */
+      --star-rgb: 255,255,255; 
+      --star-density: 1; 
       --wave-a: #f8f6ff;
       --wave-b: #c4b5fd;
       --flicker-overlay: rgba(255,255,255,0.006);
       --icon: rgba(208, 214, 255, 0.9);
 
-      /* Sun / moon / sky washes (overridden per sky in palettes) */
+      /* Sun / Moon light profiles */
       --sun-core: #FFD66A;
       --sun-mid: #FF9E4A;
       --sun-glow: rgba(255, 170, 110, 0.28);
@@ -62,28 +59,28 @@
       --moon-rim-soft: rgba(198, 192, 235, 0.55);
       --moon-halo: rgba(165, 158, 220, 0.45);
 
-      /* Sun placement from clock (Europe/Rome), set by script */
-      --sun-left: 50%;
-      --sun-top: 14%;
-      --sun-scale: 1.05;
+      /* Solar path coordinates */
+      --sun-left: 8%;
+      --sun-top: 55%;
+      --sun-scale: 1.0;
     }
 
     html,
     body {
       margin: 0;
       height: 100%;
-      font-family: 'Press Start 2P', monospace;
+      font-family: 'Press Start 2P', 'Lexend', 'Noto Sans JP', monospace;
       overflow: hidden;
       background: var(--bg);
       color: var(--text);
     }
 
-    /* (Light theme overrides removed — site uses time-based palettes now) */
-
     body {
       position: relative;
       background: var(--bg);
       transition: background 0.35s ease, color 0.35s ease;
+      padding-left: 8px;
+      padding-right: 8px;
     }
 
     /* ─────────────────────────────────────────────────────────────
@@ -99,11 +96,9 @@
           var(--wave-a) 100%);
 
       background-size: 300% 100%;
-
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-
       animation: wave-effect 6s linear infinite;
 
       text-shadow:
@@ -111,8 +106,6 @@
         0 0 22px color-mix(in srgb, var(--accent) 55%, transparent);
       -webkit-text-stroke: 0.22px color-mix(in srgb, var(--line-soft) 70%, transparent);
     }
-
-    /* wave-text remains themed by palette & accent */
 
     .space-plate {
       position: fixed;
@@ -125,7 +118,7 @@
       transition: background 1.2s ease;
     }
 
-    /* Galaxy band + soft mist */
+    /* Cosmic visual noise layout */
     .space-plate::before {
       content: "";
       position: absolute;
@@ -149,7 +142,6 @@
           transparent 75%);
     }
 
-    /* Dithering / grain */
     .space-plate::after {
       content: "";
       position: absolute;
@@ -160,46 +152,28 @@
       background-size: 2px 2px;
     }
 
-    /* Crescent moons (pure CSS) */
+    /* Single high-fidelity crescent moon placed in top-right of page */
     .moon {
       position: fixed;
       border-radius: 50%;
       pointer-events: none;
       z-index: 3;
       opacity: 0.75;
-      filter: drop-shadow(0 0 14px var(--moon-halo, var(--glow)));
+      filter: drop-shadow(0 0 16px var(--moon-halo, var(--glow)));
       transition: opacity 1.2s ease, transform 1.2s ease, filter 1.2s ease;
-    }
-
-    .moon.big {
-      width: 220px;
-      height: 220px;
-      top: 10%;
-      left: 10%;
+      width: 180px;
+      height: 180px;
+      top: 15%;
+      right: 12%;
       background:
-        radial-gradient(circle at 30% 35%,
-          transparent 60%,
-          var(--moon-rim, var(--line)) 61%,
-          var(--moon-rim, var(--line)) 63%,
+        radial-gradient(circle at 30% 30%,
+          transparent 58%,
+          var(--moon-rim, var(--line)) 59%,
+          var(--moon-rim, var(--line)) 62%,
           var(--moon-rim-soft, var(--line-soft)) 66%,
-          transparent 70%);
+          transparent 72%);
     }
 
-    .moon.small {
-      width: 110px;
-      height: 110px;
-      top: 32%;
-      left: 46%;
-      opacity: 0.55;
-      background:
-        radial-gradient(circle at 32% 38%,
-          transparent 60%,
-          var(--moon-rim-soft, var(--line-soft)) 61%,
-          var(--moon-rim, var(--line)) 64%,
-          transparent 70%);
-    }
-
-    /* Sun element (appears during day / moves at sunset) */
     .sun {
       position: fixed;
       border-radius: 50%;
@@ -222,7 +196,6 @@
       100% { transform: translateY(0) rotate(0); }
     }
 
-    /* Sun position: --sun-left / --sun-top / --sun-scale from clock (same TZ as palettes) */
     [data-sky="day"] .sun {
       opacity: 1;
       left: var(--sun-left);
@@ -239,13 +212,11 @@
     [data-sky="indigo"] .sun,
     [data-sky="night"] .sun { opacity: 0; transform: translate(-50%, -10%) scale(0.7); }
 
-    /* Moon visibility across phases */
     [data-sky="day"] .moon { opacity: 0; transform: translateY(-28px) scale(0.9); filter: blur(0.6px); pointer-events: none; }
     [data-sky="sunset"] .moon { opacity: 0.35; transform: translateY(-8px) scale(0.95); filter: blur(0); }
     [data-sky="indigo"] .moon { opacity: 0.7; transform: translateY(-4px) scale(0.98); filter: blur(0); }
     [data-sky="night"] .moon { opacity: 0.98; transform: translateY(0) scale(1); animation: moon-bob 12s ease-in-out infinite; }
 
-    /* Star canvas on top of plate, below UI */
     #starCanvas {
       position: fixed;
       inset: 0;
@@ -256,7 +227,7 @@
     }
 
     /* ─────────────────────────────────────────────────────────────
-       CRT OVERLAY
+       CRT OVERLAY & NOISE
        ───────────────────────────────────────────────────────────── */
 
     .crt-overlay {
@@ -279,21 +250,14 @@
     }
 
     @keyframes scanScroll {
-      0% {
-        transform: translateY(0);
-      }
-
-      100% {
-        transform: translateY(5px);
-      }
+      0% { transform: translateY(0); }
+      100% { transform: translateY(5px); }
     }
-
 
     .crt-overlay::after {
       content: '';
       position: absolute;
       inset: 0;
-      /* Wide, soft falloff — avoids harsh vertical “columns” at the sides */
       background: radial-gradient(ellipse 130% 115% at 50% 48%,
           transparent 0%,
           transparent 58%,
@@ -301,7 +265,6 @@
           var(--vignette) 100%);
     }
 
-    /* Subtle flicker */
     body::before {
       content: '';
       position: fixed;
@@ -314,20 +277,12 @@
     }
 
     @keyframes flicker {
-
-      0%,
-      100% {
-        opacity: 0;
-      }
-
-      50% {
-        opacity: 0.28;
-      }
+      0%, 100% { opacity: 0; }
+      50% { opacity: 0.28; }
     }
 
     /* ─────────────────────────────────────────────────────────────
-       ANIMATED BORDERS — edge segments + traveling beams (Bluerra-style)
-       Colors track palette via --line / --line-soft / --glow
+       NEON BORDER FRAME SYSTEM
        ───────────────────────────────────────────────────────────── */
 
     .border-segments {
@@ -350,33 +305,10 @@
       transition: box-shadow 1s ease, filter 1s ease;
     }
 
-    .border-top {
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-    }
-
-    .border-right {
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 3px;
-    }
-
-    .border-bottom {
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-    }
-
-    .border-left {
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 3px;
-    }
+    .border-top { top: 0; left: 0; right: 0; height: 3px; }
+    .border-right { top: 0; right: 0; bottom: 0; width: 3px; }
+    .border-bottom { bottom: 0; left: 0; right: 0; height: 3px; }
+    .border-left { top: 0; left: 0; bottom: 0; width: 3px; }
 
     .border-top::after,
     .border-right::after,
@@ -427,118 +359,44 @@
       animation: snake-btt 12s linear infinite;
     }
 
-    .border-line-1.border-top::after {
-      animation-delay: 0s;
-    }
-
-    .border-line-1.border-right::after {
-      animation-delay: 3s;
-    }
-
-    .border-line-1.border-bottom::after {
-      animation-delay: 6s;
-    }
-
-    .border-line-1.border-left::after {
-      animation-delay: 9s;
-    }
-
-    .border-line-2.border-top::after {
-      animation-delay: 6s;
-    }
-
-    .border-line-2.border-right::after {
-      animation-delay: 9s;
-    }
-
-    .border-line-2.border-bottom::after {
-      animation-delay: 0s;
-    }
-
-    .border-line-2.border-left::after {
-      animation-delay: 3s;
-    }
+    .border-line-1.border-top::after { animation-delay: 0s; }
+    .border-line-1.border-right::after { animation-delay: 3s; }
+    .border-line-1.border-bottom::after { animation-delay: 6s; }
+    .border-line-1.border-left::after { animation-delay: 9s; }
+    .border-line-2.border-top::after { animation-delay: 6s; }
+    .border-line-2.border-right::after { animation-delay: 9s; }
+    .border-line-2.border-bottom::after { animation-delay: 0s; }
+    .border-line-2.border-left::after { animation-delay: 3s; }
 
     @keyframes snake-ltr {
-      0% {
-        transform: translateX(-15vw);
-        opacity: 1;
-      }
-
-      25% {
-        transform: translateX(100vw);
-        opacity: 1;
-      }
-
-      25.01%,
-      100% {
-        transform: translateX(100vw);
-        opacity: 0;
-      }
+      0% { transform: translateX(-15vw); opacity: 1; }
+      25% { transform: translateX(100vw); opacity: 1; }
+      25.01%, 100% { transform: translateX(100vw); opacity: 0; }
     }
 
     @keyframes snake-ttb {
-      0% {
-        transform: translateY(-15vh);
-        opacity: 1;
-      }
-
-      25% {
-        transform: translateY(100vh);
-        opacity: 1;
-      }
-
-      25.01%,
-      100% {
-        transform: translateY(100vh);
-        opacity: 0;
-      }
+      0% { transform: translateY(-15vh); opacity: 1; }
+      25% { transform: translateY(100vh); opacity: 1; }
+      25.01%, 100% { transform: translateY(100vh); opacity: 0; }
     }
 
     @keyframes snake-rtl {
-      0% {
-        transform: translateX(15vw);
-        opacity: 1;
-      }
-
-      25% {
-        transform: translateX(-100vw);
-        opacity: 1;
-      }
-
-      25.01%,
-      100% {
-        transform: translateX(-100vw);
-        opacity: 0;
-      }
+      0% { transform: translateX(15vw); opacity: 1; }
+      25% { transform: translateX(-100vw); opacity: 1; }
+      25.01%, 100% { transform: translateX(-100vw); opacity: 0; }
     }
 
     @keyframes snake-btt {
-      0% {
-        transform: translateY(15vh);
-        opacity: 1;
-      }
-
-      25% {
-        transform: translateY(-100vh);
-        opacity: 1;
-      }
-
-      25.01%,
-      100% {
-        transform: translateY(-100vh);
-        opacity: 0;
-      }
+      0% { transform: translateY(15vh); opacity: 1; }
+      25% { transform: translateY(-100vh); opacity: 1; }
+      25.01%, 100% { transform: translateY(-100vh); opacity: 0; }
     }
 
     @keyframes border-glow {
-
-      0%,
-      100% {
+      0%, 100% {
         opacity: 0.75;
         filter: drop-shadow(0 0 8px var(--glow));
       }
-
       50% {
         opacity: 1;
         filter: drop-shadow(0 0 14px var(--glow)) drop-shadow(0 0 6px var(--line-soft));
@@ -546,7 +404,7 @@
     }
 
     /* ─────────────────────────────────────────────────────────────
-       UI / CONTENT
+       CORE LAYOUT & GRID ALIGNMENT (20px INNER SPACING)
        ───────────────────────────────────────────────────────────── */
 
     .container {
@@ -555,16 +413,20 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start; 
       justify-content: center;
-      padding: 2rem;
-      text-align: center;
+      padding-left: calc(var(--gutter) + 12px); 
+      padding-right: calc(var(--gutter) + 12px); 
+      text-align: left;
+      box-sizing: border-box;
+      width: calc(100% - 24px);
+      max-width: none;
     }
 
     h1 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       font-weight: 400;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       cursor: pointer;
       user-select: none;
       position: relative;
@@ -578,13 +440,11 @@
     }
 
     @keyframes titlePulse {
-
       0%, 100% {
         text-shadow:
           0 0 10px var(--glow),
           0 0 8px color-mix(in srgb, var(--accent) 45%, transparent);
       }
-
       50% {
         text-shadow:
           0 0 14px var(--glow),
@@ -593,19 +453,14 @@
     }
 
     @keyframes wave-effect {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -100% 0;
-      }
+      0% { background-position: 200% 0; }
+      100% { background-position: -100% 0; }
     }
 
     p {
-      font-size: 0.72rem;
-      line-height: 1.9;
-      margin: 1.2rem 0 0;
+      font-size: 0.55rem;
+      line-height: 2.1;
+      margin: 1.1rem 0 0;
       color: var(--text-dim);
       text-shadow:
         0 0 1px color-mix(in srgb, var(--text) 22%, transparent),
@@ -615,13 +470,13 @@
 
     .icons {
       display: flex;
-      gap: 2.2rem;
-      margin-top: 2rem;
+      gap: 1.8rem;
+      margin-top: 1.8rem;
     }
 
     .icons a {
       color: var(--icon);
-      font-size: 1.6rem;
+      font-size: 1.2rem;
       transition: all 0.25s ease;
       position: relative;
       text-shadow:
@@ -631,7 +486,7 @@
 
     .icons a:hover {
       color: var(--accent);
-      transform: translateY(-5px) scale(1.1);
+      transform: translateY(-4px) scale(1.1);
       text-shadow: 0 0 18px var(--accent);
     }
 
@@ -652,7 +507,7 @@
       transform: translateX(-50%) scaleX(1);
     }
 
-    /* Click counter */
+    /* Click counter system */
     .click-counter {
       margin-top: 1.2rem;
       padding: 0;
@@ -661,14 +516,11 @@
       background: transparent;
       box-shadow: none;
       backdrop-filter: none;
-
-      font-size: 0.65rem;
+      font-size: 0.52rem;
       opacity: 0;
       transform: translateY(6px);
       transition: opacity 0.35s ease, transform 0.35s ease;
     }
-
-    /* click-counter adapts to palette; removed static light-theme tweak */
 
     .click-counter.show {
       opacity: 1;
@@ -690,15 +542,37 @@
         0 0 10px var(--glow);
     }
 
+    /* ─────────────────────────────────────────────────────────────
+       PREMIUM DOCK FOOTER LAYOUT
+       ───────────────────────────────────────────────────────────── */
+
     footer {
       position: fixed;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.55rem;
-      text-align: center;
+      bottom: var(--gutter);
+      left: calc(var(--gutter) + 12px);
+      right: calc(var(--gutter) + 12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
       z-index: 10;
-      line-height: 2;
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+
+    .footer-left {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-start;
+      text-align: left;
+      pointer-events: auto;
+      max-width: 55vw;
+    }
+
+    .song-title {
+      font-family: 'Press Start 2P', 'Noto Sans JP', monospace;
+      font-size: 0.50rem;
+      line-height: 1.4;
       color: var(--text-dim);
       letter-spacing: 0.08em;
       text-shadow:
@@ -706,37 +580,64 @@
         0 0 8px var(--glow);
     }
 
-    footer a {
-      color: var(--text-dim);
-      text-decoration: none;
+    /* PREMIUM VIEWPORT SCROLLER SYSTEM FOR LYRICS (Tightened Line spacing) */
+    .lyrics-viewport {
       position: relative;
-      transition: color 0.25s;
-    }
-
-    footer a:hover {
-      color: var(--accent);
-      text-shadow: 0 0 10px var(--accent);
-    }
-
-    footer a::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: linear-gradient(90deg, var(--accent) 0%, var(--line) 100%);
-      transition: width 0.25s ease;
-    }
-
-    footer a:hover::after {
+      height: 1.1rem; 
       width: 100%;
+      overflow: hidden;
+      padding-left: 12px;
+      padding-right: 12px;
+      box-sizing: border-box;
     }
 
-    /* Theme toggle removed — site uses time-driven palettes */
+    .lyric-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      font-family: 'Lexend', 'Noto Sans JP', sans-serif;
+      font-weight: 400;
+      font-size: 0.50rem; /* Perfectly scaled to fit tight spaces without clipping */
+      font-stretch: expanded;
+      color: var(--text-dim);
+      opacity: 0;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 6px var(--glow);
+      line-height: 1.3; /* Tight line heights remove vertically stretched illusion */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transform: translateY(14px); /* starting coordinate */
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+    }
+
+    .lyric-line.active {
+      opacity: 0.95;
+      transform: translateY(0);
+    }
+
+    .lyric-line.exit {
+      opacity: 0;
+      transform: translateY(-14px); /* smooth push-up exit */
+    }
+
+    .footer-right {
+      text-align: right;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.48rem;
+      line-height: 1.4; /* Compact line spacing eliminates visual stretching */
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-shadow:
+        0 0 1px color-mix(in srgb, var(--text) 18%, transparent),
+        0 0 8px var(--glow);
+      pointer-events: auto;
+      padding-right: 12px;
+      box-sizing: border-box;
+    }
 
     /* ─────────────────────────────────────────────────────────────
-       SPLASH (typing + click to enter)
+       SPLASH AUDIO GATEWAY SYSTEM
        ───────────────────────────────────────────────────────────── */
 
     .splash-screen {
@@ -765,42 +666,6 @@
       gap: 1.1rem;
     }
 
-    .splash-ring {
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      border: 1px solid var(--line-soft);
-      animation: ringPulse 3.2s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    .splash-ring:nth-child(2) {
-      width: 340px;
-      height: 340px;
-      animation-delay: 0.55s;
-    }
-
-    .splash-ring:nth-child(3) {
-      width: 480px;
-      height: 480px;
-      animation-delay: 1.1s;
-    }
-
-    @keyframes ringPulse {
-
-      0%,
-      100% {
-        opacity: 0.25;
-        transform: scale(1);
-      }
-
-      50% {
-        opacity: 0.65;
-        transform: scale(1.03);
-      }
-    }
-
     .typing-text {
       display: inline-block;
       white-space: nowrap;
@@ -820,47 +685,67 @@
     }
 
     @keyframes blinkCaret {
-
-      from,
-      to {
-        border-color: transparent;
-      }
-
-      50% {
-        border-color: var(--line);
-      }
+      from, to { border-color: transparent; }
+      50% { border-color: var(--line); }
     }
 
     .splash-hint {
-      font-size: 0.5rem;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
       color: var(--text-dim);
-      letter-spacing: 0.22em;
-      animation: hintBlink 2s ease-in-out infinite;
+      letter-spacing: 0.15em;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      margin-top: 0.8rem;
+      pointer-events: none;
     }
 
+    .splash-hint.show {
+      opacity: 0.75;
+      transform: translateY(0);
+      animation: hintBlink 2.2s ease-in-out infinite;
+    }
 
     @keyframes hintBlink {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.85; }
+    }
 
-      0%,
-      100% {
-        opacity: 0.4;
+    /* ─────────────────────────────────────────────────────────────
+       MOBILE VIEWPORT ADAPTATION
+       ───────────────────────────────────────────────────────────── */
+
+    @media (max-width: 768px) {
+      .container {
+        padding-left: var(--gutter);
+        padding-right: var(--gutter);
+        align-items: flex-start;
+        text-align: left;
       }
-
-      50% {
-        opacity: 0.9;
+      .moon {
+        width: 130px;
+        height: 130px;
+        top: 8%;
+        right: 8%;
+      }
+      footer {
+        left: var(--gutter);
+        right: var(--gutter);
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+        bottom: var(--gutter);
       }
     }
 
-    /* Accessibility: reduce motion */
     @media (prefers-reduced-motion: reduce) {
-
       .border-top,
       .border-right,
       .border-bottom,
       .border-left {
         animation: none !important;
       }
-
       .border-top::after,
       .border-right::after,
       .border-bottom::after,
@@ -868,11 +753,9 @@
         animation: none !important;
         opacity: 0 !important;
       }
-
       .crt-overlay::before,
       body::before,
       h1,
-      .splash-ring,
       .splash-hint {
         animation: none !important;
       }
@@ -884,24 +767,21 @@
   <!-- Space plate background -->
   <div class="space-plate" aria-hidden="true"></div>
   <div class="sun" aria-hidden="true"></div>
-  <div class="moon big" aria-hidden="true"></div>
-  <div class="moon small" aria-hidden="true"></div>
+  <div class="moon" aria-hidden="true"></div>
   <canvas id="starCanvas" aria-hidden="true"></canvas>
 
   <!-- CRT overlay -->
   <div class="crt-overlay" aria-hidden="true"></div>
 
-  <!-- Splash -->
+  <!-- Immersive Audio Prompting Intro -->
   <div class="splash-screen" id="splashScreen" role="dialog" aria-label="Welcome">
     <div class="splash-content">
-      <div class="splash-ring"></div>
-      <div class="splash-ring"></div>
-      <div class="splash-ring"></div>
       <div class="typing-text" id="splashTitle">MiloHakai</div>
+      <div class="splash-hint" id="splashHint">click to continue</div>
     </div>
   </div>
 
-  <!-- Animated borders: dual traveling beams on fixed edge segments (same pattern as Bluerra) -->
+  <!-- Animated borders -->
   <div class="border-segments" aria-hidden="true">
     <div class="border-top border-line-1"></div>
     <div class="border-right border-line-1"></div>
@@ -913,16 +793,17 @@
     <div class="border-left border-line-2"></div>
   </div>
 
-
   <!-- Main content -->
   <div class="container">
     <h1 id="username" class="wave-text" onclick="playClickSound()">MiloHakai</h1>
     <p>Game Designer and occasional streamer from Italy.</p>
 
+    <!-- Click counter container -->
     <div id="clickCounter" class="click-counter" style="display:none;">
       <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
     </div>
 
+    <!-- Social links -->
     <div class="icons">
       <a href="https://discord.gg/mhfnh6j9uQ" title="Discord" target="_blank" rel="noopener"><i
           class="fab fa-discord"></i></a>
@@ -935,12 +816,21 @@
     </div>
   </div>
 
+  <!-- Dynamic music lyrics and titles footer -->
   <footer>
-    Copyright © 2026–present MiloHakai // OutOfTune<br>
-    Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank" rel="noopener">SpectraPulse</a>
+    <div class="footer-left">
+      <div class="song-title" id="songTitle">Loading...</div>
+      <div class="lyrics-viewport" id="lyricsViewport">
+        <!-- Lyric lines will slide and fade dynamically inside here -->
+      </div>
+    </div>
+    <div class="footer-right">
+      © 2026 - OutOfTune<br>
+      MiloHakai
+    </div>
   </footer>
 
-  <!-- Background music tracks (one per phase) -->
+  <!-- Audio elements -->
   <audio id="bgmDay" preload="auto" loop muted playsinline>
     <source src="./audio/bgm-day.mp3" type="audio/mpeg">
   </audio>
@@ -957,11 +847,6 @@
   </audio>
 
   <script>
-    /* Theme switching removed — site uses time-based palettes */
-
-    /* ─────────────────────────────────────────────────────────────
-       STARFIELD (monochrome) + occasional shooting star
-       ───────────────────────────────────────────────────────────── */
     (function () {
       const canvas = document.getElementById('starCanvas');
       const ctx = canvas.getContext('2d', { alpha: true });
@@ -975,7 +860,7 @@
         H = canvas.height = Math.floor(window.innerHeight * dpr);
         canvas.style.width = window.innerWidth + "px";
         canvas.style.height = window.innerHeight + "px";
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); 
         initStars();
       }
 
@@ -1038,9 +923,9 @@
 
         if (s.spike) {
           const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, sz * 5);
-            const css = getComputedStyle(document.documentElement);
-            const starRgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
-            g.addColorStop(0, `rgba(${starRgb},${a * 0.22})`);
+          const css = getComputedStyle(document.documentElement);
+          const starRgb = (css.getPropertyValue('--star-rgb') || '255,255,255').trim();
+          g.addColorStop(0, `rgba(${starRgb},${a * 0.22})`);
           g.addColorStop(1, 'transparent');
           ctx.beginPath();
           ctx.arc(s.x, s.y, sz * 5, 0, Math.PI * 2);
@@ -1092,7 +977,6 @@
         requestAnimationFrame(draw);
       }
 
-      /* expose a small API to update sky / star settings from outside this closure */
       window.__starfield = {
         setSkyVars(vars) {
           window.__sky = Object.assign(window.__sky || {}, vars || {});
@@ -1104,10 +988,9 @@
       resize();
       requestAnimationFrame(draw);
     })();
+  </script>
 
-    /* ─────────────────────────────────────────────────────────────
-       CLICK COUNTER + SOUND
-       ───────────────────────────────────────────────────────────── */
+  <script>
     let clickCount = 0;
     const clickCounter = document.getElementById('clickCounter');
     const clickCountSpan = document.getElementById('clickCount');
@@ -1125,12 +1008,9 @@
         setTimeout(() => clickCounter.classList.add('show'), 10);
       }
     }
+  </script>
 
-    /* ─────────────────────────────────────────────────────────────
-       BACKGROUND AUDIO MANAGER
-       - manages three tracks (day, sunset/indigo, night) with crossfade
-       - primes tracks and unmutes on first user gesture
-       ───────────────────────────────────────────────────────────── */
+  <script>
     (function () {
       const tracks = {
         day: document.getElementById('bgmDay'),
@@ -1157,7 +1037,6 @@
       function fadeTo(el, to, ms = 900) {
         if (!el) return;
         el.muted = false;
-        // ensure a sane numeric start volume
         const start = (typeof el.volume === 'number') ? el.volume : 0;
         if (ms <= 0) {
           const v = Math.max(0, Math.min(1, to));
@@ -1194,10 +1073,7 @@
         if (oldT && oldT !== newT) fadeTo(oldT, 0);
       }
 
-      // expose manager
       window.__bgmManager = { setFor, ensureAll, tracks };
-
-      // prime tracks now (muted) and wait for user gesture to fully enable
       ensureAll();
 
       const onFirstGesture = () => {
@@ -1206,21 +1082,22 @@
           t.muted = false;
           try { t.play().catch(() => { }); } catch (e) { }
         });
-        // if there's already a selected track, fade it up
         if (current && tracks[current]) fadeTo(tracks[current], DEFAULT_VOLUME, 700);
       };
+
+      window.__bgmManager.onFirstGesture = onFirstGesture;
 
       ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(ev =>
         document.addEventListener(ev, onFirstGesture, { once: true, capture: true })
       );
     })();
+  </script>
 
-    /* ─────────────────────────────────────────────────────────────
-       SPLASH typing + hide
-       ───────────────────────────────────────────────────────────── */
+  <script>
     (function () {
       const splash = document.getElementById('splashScreen');
       const splashTitle = document.getElementById('splashTitle');
+      const splashHint = document.getElementById('splashHint');
       const mainTitle = document.getElementById('username');
       const text = (mainTitle && mainTitle.textContent.trim()) || 'MiloHakai';
 
@@ -1239,28 +1116,82 @@
       }
 
       function hide() {
-        if (splash) splash.classList.add('hidden');
+        if (splash) {
+          splash.classList.add('hidden');
+          // Activate and unmute audio on dismissal
+          if (window.__bgmManager && typeof window.__bgmManager.onFirstGesture === 'function') {
+            window.__bgmManager.onFirstGesture();
+          }
+        }
       }
 
       if (splash && splashTitle) {
-        typeText(splashTitle, text, 75, () => setTimeout(hide, 900));
+        // Run Typing sequence, then smoothly show "click to continue"
+        typeText(splashTitle, text, 75, () => {
+          setTimeout(() => {
+            if (splashHint) splashHint.classList.add('show');
+          }, 300);
+        });
         splash.addEventListener('pointerdown', hide, { once: true });
       }
     })();
+  </script>
 
-    /* ------------------------------------------------------------------
-       Time-based sky palettes (Europe/Rome clock, Napoli sun geometry)
-       - Official sunrise/sunset (−0.833°), civil dawn/dusk (−6°), etc.
-       - Same class of times as published alba/tramonto tables (e.g. Napoli).
-       ------------------------------------------------------------------ */
+  <script>
+    const lyricsData = [
+      { time: 31.25, text: "雨上がりの観覧車" },
+      { time: 35.13, text: "花言葉 ボードウォーク" },
+      { time: 38.83, text: "指遊び 美術館" },
+      { time: 42.88, text: "チャイナタウン 青りんご味" },
+      { time: 46.75, text: "色とりどりのコンテナー" },
+      { time: 50.45, text: "片っぽだけの手袋" },
+      { time: 54.67, text: "嘆きはタイムラインの彼方" },
+      { time: 58.32, text: "その傷はスワイプ出来ない" },
+      { time: 62.31, text: "No fate 鈍色の空" },
+      { time: 67.91, text: "微かにまぶしい" },
+      { time: 71.84, text: "雲の切れ間から降の帯を" },
+      { time: 79.66, text: "手繰りよせ まとえば" },
+      { time: 83.12, text: "私でも空を飛べるか" },
+      { time: 103.12, text: "Au jour du départ, à nouveau" },
+      { time: 107.33, text: "À chaque décision on rêve" },
+      { time: 111.41, text: "Pour que le manège ne s'arrête jamais de tourner" },
+      { time: 118.97, text: "霧の夜 of イルミネーション" },
+      { time: 122.62, text: "誕生日の蝋燭" },
+      { time: 126.83, text: "自分らしさ装うセルフィ" },
+      { time: 130.83, text: "ネタバレしてる人生" },
+      { time: 134.48, text: "No fate 真夜中の海" },
+      { time: 140.05, text: "引き摺り込まれそう" },
+      { time: 143.99, text: "月の光でも虹は架かるという" },
+      { time: 151.94, text: "手繰りよせ まとえば" },
+      { time: 155.40, text: "君なら夜を越えるよ" },
+      { time: 177.77, text: "Je te vois dans le miroir" },
+      { time: 181.68, text: "C'est plus clair qu'une image" },
+      { time: 185.68, text: "Les étoiles que tu contemples" },
+      { time: 188.50, text: "Nous dicen de chanter \"la, la, la, la, la\"" },
+      { time: 193.33, text: "La, la, la, la, la, la, la" },
+      { time: 197.27, text: "La, la, la, la, la, la, la" },
+      { time: 201.26, text: "La, la, la, la, la, la, la" },
+      { time: 204.16, text: "La, la, la, la, la, la, la, la, la, la, la" },
+      { time: 208.81, text: "Je te vois dans le miroir" },
+      { time: 212.84, text: "En chanting une ballade" },
+      { time: 216.72, text: "Les étoiles que tu contemples" },
+      { time: 219.77, text: "Couvrent même les lumières de cette ville" },
+      { time: 224.51, text: "La, la, la, la, la, la, la" },
+      { time: 228.45, text: "La, la, la, la, la, la, la" },
+      { time: 232.48, text: "La, la, la, la, la, la, la" },
+      { time: 235.33, text: "La, la, la, la, la, la, la, la, la, la, la" },
+      { time: 240.39, text: "La, la, la, la, la, la, la" },
+      { time: 244.25, text: "La, la, la, la, la, la, la" },
+      { time: 247.96, text: "La, la, la, la, la, la, la" },
+      { time: 250.91, text: "La, la, la, la, la, la, la, la, la, la, la" }
+    ];
+  </script>
+
+  <script>
     (function () {
       const SKY_LAT = 40.8518;
       const SKY_LON = 14.2681;
 
-      /*
-       * Minimal SunCalc core (BSD-2-Clause, Vladimir Agafonkin).
-       * https://github.com/mourner/suncalc — formulas from https://aa.quae.nl/en/reken/zonpositie.html
-       */
       const SC_PI = Math.PI,
         SC_sin = Math.sin,
         SC_cos = Math.cos,
@@ -1364,7 +1295,6 @@
         return sunInstCache.data;
       }
 
-      /** Minutes before official sunset when “sunset” palette begins; after dusk for indigo. */
       const SUN_BAND = { dayFadeBeforeSet: 22, civilAfterDusk: 28, indigoAfterNautical: 52 };
 
       function pickPaletteFromInstant(now) {
@@ -1444,21 +1374,91 @@
         },
         night: {
           bg: '#050505', bg2: '#070707',
-          text: '#f0edff', textDim: 'rgba(220, 226, 255, 0.84)',
+          text: '#f8f6ff', textDim: 'rgba(220, 226, 255, 0.84)',
           line: 'rgba(255, 252, 255, 0.94)', lineSoft: 'rgba(228, 224, 255, 0.52)',
-          glow: 'rgba(188, 196, 255, 0.40)',
-          skyTop: '#050505', skyMid: '#070707', skyBottom: '#121214',
-          accent: '#d4c4ff', icon: 'rgba(210, 216, 255, 0.92)', starRgb: '255,255,255', starDensity: 1.4,
-          bandStrong: 'rgba(255,255,255,0.20)', bandSoft: 'rgba(255,255,255,0.08)',
-          mist: 'rgba(255,255,255,0.06)', dust: 'rgba(255,255,255,0.12)',
+          glow: 'rgba(100, 140, 255, 0.35)',
+          skyTop: '#0c101b', skyMid: '#080a12', skyBottom: '#040509',
+          accent: '#cbd5e1', icon: 'rgba(210, 216, 255, 0.92)', starRgb: '255,255,255', starDensity: 1.4,
+          bandStrong: 'rgba(255,255,255,0.04)', 
+          bandSoft: 'rgba(255,255,255,0.01)',
+          mist: 'rgba(255,255,255,0.02)', dust: 'rgba(255,255,255,0.08)',
           vignette: 'rgba(0,0,0,0.38)', scanline: 'rgba(0,0,0,0.16)',
           flicker: 'rgba(255,255,255,0.006)',
-          waveA: '#f8f6ff', waveB: '#c4b5fd',
+          waveA: '#f8f6ff', waveB: '#cbd5e1',
           sunCore: '#1f1c28', sunMid: '#121018', sunGlow: 'rgba(0,0,0,0)',
-          moonRim: 'rgba(252, 250, 255, 0.96)', moonRimSoft: 'rgba(205, 200, 238, 0.58)',
-          moonHalo: 'rgba(150, 142, 210, 0.5)'
+          moonRim: 'rgba(255, 255, 255, 0.98)', moonRimSoft: 'rgba(220, 230, 255, 0.7)',
+          moonHalo: 'rgba(110, 140, 255, 0.4)'
         }
       };
+
+      let lyricSyncListener = null;
+
+      /* HIGHER-FIDELITY SCROLL-UP LYRICS CONTROLLER */
+      function pushLyricText(newText) {
+        const viewport = document.getElementById('lyricsViewport');
+        if (!viewport) return;
+
+        // Skip duplicates to prevent screen jitter
+        if (viewport.dataset.currentText === newText) return;
+        viewport.dataset.currentText = newText;
+
+        const currentActive = viewport.querySelector('.lyric-line.active');
+        if (currentActive) {
+          currentActive.classList.remove('active');
+          currentActive.classList.add('exit');
+          setTimeout(() => currentActive.remove(), 420);
+        }
+
+        const newLine = document.createElement('div');
+        newLine.className = 'lyric-line';
+        newLine.textContent = newText;
+        viewport.appendChild(newLine);
+
+        // Force browser layout repaint
+        newLine.offsetHeight;
+
+        newLine.classList.add('active');
+      }
+
+      function setupLyricsForMode(name) {
+        const songMap = {
+          day: '薄明 (feat. Maika Loubté) - Kirinji',
+          sunset: 'Lau-fi - Laur',
+          indigo: 'Lau-fi - Laur',
+          night: 'Catharsis - Aether'
+        };
+
+        const titleEl = document.getElementById('songTitle');
+        const dayBgm = document.getElementById('bgmDay');
+
+        if (titleEl) {
+          titleEl.textContent = songMap[name] || '';
+        }
+
+        if (lyricSyncListener) {
+          dayBgm.removeEventListener('timeupdate', lyricSyncListener);
+          lyricSyncListener = null;
+        }
+
+        if (name === 'day') {
+          lyricSyncListener = function () {
+            const curTime = dayBgm.currentTime;
+            let currentLine = "...";
+            for (let i = 0; i < lyricsData.length; i++) {
+              if (curTime >= lyricsData[i].time) {
+                currentLine = lyricsData[i].text;
+              } else {
+                break;
+              }
+            }
+            pushLyricText(currentLine);
+          };
+          dayBgm.addEventListener('timeupdate', lyricSyncListener);
+          lyricSyncListener(); 
+        } else {
+          pushLyricText("Enjoy OutOfTune");
+        }
+      }
 
       function applyPalette(name) {
         const p = palettes[name];
@@ -1475,7 +1475,6 @@
         root.setProperty('--sky-mid', p.skyMid);
         root.setProperty('--sky-bottom', p.skyBottom);
         root.setProperty('--accent', p.accent || '');
-        // band / mist / dust / vignette / scanline / flicker
         if (p.bandStrong) root.setProperty('--band-strong', p.bandStrong);
         if (p.bandSoft) root.setProperty('--band-soft', p.bandSoft);
         if (p.mist) root.setProperty('--mist', p.mist);
@@ -1483,16 +1482,12 @@
         if (p.vignette) root.setProperty('--vignette', p.vignette);
         if (p.scanline) root.setProperty('--scanline', p.scanline);
         if (p.flicker) root.setProperty('--flicker-overlay', p.flicker);
-        // wave / title gradient
         if (p.waveA) root.setProperty('--wave-a', p.waveA);
         if (p.waveB) root.setProperty('--wave-b', p.waveB);
-        // ensure star-rgb is stored as r,g,b (no #)
         const rgb = p.starRgb && p.starRgb.indexOf('#') === 0 ? hexToRgb(p.starRgb) : (p.starRgb || '255,255,255');
         root.setProperty('--star-rgb', rgb);
         root.setProperty('--star-density', String(p.starDensity || 1));
-        // icon color
         if (p.icon) root.setProperty('--icon', p.icon);
-        // sun / moon / sky rim light (keeps celestial bodies in palette family)
         if (p.sunCore != null) root.setProperty('--sun-core', p.sunCore);
         if (p.sunMid != null) root.setProperty('--sun-mid', p.sunMid);
         if (p.sunGlow != null) root.setProperty('--sun-glow', p.sunGlow);
@@ -1502,10 +1497,10 @@
 
         document.documentElement.setAttribute('data-sky', name);
 
-        // instruct bgm manager to switch tracks for this palette (if available)
+        setupLyricsForMode(name);
+
         try { if (window.__bgmManager && typeof window.__bgmManager.setFor === 'function') window.__bgmManager.setFor(name); } catch (e) { }
 
-        // add a brief swap class to kick off any CSS keyframe wash if present
         try {
           const el = document.documentElement;
           el.classList.add('palette-swap');
@@ -1513,7 +1508,6 @@
           el.__paletteSwapTimer = window.setTimeout(() => el.classList.remove('palette-swap'), 1400);
         } catch (e) { }
 
-        // tell starfield to reinit with new density when available
         if (window.__starfield && typeof window.__starfield.setSkyVars === 'function') {
           window.__starfield.setSkyVars({ starDensity: p.starDensity || 1, starRgb: rgb });
         } else {
@@ -1523,9 +1517,6 @@
         updateSunFromClock();
       }
 
-      /**
-       * Sun disk from Napoli sunrise→sunset (day) or sunset-band (civil twilight window).
-       */
       function updateSunFromClock() {
         const root = document.documentElement.style;
         const sky = document.documentElement.getAttribute('data-sky');
@@ -1548,24 +1539,29 @@
           const span = Math.max(1, set - rise);
           let t = (nowT - rise) / span;
           t = Math.max(0, Math.min(1, t));
-          const sinBand = Math.pow(Math.sin(Math.PI * t), 2);
-          const left = 7 + t * 86;
-          const top = 23 - 15 * sinBand;
-          const scale = 1.0 + 0.07 * sinBand;
+          
+          /* Sweep arch from left to right */
+          const left = 8 + t * 78;
+          const top = 55 - 43 * Math.sin(Math.PI * t); 
+          const scale = 1.0 + 0.08 * Math.sin(Math.PI * t);
+
           root.setProperty('--sun-left', left.toFixed(2) + '%');
           root.setProperty('--sun-top', top.toFixed(2) + '%');
           root.setProperty('--sun-scale', scale.toFixed(3));
           return;
         }
 
+        /* Sunset curve */
         const ss0 = set - SUN_BAND.dayFadeBeforeSet * MIN;
         const ss1 = dusk + SUN_BAND.civilAfterDusk * MIN;
         const span = Math.max(1, ss1 - ss0);
         let u = (nowT - ss0) / span;
         u = Math.max(0, Math.min(1, u));
-        const left = 88 - u * 28;
-        const top = 14 + u * 42;
-        const scale = 1.02 - u * 0.22;
+
+        const left = 86 + u * 8;
+        const top = 55 + u * 20;
+        const scale = 1.05 - u * 0.22;
+
         root.setProperty('--sun-left', left.toFixed(2) + '%');
         root.setProperty('--sun-top', top.toFixed(2) + '%');
         root.setProperty('--sun-scale', scale.toFixed(3));
@@ -1575,11 +1571,9 @@
         applyPalette(pickPaletteFromInstant(new Date()));
       }
 
-      // initial apply and periodic refresh (every minute)
       choosePaletteByTime();
       setInterval(choosePaletteByTime, 60 * 1000);
 
-      // expose for testing / manual override
       window.applySkyPalette = applyPalette;
       window.updateSunFromClock = updateSunFromClock;
       window.getCachedSunInstants = getCachedSunInstants;
@@ -1587,5 +1581,4 @@
     })();
   </script>
 </body>
-
 </html>
