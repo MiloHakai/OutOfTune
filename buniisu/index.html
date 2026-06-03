@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bunnisu</title>
+    <meta name="description" content="Silly artist" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bunnisu" />
+    <meta property="og:description" content="Silly artist" />
+    <meta property="og:url" content="https://bunnisu.dev/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Bunnisu" />
+    <meta name="twitter:description" content="Silly artist" />
+    <link class="icon" type="image/svg+xml" href="assets/icons/logo.svg">
+    
+    <!-- GOOGLE FONTS: Noto Sans JP and KR for clean Japanese/Korean character fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* DEEPLY DIMMED TWILIGHT NAVY PALETTE */
+            --bg-base: #181e29;
+            --bg-base-dark: #12161f;
+            --primary: #a5b4fc;       
+            --text-main: #e2e8f0;     
+            --text-muted: #64748b;    
+
+            /* Glowing text wave palette */
+            --wave-light: #C7D7FF;
+            --wave-dark: #7D92B5;
+
+            /* CELESTIAL BACKGROUND ELEMENTS */
+            --moon-rim: rgba(255, 255, 255, 0.85);
+            --moon-rim-soft: rgba(224, 235, 255, 0.25);
+            --moon-halo: rgba(255, 255, 255, 0.08);
+            
+            --band-strong: rgba(255, 255, 255, 0.04);
+            --band-soft: rgba(255, 255, 255, 0.01);
+            --mist: rgba(255, 255, 255, 0.01);
+            --dust: rgba(255, 255, 255, 0.15);
+            
+            /* CRT Overlay properties */
+            --scanline: rgba(255, 255, 255, 0.015);
+            --vignette: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            height: 100svh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           CELESTIAL BACKGROUND SYSTEM
+           ───────────────────────────────────────────────────────────── */
+        .space-plate {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-base-dark) 100%);
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+
+        body.ambient-active .space-plate {
+            opacity: 1;
+        }
+
+        .space-plate::before {
+            content: "";
+            position: absolute;
+            inset: -25%;
+            transform: rotate(-14deg) scale(1.15);
+            opacity: 0.85;
+            background:
+                radial-gradient(ellipse 160% 20% at 68% 55%,
+                    var(--band-strong) 0%,
+                    var(--band-soft) 40%,
+                    transparent 75%),
+                radial-gradient(ellipse 60% 35% at 20% 30%,
+                    var(--mist) 0%,
+                    transparent 70%);
+        }
+
+        .space-plate::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+            background-image: radial-gradient(var(--dust) 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+
+        .moon {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            filter: drop-shadow(0 0 25px var(--moon-halo));
+            transition: opacity 1.5s ease 0.3s, transform 1.5s ease;
+        }
+
+        body.ambient-active .moon {
+            opacity: 0.9;
+        }
+
+        .moon.big {
+            width: 180px;
+            height: 180px;
+            top: 15%;
+            right: 10%;
+            background: radial-gradient(circle at 34% 36%,
+                transparent 58%,
+                var(--moon-rim) 59%,
+                var(--moon-rim) 62%,
+                var(--moon-rim-soft) 66%,
+                transparent 72%);
+            animation: moon-bob 16s ease-in-out infinite;
+        }
+
+        @keyframes moon-bob {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(0.5deg); }
+        }
+
+        #starCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        
+        body.ambient-active #starCanvas {
+            opacity: 0.85;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           CRT SCANLINE LAYER
+           ───────────────────────────────────────────────────────────── */
+        .crt-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .crt-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                var(--scanline) 0px,
+                var(--scanline) 1px,
+                transparent 1px,
+                transparent 4px);
+        }
+
+        .crt-overlay::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 120% 110% at 50% 50%,
+                transparent 0%,
+                transparent 65%,
+                var(--vignette) 100%);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           UI CORE WORKSPACE (DESKTOP MODES)
+           ───────────────────────────────────────────────────────────── */
+        .content-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
+            z-index: 10;
+            width: 100%;
+            padding-left: 40px;
+            padding-right: 40px;
+        }
+
+        .brand-section {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .brand-section h1.wave-text {
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+            font-weight: 400;
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: 0.02em;
+            cursor: default;
+            user-select: none;
+            color: var(--primary);
+            display: inline-block;
+        }
+
+        .brand-section h1.wave-text.glow-active {
+            background: linear-gradient(90deg, 
+                var(--wave-light) 0%, 
+                var(--wave-dark) 25%, 
+                var(--wave-light) 50%, 
+                var(--wave-dark) 75%, 
+                var(--wave-light) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: wave-slide 4s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(199, 215, 255, 0.65));
+        }
+
+        @keyframes wave-slide {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            font-weight: 400;
+            max-width: 500px;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+        }
+
+        .socials-row {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .social-icon-link {
+            color: var(--primary);
+            transition: transform 0.2s ease, color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-icon-link:hover {
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .social-icon-link svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Audio Lyrics Display Box */
+        .lyrics-container {
+            position: fixed;
+            left: 40px;
+            bottom: 40px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: min(540px, calc(100vw - 80px));
+        }
+
+        .track-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.45rem;
+            color: var(--text-muted);
+            font-weight: bold;
+            letter-spacing: 0.04em;
+        }
+
+        .lyric-line {
+            font-family: 'Press Start 2P', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+            font-size: 0.5rem; 
+            color: var(--text-main);
+            line-height: 1.7;
+            min-height: 3.2em; 
+            transition: color 0.3s ease;
+            letter-spacing: 0.04em;
+        }
+
+        .lyric-typed {
+            display: inline;
+        }
+
+        .lyric-caret {
+            display: inline-block;
+            width: 0.5ch;
+            margin-left: 4px;
+            color: var(--primary);
+            animation: caretBlink 0.65s step-end infinite;
+            vertical-align: baseline;
+        }
+
+        @keyframes caretBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Stacked bottom-right footer system */
+        .footer-right {
+            position: fixed;
+            right: 40px;
+            bottom: 40px;
+            z-index: 100;
+            font-family: 'Press Start 2P', monospace;
+            color: var(--text-muted);
+            font-size: 0.42rem;
+            line-height: 1.7;
+            letter-spacing: 0.5px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .footer-copy {
+            opacity: 0.6;
+        }
+
+        .footer-author {
+            opacity: 0.85;
+            color: var(--primary);
+        }
+
+        /* TEXT INTRO SLIDE OVERLAY ARCHITECTURE */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-base);
+            transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-holder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            user-select: none;
+        }
+
+        .intro-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.1rem, 2.8vw, 1.6rem); 
+            color: var(--primary);
+            opacity: 0;
+            transform: translateY(25px);
+            animation: introSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
+        }
+
+        .intro-sub-click {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.45rem, 1.2vw, 0.52rem); 
+            color: var(--text-muted);
+            opacity: 0;
+            letter-spacing: 1px;
+            animation: fadeInSimple 0.8s ease forwards 0.9s;
+        }
+
+        @keyframes introSlideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInSimple {
+            to { opacity: 0.75; }
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           UPDATED: CENTERED & VERTICALLY BALANCED MOBILE ARCHITECTURE
+           ───────────────────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            body {
+                justify-content: center; /* FIXED: Vertically centers everything on the screen */
+                align-items: center;     /* Horizontally centers everything */
+                padding: 24px; 
+            }
+
+            .content-wrapper {
+                padding: 0;
+                justify-content: center;
+                align-items: center; 
+                text-align: center;  
+                height: auto;
+                width: 100%;
+            }
+
+            .brand-section {
+                gap: 10px;
+                width: 100%;
+                align-items: center; 
+            }
+
+            .brand-section h1.wave-text {
+                font-size: 1.4rem; 
+            }
+
+            .socials-row {
+                justify-content: center; 
+                width: 100%;
+            }
+
+            .moon.big {
+                width: 90px;
+                height: 90px;
+                top: 8%; /* FIXED: Pushed down slightly from the very top border edge */
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%); 
+                animation: moon-bob-mobile 16s ease-in-out infinite;
+            }
+
+            @keyframes moon-bob-mobile {
+                0%, 100% { transform: translate(-50%, 0); }
+                50% { transform: translate(-50%, -8px); }
+            }
+
+            .lyrics-container {
+                position: relative;
+                left: auto;
+                bottom: auto;
+                top: auto;
+                margin-top: 32px; /* FIXED: Proportional spacing relative to the brand header */
+                width: 100%;
+                gap: 8px;
+                align-items: center; 
+            }
+
+            .track-title {
+                font-size: 0.44rem;
+                line-height: 1.5;
+                text-align: center;
+            }
+
+            .lyric-line {
+                font-size: 0.58rem; 
+                text-align: center; 
+                min-height: 4.5em; 
+                width: 100%;
+            }
+
+            .footer-right {
+                position: fixed;
+                left: 24px;
+                right: 24px;
+                bottom: 24px;
+                text-align: center;
+                align-items: center;
+                flex-direction: row;
+                justify-content: space-between;
+                width: calc(100% - 48px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="space-plate" aria-hidden="true"></div>
+    <div class="moon big" aria-hidden="true"></div>
+    <canvas id="starCanvas" aria-hidden="true"></canvas>
+
+    <div class="crt-overlay" aria-hidden="true"></div>
+
+    <div id="overlay" class="overlay">
+        <div class="intro-holder">
+            <div class="intro-title">Bunnisu</div>
+            <div class="intro-sub-click">click here to continue</div>
+        </div>
+    </div>
+
+    <main class="content-wrapper">
+        <section class="brand-section">
+            <h1 id="brand-title" class="wave-text">Bunnisu</h1>
+            <p class="subtitle">Silly artist</p>
+            
+            <div class="socials-row">
+                <a href="https://ko-fi.com" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Support on Ko-fi">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.73s-.515.025-.67.437c-.13.344-.04 1.159-.04 1.159l.49 11.232c.155 1.546 1.495 2.371 2.758 2.397h11.233c1.392-.026 2.654-.876 2.887-2.397l.438-4.432s3.659-.077 5.101-1.392c1.444-1.314 1.732-4.01 1.055-6.411zm-5.024 3.737c-.31 1.727-2.062 1.83-2.062 1.83h-1.314v-7.292h1.365s1.805-.078 2.114 1.623c.31 1.7.155 2.113-.103 3.839zM5.334 7.505s1.16-.026 1.907.825c0 0 2.19-2.268 4.303-.567 0 0 1.03 1.005-.18 2.525 0 0-1.856 2.113-4.123 4.149 0 0-.258.206-.49.206l-.052-.026s-.206-.051-.386-.232c-2.165-2.061-3.66-3.865-3.66-3.865-1.03-1.417.681-3.015.681-3.015.953-.876 1.904.032 1.904.032z"/>
+                    </svg>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <div class="lyrics-container">
+        <div id="track-name" class="track-title">Loading track…</div>
+        <div class="lyric-line" id="lyric-line-box">
+            <span class="lyric-typed" id="lyric-output"></span><span class="lyric-caret" id="lyric-caret">|</span>
+        </div>
+    </div>
+
+    <div class="footer-right">
+        <div class="footer-copy">© 2026 - OutOfTune</div>
+        <div class="footer-author">Bunnisu</div>
+    </div>
+
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <script type="text/plain" id="lrc-content">
+        [00:10.09]ひらめきは刹那
+        [00:14.23]かがやきは永遠
+        [00:18.70]この胸に突き刺さったなら
+        [00:24.66]Killer tune
+        [00:28.09]踊りたいの 歌いたいの
+        [00:35.67]That's all I want
+        [00:37.29]すれ違って振り返ったなら
+        [00:43.14]それは killer tune
+        [00:46.90]あの曲なら もう プレイリストから外した
+        [00:55.31]アドレスもアカウントも変えたの
+        [00:59.69]写真も消した
+        [01:01.71]終わったことだもの
+        [01:04.42]素敵な音 見つかるけど
+        [01:08.90]これじゃないみたい
+        [01:13.23]イントロだけは最高
+        [01:15.85]心奪って欲しいのに ah
+        [01:23.00]始めたいの 忘れよう もう
+        [01:30.32]Goodbye my love
+        [01:31.92]巡り逢う新しい恋は
+        [01:37.45]Killer tune
+        [01:41.22]踊りたいの 歌いたいの
+        [01:48.66]That's all I want
+        [01:50.30]すれ違って振り返ったなら
+        [01:56.39]それは killer tune killer tune killer tune
+        [02:00.65]그저 숨겨놓은 상처들이
+        [02:02.48]반창고를 붙여서 보이지 않았을뿐
+        [02:06.19]그대로 남아있잖아
+        [02:09.55]차가워저버린 내 마음은
+        [02:11.64]더이상 이어폰을 끼지않고
+        [02:15.04]今日も時間を소모
+        [02:17.24]そんなRoutine も
+        [02:19.45]抜け出すかのように
+        [02:22.08]聴코える 懐かしのメロディー
+        [02:26.65]ときめきは永遠
+        [02:28.71]心奪われる
+        [02:30.48]やっぱり あの曲しかないね
+        [02:35.63]光浴びて ビートに抱かれ
+        [02:39.82]傷も癒えたけど
+        [02:44.14]あの夢 あの感情 遠ざかってゆく
+        [02:49.06]It's so faraway ah
+        [02:53.77]星は帰った 私も帰る
+        [03:02.89]ひとりぼっち 口ずさんれる killer tune
+        [03:11.98]君は今も聴いてるかな あの曲
+        [03:21.22]胸의오쿠 突き刺さったままの killer tune
+        [03:28.82]Killer tune
+        [03:29.68]Killer tune kills me
+        [03:38.48]Killer tune killer tune killer tune
+        [03:43.00]Goodbye my love...
+        [03:47.50]Killer tune killer tune killer tune
+        [03:52.06]Goodbye my love...
+        [03:56.53]Killer tune killer tune killer tune
+        [04:01.66]I want to cherish my tune
+    </script>
+
+    <script>
+        /* STARS DRAWING ENGINE */
+        (function () {
+            const canvas = document.getElementById('starCanvas');
+            const ctx = canvas.getContext('2d', { alpha: true });
+            let W = 0, H = 0;
+            let stars = [];
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                W = canvas.width = Math.floor(window.innerWidth * dpr);
+                H = canvas.height = Math.floor(window.innerHeight * dpr);
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                initStars();
+            }
+
+            function rand(min, max) { return min + Math.random() * (max - min); }
+
+            function initStars() {
+                stars = [];
+                const area = window.innerWidth * window.innerHeight;
+                const count = Math.min(Math.floor(area / 1800), 450); 
+
+                for (let i = 0; i < count; i++) {
+                    const r = Math.random();
+                    stars.push({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        size: r < 0.85 ? rand(0.5, 1.2) : rand(1.2, 2.0),
+                        a: rand(0.4, 0.95),
+                        tw: rand(0.005, 0.015),
+                        off: rand(0, Math.PI * 2)
+                    });
+                }
+            }
+
+            function draw(t) {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                ctx.fillStyle = "rgba(230, 242, 255, 1)"; 
+                
+                for (const s of stars) {
+                    const twinkle = Math.sin(t * s.tw * 60 + s.off);
+                    const alpha = s.a * (0.5 + 0.5 * twinkle);
+                    ctx.globalAlpha = alpha;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0;
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            requestAnimationFrame(draw);
+        })();
+
+        /* CORE AUDIO & LYRICS INTERACTION ENGINE */
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('overlay');
+            const audio = document.getElementById('bgm');
+            const brandTitle = document.getElementById('brand-title');
+            const bodyNode = document.body;
+            
+            const lyricOutput = document.getElementById('lyric-output');
+            const trackName = document.getElementById('track-name');
+            const lyricCaret = document.getElementById('lyric-caret');
+
+            let parsedLyrics = [];
+            let currentLineIndex = -1;
+
+            trackName.textContent = 'Killer Tune — Kirinji (ft. YonYon)';
+            lyricOutput.textContent = '';
+
+            function parseLRC() {
+                const lrcText = document.getElementById('lrc-content').textContent;
+                const lines = lrcText.split('\n');
+                const timeReg = /\[(\d+):(\d+)\.(\d+)\]/;
+
+                lines.forEach(line => {
+                    const match = timeReg.exec(line);
+                    if (match) {
+                        const minutes = parseInt(match[1]);
+                        const seconds = parseInt(match[2]);
+                        const milliseconds = parseInt(match[3]) * 10;
+                        const timeInSeconds = (minutes * 60) + seconds + (milliseconds / 1000);
+                        const text = line.replace(timeReg, '').trim();
+                        if(text) {
+                            parsedLyrics.push({ time: timeInSeconds, text: text });
+                        }
+                    }
+                });
+                parsedLyrics.sort((a, b) => a.time - b.time);
+            }
+            parseLRC();
+
+            overlay.addEventListener('click', () => {
+                overlay.classList.add('hidden');
+                bodyNode.classList.add('ambient-active');
+                brandTitle.classList.add('glow-active');
+                
+                audio.volume = 0.35;
+                audio.play()
+                    .then(() => {
+                        startLyricSyncLoop();
+                    })
+                    .catch(err => {
+                        console.warn('Audio playback handled safely:', err);
+                        lyricOutput.textContent = 'Playback initialized. Stream paused.';
+                    });
+            });
+
+            function startLyricSyncLoop() {
+                function frameCheck() {
+                    if (!audio.paused && !audio.ended) {
+                        const currentTime = audio.currentTime;
+                        let activeIndex = -1;
+
+                        for (let i = 0; i < parsedLyrics.length; i++) {
+                            if (currentTime >= parsedLyrics[i].time) {
+                                activeIndex = i;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (activeIndex !== -1 && activeIndex !== currentLineIndex) {
+                            currentLineIndex = activeIndex;
+                            triggerLinePrint(parsedLyrics[currentLineIndex].text);
+                        }
+                    }
+                    requestAnimationFrame(frameCheck);
+                }
+                requestAnimationFrame(frameCheck);
+            }
+
+            let printInterval = null;
+            function triggerLinePrint(fullText) {
+                if (printInterval) clearInterval(printInterval);
+                lyricOutput.textContent = '';
+                lyricCaret.hidden = false;
+                
+                let charIdx = 0;
+                printInterval = setInterval(() => {
+                    if (charIdx < fullText.length) {
+                        lyricOutput.textContent += fullText[charIdx];
+                        charIdx++;
+                    } else {
+                        clearInterval(printInterval);
+                    }
+                }, 25); 
+            }
+        });
+    </script>
+</body>
+</html>
