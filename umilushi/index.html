@@ -52,6 +52,10 @@
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
+      /* FIXED ALIGNMENT: Converted center flex flow to left-aligned distribution matching Karakule */
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
     }
 
     body::before {
@@ -122,14 +126,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #9b59b6 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(90deg, transparent 0%, transparent 30%, #4dd9d9 40%, #9b59b6 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal 12s linear infinite;
     }
@@ -139,14 +136,7 @@
       right: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(180deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #9b59b6 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(180deg, transparent 0%, transparent 30%, #4dd9d9 40%, #9b59b6 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical 12s linear infinite;
     }
@@ -156,14 +146,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(-90deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #9b59b6 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(-90deg, transparent 0%, transparent 30%, #4dd9d9 40%, #9b59b6 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal-reverse 12s linear infinite;
     }
@@ -173,61 +156,15 @@
       left: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(-180deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #9b59b6 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(-180deg, transparent 0%, transparent 30%, #4dd9d9 40%, #9b59b6 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical-reverse 12s linear infinite;
     }
 
-    [data-theme="light"] .border-top {
-      background: linear-gradient(90deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #8e44ad 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
-
-    [data-theme="light"] .border-right {
-      background: linear-gradient(180deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #8e44ad 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
-
-    [data-theme="light"] .border-bottom {
-      background: linear-gradient(-90deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #8e44ad 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
-
-    [data-theme="light"] .border-left {
-      background: linear-gradient(-180deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #8e44ad 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
+    [data-theme="light"] .border-top { background: linear-gradient(90deg, transparent 0%, transparent 30%, #3ca0a0 40%, #8e44ad 50%, #3ca0a0 60%, transparent 70%, transparent 100%) !important; }
+    [data-theme="light"] .border-right { background: linear-gradient(180deg, transparent 0%, transparent 30%, #3ca0a0 40%, #8e44ad 50%, #3ca0a0 60%, transparent 70%, transparent 100%) !important; }
+    [data-theme="light"] .border-bottom { background: linear-gradient(-90deg, transparent 0%, transparent 30%, #3ca0a0 40%, #8e44ad 50%, #3ca0a0 60%, transparent 70%, transparent 100%) !important; }
+    [data-theme="light"] .border-left { background: linear-gradient(-180deg, transparent 0%, transparent 30%, #3ca0a0 40%, #8e44ad 50%, #3ca0a0 60%, transparent 70%, transparent 100%) !important; }
 
     body.rampage .border-top,
     body.rampage .border-right,
@@ -237,14 +174,7 @@
     [data-theme="light"] body.rampage .border-right,
     [data-theme="light"] body.rampage .border-bottom,
     [data-theme="light"] body.rampage .border-left {
-      background-image: linear-gradient(90deg,
-          transparent 0%,
-          transparent 25%,
-          #ff2a2a 40%,
-          #ff8a00 50%,
-          #ff2a2a 60%,
-          transparent 75%,
-          transparent 100%) !important;
+      background-image: linear-gradient(90deg, transparent 0%, transparent 25%, #ff2a2a 40%, #ff8a00 50%, #ff2a2a 60%, transparent 75%, transparent 100%) !important;
       box-shadow: 0 0 8px rgba(255, 80, 0, 0.8), 0 0 18px rgba(255, 30, 30, 0.55);
     }
 
@@ -257,49 +187,24 @@
     .border-line-2.border-bottom { animation-delay: 0s; }
     .border-line-2.border-left { animation-delay: 3s; }
 
-    @keyframes move-horizontal {
-      0% { background-position: -100% 0; }
-      100% { background-position: 200% 0; }
-    }
+    @keyframes move-horizontal { 0% { background-position: -100% 0; } 100% { background-position: 200% 0; } }
+    @keyframes move-horizontal-reverse { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
+    @keyframes move-vertical { 0% { background-position: 0 -100%; } 100% { background-position: 0 200%; } }
+    @keyframes move-vertical-reverse { 0% { background-position: 0 200%; } 100% { background-position: 0 -100%; } }
+    @keyframes rampage-screen-shake { 0% { transform: translate(0, 0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -2px); } 75% { transform: translate(-1px, 2px); } 100% { transform: translate(0, 0); } }
+    @keyframes fire-flicker { 0%, 100% { opacity: 0.8; filter: hue-rotate(0deg) saturate(1); } 50% { opacity: 1; filter: hue-rotate(-6deg) saturate(1.3); } }
 
-    @keyframes move-horizontal-reverse {
-      0% { background-position: 200% 0; }
-      100% { background-position: -100% 0; }
-    }
-
-    @keyframes move-vertical {
-      0% { background-position: 0 -100%; }
-      100% { background-position: 0 200%; }
-    }
-
-    @keyframes move-vertical-reverse {
-      0% { background-position: 0 200%; }
-      100% { background-position: 0 -100%; }
-    }
-
-    @keyframes rampage-screen-shake {
-      0% { transform: translate(0, 0); }
-      25% { transform: translate(-2px, 1px); }
-      50% { transform: translate(2px, -2px); }
-      75% { transform: translate(-1px, 2px); }
-      100% { transform: translate(0, 0); }
-    }
-
-    @keyframes fire-flicker {
-      0%, 100% { opacity: 0.8; filter: hue-rotate(0deg) saturate(1); }
-      50% { opacity: 1; filter: hue-rotate(-6deg) saturate(1.3); }
-    }
-
+    /* FIXED ALIGNMENT: Left padding shift away from window edges */
     .container {
       position: relative;
       z-index: 3;
-      height: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 2rem;
-      text-align: center;
+      padding-left: 3.5rem;
+      text-align: left;
+      max-width: 600px;
     }
 
     h1 {
@@ -320,47 +225,27 @@
     }
 
     .wave-text {
-      background: linear-gradient(90deg,
-          #4dd9d9 0%,
-          #a8e6cf 35%,
-          #9b59b6 50%,
-          #a8e6cf 65%,
-          #4dd9d9 100%);
+      background: linear-gradient(90deg, #4dd9d9 0%, #a8e6cf 35%, #9b59b6 50%, #a8e6cf 65%, #4dd9d9 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: wave-effect 6s linear infinite;
-      text-shadow:
-        0 0 20px rgba(77, 217, 217, 0.6),
-        0 0 40px rgba(155, 89, 182, 0.4),
-        0 0 60px rgba(168, 230, 207, 0.2);
+      text-shadow: 0 0 20px rgba(77, 217, 217, 0.6), 0 0 40px rgba(155, 89, 182, 0.4), 0 0 60px rgba(168, 230, 207, 0.2);
       filter: drop-shadow(0 0 10px rgba(77, 217, 217, 0.5));
     }
 
     [data-theme="light"] .wave-text {
-      background: linear-gradient(90deg,
-          #3ca0a0 0%,
-          #2d5a6b 35%,
-          #8e44ad 50%,
-          #2d5a6b 65%,
-          #3ca0a0 100%);
+      background: linear-gradient(90deg, #3ca0a0 0%, #2d5a6b 35%, #8e44ad 50%, #2d5a6b 65%, #3ca0a0 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow:
-        0 0 20px rgba(60, 160, 160, 0.6),
-        0 0 40px rgba(142, 68, 173, 0.4),
-        0 0 60px rgba(45, 90, 107, 0.2);
+      text-shadow: 0 0 20px rgba(60, 160, 160, 0.6), 0 0 40px rgba(142, 68, 173, 0.4), 0 0 60px rgba(45, 90, 107, 0.2);
       filter: drop-shadow(0 0 10px rgba(60, 160, 160, 0.5));
     }
 
-    @keyframes wave-effect {
-      0% { background-position: 200% 0; }
-      100% { background-position: -100% 0; }
-    }
-
+    @keyframes wave-effect { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
     h1:active { transform: scale(0.98); }
 
     .title-gif {
@@ -379,16 +264,11 @@
       line-height: 1.3;
       color: #ffd8b1;
       text-transform: uppercase;
-      text-shadow:
-        0 0 10px rgba(255, 34, 34, 0.95),
-        0 0 20px rgba(255, 94, 0, 0.75),
-        3px 3px 0 rgba(40, 0, 0, 0.85);
+      text-shadow: 0 0 10px rgba(255, 34, 34, 0.95), 0 0 20px rgba(255, 94, 0, 0.75), 3px 3px 0 rgba(40, 0, 0, 0.85);
       animation: fire-flicker 0.35s infinite;
     }
 
-    body.rampage .rampage-banner {
-      display: block;
-    }
+    body.rampage .rampage-banner { display: block; }
 
     p {
       margin-top: 1.5rem;
@@ -401,12 +281,15 @@
       line-height: 1.4;
     }
 
-    @keyframes subtle-pulse {
-      0%, 100% { opacity: 0.9; }
-      50% { opacity: 1; }
-    }
+    @keyframes subtle-pulse { 0%, 100% { opacity: 0.9; } 50% { opacity: 1; } }
 
-    .icons { margin-top: 1.5rem; }
+    /* FIXED ALIGNMENT: Left-aligned icon row container */
+    .icons {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: flex-start;
+      gap: 20px;
+    }
 
     .click-counter {
       margin-top: 1rem;
@@ -440,11 +323,12 @@
     }
 
     .icons a {
-      margin: 0 10px;
       font-size: 1.5rem;
       color: inherit;
       text-decoration: none;
       transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
     }
 
     .icons a:hover {
@@ -457,21 +341,45 @@
       filter: drop-shadow(0 0 8px rgba(255, 68, 0, 0.7));
     }
 
-    [data-theme="light"] .icons a:hover {
-      color: #3ca0a0;
-    }
+    [data-theme="light"] .icons a:hover { color: #3ca0a0; }
 
+    /* FIXED FOOTER: OutOfTune dual-split bar setup matching Karakule */
     footer {
       position: fixed;
-      bottom: 10px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.5rem;
+      bottom: 20px;
+      left: 30px;
+      right: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.55rem;
       color: #8899aa;
       z-index: 2;
       font-family: 'Press Start 2P', monospace;
+      pointer-events: none;
       letter-spacing: 0.05em;
-      line-height: 1.4;
+    }
+
+    footer .track-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    footer .track-info i {
+      font-size: 0.6rem;
+      color: #4dd9d9;
+    }
+
+    body.rampage footer .track-info i {
+      color: #ff2a2a;
+    }
+
+    footer .copyright-info {
+      text-align: right;
+      line-height: 1.6;
+      pointer-events: auto;
     }
 
     footer a {
@@ -481,12 +389,7 @@
     }
 
     footer a:hover { color: #9b59b6; }
-
-    body.rampage footer,
-    body.rampage footer a {
-      color: #ffc9b3;
-    }
-
+    body.rampage footer, body.rampage footer a { color: #ffc9b3; }
     [data-theme="light"] footer { color: #5a7a8a; }
     [data-theme="light"] footer a { color: #3ca0a0; }
     [data-theme="light"] footer a:hover { color: #8e44ad; }
@@ -555,13 +458,33 @@
     }
 
     @media (max-width: 600px) {
+      body {
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        align-items: center;
+        text-align: center;
+      }
       h1 { font-size: 1.5rem; }
       p { font-size: 0.6rem; }
-      .icons a {
-        font-size: 1.3rem;
-        margin: 0 8px;
+      .icons {
+        justify-content: center;
+        gap: 16px;
       }
-      footer { font-size: 0.4rem; }
+      footer {
+        flex-direction: column;
+        gap: 12px;
+        bottom: 15px;
+        left: 10px;
+        right: 10px;
+        text-align: center;
+      }
+      footer .copyright-info {
+        text-align: center;
+      }
       .chaos-cube {
         width: 72px;
         height: 72px;
@@ -606,9 +529,16 @@
     </div>
   </div>
 
+  <!-- FIXED: Standard split tracking player footer template applied directly -->
   <footer>
-    Copyright © 2025–present Umilushi // OutOfTune <br>
-    Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank"> SpectraPulse</a>
+    <div class="track-info">
+      <i class="fas fa-music"></i>
+      <span></span>
+    </div>
+    <div class="copyright-info">
+      © 2026 OutOfTune<br>
+      Umilushi
+    </div>
   </footer>
 
   <audio id="backgroundAudio" preload="auto" loop>
