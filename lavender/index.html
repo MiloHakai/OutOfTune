@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
   <title>Lavender</title>
   <meta name="description" content="Digital and Music Artist — Lavender on OutOfTune.">
   <!-- Open Graph / Social Media Sharing -->
@@ -20,22 +20,17 @@
   <style>
     :root {
       --bg-dark: rgb(26, 15, 46);
-      --bg-light: #e8f4f8;
       --text-dark: #a8e6cf;
-      --text-light: #2d5a6b;
-      --border-color-dark: #4dd9d9;
-      --border-color-light: #3ca0a0;
-      --glow-color-dark: rgba(77, 217, 217, 0.8);
-      --glow-color-light: rgba(38, 123, 123, 0.8);
       --accent-cyan: #4dd9d9;
       --accent-gold: #bfa14a;
-      --accent-orange: #f39c12;
     }
 
     html,
     body {
       margin: 0;
+      padding: 0;
       height: 100%;
+      width: 100%;
       font-family: 'Press Start 2P', monospace;
       overflow: hidden;
     }
@@ -43,13 +38,16 @@
     body {
       background-color: var(--bg-dark);
       color: var(--text-dark);
-      transition: background 0.5s ease, color 0.5s ease;
       position: relative;
       background-image: url('./images/background.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
+      /* MATCHED ALIGNMENT: Left-aligned content distribution matching image_502997.jpg */
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
     }
 
     /* Background overlay for dimming */
@@ -61,24 +59,10 @@
       right: 0;
       bottom: 0;
       background: rgba(10, 10, 20, 0.57);
-      /* Nearly black, very high opacity */
       z-index: 0;
-      transition: background 0.4s ease;
     }
 
-    [data-theme="light"] body {
-      background-color: var(--bg-light);
-      color: var(--text-light);
-    }
-
-    [data-theme="light"] body::before {
-      background: linear-gradient(135deg,
-          rgba(232, 244, 248, 0.85) 0%,
-          rgba(168, 230, 207, 0.75) 50%,
-          rgba(77, 217, 217, 0.65) 100%);
-    }
-
-    /* Alternative approach with individual border segments */
+    /* Animated Border Lines */
     .border-segments {
       position: fixed;
       top: 0;
@@ -89,7 +73,6 @@
       z-index: 1;
     }
 
-    /* Border line animations */
     .border-top,
     .border-right,
     .border-bottom,
@@ -97,20 +80,12 @@
       position: absolute;
     }
 
-    /* Dark theme borders (default) */
     .border-top {
       top: 0;
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #bfa14a 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(90deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal 12s linear infinite;
     }
@@ -120,14 +95,7 @@
       right: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(180deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #bfa14a 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(180deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical 12s linear infinite;
     }
@@ -137,14 +105,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(-90deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #bfa14a 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(-90deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal-reverse 12s linear infinite;
     }
@@ -154,154 +115,43 @@
       left: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(-180deg,
-          transparent 0%,
-          transparent 30%,
-          #4dd9d9 40%,
-          #bfa14a 50%,
-          #4dd9d9 60%,
-          transparent 70%,
-          transparent 100%);
+      background: linear-gradient(-180deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical-reverse 12s linear infinite;
     }
 
-    /* Light theme borders */
-    [data-theme="light"] .border-top {
-      background: linear-gradient(90deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #bfa14a 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
+    .border-line-1.border-top { animation-delay: 0s; }
+    .border-line-1.border-right { animation-delay: 3s; }
+    .border-line-1.border-bottom { animation-delay: 6s; }
+    .border-line-1.border-left { animation-delay: 9s; }
+    .border-line-2.border-top { animation-delay: 6s; }
+    .border-line-2.border-right { animation-delay: 9s; }
+    .border-line-2.border-bottom { animation-delay: 0s; }
+    .border-line-2.border-left { animation-delay: 3s; }
 
-    [data-theme="light"] .border-right {
-      background: linear-gradient(180deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #bfa14a 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
+    @keyframes move-horizontal { 0% { background-position: -100% 0; } 100% { background-position: 200% 0; } }
+    @keyframes move-horizontal-reverse { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
+    @keyframes move-vertical { 0% { background-position: 0 -100%; } 100% { background-position: 0 200%; } }
+    @keyframes move-vertical-reverse { 0% { background-position: 0 200%; } 100% { background-position: 0 -100%; } }
 
-    [data-theme="light"] .border-bottom {
-      background: linear-gradient(-90deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #bfa14a 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
-
-    [data-theme="light"] .border-left {
-      background: linear-gradient(-180deg,
-          transparent 0%,
-          transparent 30%,
-          #3ca0a0 40%,
-          #bfa14a 50%,
-          #3ca0a0 60%,
-          transparent 70%,
-          transparent 100%) !important;
-    }
-
-    /* First line - no delays, continuous movement */
-    .border-line-1.border-top {
-      animation-delay: 0s;
-    }
-
-    .border-line-1.border-right {
-      animation-delay: 3s;
-    }
-
-    .border-line-1.border-bottom {
-      animation-delay: 6s;
-    }
-
-    .border-line-1.border-left {
-      animation-delay: 9s;
-    }
-
-    /* Second line - offset by 6s (half cycle) */
-    .border-line-2.border-top {
-      animation-delay: 6s;
-    }
-
-    .border-line-2.border-right {
-      animation-delay: 9s;
-    }
-
-    .border-line-2.border-bottom {
-      animation-delay: 0s;
-    }
-
-    .border-line-2.border-left {
-      animation-delay: 3s;
-    }
-
-    @keyframes move-horizontal {
-      0% {
-        background-position: -100% 0;
-      }
-
-      100% {
-        background-position: 200% 0;
-      }
-    }
-
-    @keyframes move-horizontal-reverse {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -100% 0;
-      }
-    }
-
-    @keyframes move-vertical {
-      0% {
-        background-position: 0 -100%;
-      }
-
-      100% {
-        background-position: 0 200%;
-      }
-    }
-
-    @keyframes move-vertical-reverse {
-      0% {
-        background-position: 0 200%;
-      }
-
-      100% {
-        background-position: 0 -100%;
-      }
-    }
-
+    /* MATCHED ALIGNMENT: Left padding shift away from window edges */
     .container {
       position: relative;
       z-index: 3;
-      height: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 2rem;
-      text-align: center;
+      padding-left: 3.5rem;
+      text-align: left;
+      max-width: 600px;
     }
 
     h1 {
       font-family: 'Press Start 2P', monospace;
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       font-weight: 400;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.05em;
       cursor: pointer;
       user-select: none;
       transition: all 0.3s ease;
@@ -311,90 +161,60 @@
       image-rendering: -moz-crisp-edges;
       image-rendering: crisp-edges;
       line-height: 1.2;
+      margin: 0;
     }
 
-    /* Wave effect setup */
     .wave-text {
-      background: linear-gradient(90deg,
-          #4dd9d9 0%,
-          #a8e6cf 35%,
-          #bfa14a 50%,
-          #a8e6cf 65%,
-          #4dd9d9 100%);
+      background: linear-gradient(90deg, #4dd9d9 0%, #a8e6cf 35%, #bfa14a 50%, #a8e6cf 65%, #4dd9d9 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: wave-effect 6s linear infinite;
-      text-shadow:
-        0 0 20px rgba(77, 217, 217, 0.6),
-        0 0 40px rgba(191, 161, 74, 0.4),
-        0 0 60px rgba(168, 230, 207, 0.2);
-      filter: drop-shadow(0 0 10px rgba(191, 161, 74, 0.5));
+      text-shadow: 0 0 20px rgba(77, 217, 217, 0.4);
     }
 
-    [data-theme="light"] .wave-text {
-      background: linear-gradient(90deg,
-          #3ca0a0 0%,
-          #2d5a6b 35%,
-          #bfa14a 50%,
-          #2d5a6b 65%,
-          #3ca0a0 100%);
-      background-size: 300% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow:
-        0 0 20px rgba(60, 160, 160, 0.6),
-        0 0 40px rgba(191, 161, 74, 0.4),
-        0 0 60px rgba(45, 90, 107, 0.2);
-      filter: drop-shadow(0 0 10px rgba(191, 161, 74, 0.5));
-    }
-
-    @keyframes wave-effect {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -100% 0;
-      }
-    }
-
-    h1:active {
-      transform: scale(0.98);
-    }
+    @keyframes wave-effect { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
+    h1:active { transform: scale(0.98); }
 
     p {
-      margin-top: 1.5rem;
-      font-size: 0.7rem;
+      margin: 0;
+      margin-top: 1.2rem;
+      font-size: 0.75rem;
       font-family: 'Press Start 2P', monospace;
       font-weight: 400;
-      opacity: 0.9;
-      animation: subtle-pulse 12s ease-in-out infinite;
-      letter-spacing: 0.05em;
+      color: #a8e6cf;
+      letter-spacing: 0.02em;
       line-height: 1.4;
     }
 
-    @keyframes subtle-pulse {
-
-      0%,
-      100% {
-        opacity: 0.9;
-      }
-
-      50% {
-        opacity: 1;
-      }
+    /* MATCHED LAYOUT: Left-justified icons list spacing */
+    .icons {
+      margin-top: 1.8rem;
+      display: flex;
+      justify-content: flex-start;
+      gap: 18px;
     }
 
-    .icons {
-      margin-top: 1.5rem;
+    .icons a {
+      font-size: 1.4rem;
+      color: #a8e6cf;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icons a:hover {
+      color: #4dd9d9;
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 8px rgba(77, 217, 217, 0.8));
     }
 
     .click-counter {
       margin-top: 1rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0;
       opacity: 0;
       transform: translateY(10px);
       transition: all 0.3s ease;
@@ -406,46 +226,44 @@
     }
 
     .click-counter p {
-      font-size: 0.6rem;
+      font-size: 0.55rem;
       color: #33a3c2;
       margin: 0;
       text-shadow: 0 0 10px rgba(77, 217, 217, 0.5);
-      animation: none;
     }
 
-    [data-theme="light"] .click-counter p {
-      color: #0b4656;
-      text-shadow: 0 0 10px rgba(60, 160, 160, 0.5);
-    }
-
-    .icons a {
-      margin: 0 10px;
-      font-size: 1.5rem;
-      color: inherit;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    .icons a:hover {
-      color: #4dd9d9;
-      transform: scale(1.1);
-    }
-
-    [data-theme="light"] .icons a:hover {
-      color: #3ca0a0;
-    }
-
+    /* MATCHED FOOTER: OutOfTune dual split footer wrapper */
     footer {
       position: fixed;
-      bottom: 10px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.5rem;
-      color: #8899aa;
+      bottom: 20px;
+      left: 30px;
+      right: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.55rem;
+      color: #557788;
       z-index: 2;
       font-family: 'Press Start 2P', monospace;
-      letter-spacing: 0.05em;
-      line-height: 1.4;
+      pointer-events: none;
+    }
+
+    footer .track-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    footer .track-info i {
+      font-size: 0.6rem;
+      color: #4dd9d9;
+    }
+
+    footer .copyright-info {
+      text-align: right;
+      line-height: 1.6;
+      pointer-events: auto;
     }
 
     footer a {
@@ -458,94 +276,43 @@
       color: #bfa14a;
     }
 
-    [data-theme="light"] footer {
-      color: #5a7a8a;
-    }
-
-    [data-theme="light"] footer a {
-      color: #3ca0a0;
-    }
-
-    [data-theme="light"] footer a:hover {
-      color: #bfa14a;
-    }
-
-    /* Toggle Button */
-    .theme-toggle {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 5;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 12px;
-      color: inherit;
-      font-size: 1.2rem;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 50px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .theme-toggle:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-      transform: scale(1.1);
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    [data-theme="light"] .theme-toggle {
-      background: rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(0, 0, 0, 0.2);
-      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-    }
-
-    [data-theme="light"] .theme-toggle:hover {
-      background-color: rgba(0, 0, 0, 0.2);
-      box-shadow: 0 6px 25px rgba(255, 255, 255, 0.15);
-    }
-
-    .theme-icon {
-      transition: all 0.3s ease;
-    }
-
-    .sun-icon {
-      display: none;
-    }
-
-    .moon-icon {
-      display: block;
-    }
-
-    [data-theme="light"] .sun-icon {
-      display: block;
-    }
-
-    [data-theme="light"] .moon-icon {
-      display: none;
-    }
-
     @media (max-width: 600px) {
+      body {
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        align-items: center;
+        text-align: center;
+      }
+
       h1 {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
       }
 
       p {
-        font-size: 0.6rem;
+        font-size: 0.65rem;
       }
 
-      .icons a {
-        font-size: 1.3rem;
-        margin: 0 8px;
+      .icons {
+        justify-content: center;
+        gap: 16px;
       }
 
       footer {
-        font-size: 0.4rem;
+        flex-direction: column;
+        gap: 12px;
+        bottom: 15px;
+        left: 10px;
+        right: 10px;
+        text-align: center;
+      }
+
+      footer .copyright-info {
+        text-align: center;
       }
     }
   </style>
@@ -565,17 +332,12 @@
     <div class="border-left border-line-2"></div>
   </div>
 
-  <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-    <i class="fas fa-sun theme-icon sun-icon"></i>
-    <i class="fas fa-moon theme-icon moon-icon"></i>
-  </button>
-
   <div class="container">
     <h1 id="username" class="wave-text" onclick="playClickSound()">Lavender</h1>
-    <p>Digital and Music Artist</p>
+    <p>Your local artist man!</p>
 
     <div id="clickCounter" class="click-counter" style="display: none;">
-      <p>Hey! You clicked me <span id="clickCount">0</span> times.</p>
+      <p>Clicks: <span id="clickCount">0</span></p>
     </div>
 
     <div class="icons">
@@ -586,16 +348,22 @@
     </div>
   </div>
 
+  <!-- FIXED: Replaced standard footer with the standard OutOfTune network split player style -->
   <footer>
-    Copyright © 2025–present Lavender // OutOfTune <br>
-    Heavily inspired by <a href="https://github.com/spectrapulse" target="_blank"> SpectraPulse</a>
+    <div class="track-info">
+      <i class="fas fa-music"></i>
+      <span></span>
+    </div>
+    <div class="copyright-info">
+      © 2026 OutOfTune<br>
+      Lavender
+    </div>
   </footer>
 
   <!-- Audio element for background music -->
   <audio id="backgroundAudio" preload="auto" loop>
     <source src="./bgm.flac" type="audio/flac">
     <source src="./audio/bgm.mp3" type="audio/mpeg">
-    <!-- Fallback message -->
     Your browser does not support the audio element.
   </audio>
 
@@ -603,35 +371,24 @@
   <audio id="clickSound" preload="auto">
     <source src="./audio/click-sound.mp3" type="audio/mpeg">
     <source src="./click-sound.ogg" type="audio/ogg">
-    <!-- Fallback message -->
     Your browser does not support the audio element.
   </audio>
 
   <script>
-    function toggleTheme() {
-      const html = document.documentElement;
-      const current = html.getAttribute("data-theme");
-      html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
-    }
-
-    // Click counter functionality
     let clickCount = 0;
     const clickCounter = document.getElementById('clickCounter');
     const clickCountSpan = document.getElementById('clickCount');
 
-    // Function to play click sound and update counter
     function playClickSound() {
       const clickSound = document.getElementById('clickSound');
-      clickSound.currentTime = 0; // Reset to beginning in case it's already playing
+      clickSound.currentTime = 0; 
       clickSound.play().catch(error => {
         console.log('Click sound could not be played:', error);
       });
 
-      // Update click counter
       clickCount++;
       clickCountSpan.textContent = clickCount;
 
-      // Show the counter after first click
       if (clickCount === 1) {
         clickCounter.style.display = 'block';
         setTimeout(() => {
@@ -640,14 +397,11 @@
       }
     }
 
-    // Audio functionality for background music
     const audio = document.getElementById('backgroundAudio');
 
-    // Function to start background audio
     function startBackgroundAudio() {
       audio.play().catch(error => {
         console.log('Audio autoplay prevented:', error);
-        // If autoplay fails, try again on next user interaction
         document.addEventListener('click', function () {
           if (audio.paused) {
             audio.play().catch(err => console.log('Audio play failed:', err));
@@ -658,17 +412,14 @@
       });
     }
 
-    // Set audio volumes
-    audio.volume = 0.3; // Background music at 30%
+    audio.volume = 0.3; 
     const clickSound = document.getElementById('clickSound');
-    clickSound.volume = 0.5; // Click sound at 50%
+    clickSound.volume = 0.5; 
 
-    // Start background music when page loads
     window.addEventListener('load', () => {
       startBackgroundAudio();
     });
 
-    // Fallback: start audio on first user interaction
     document.addEventListener('click', function () {
       if (audio.paused) {
         startBackgroundAudio();
