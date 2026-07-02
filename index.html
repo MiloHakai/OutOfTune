@@ -1358,20 +1358,13 @@
 
             async function loadLyrics() {
                 let text = '';
-                try {
-                    const response = await fetch(new URL('song.lrc', directoryBaseHref()).href, {
-                        cache: 'no-store'
-                    });
-                    if (response.ok) text = await response.text();
-                } catch (_) {}
+                
+                // Directly use the embedded lyrics, completely ignoring any external song.lrc
+                const embedded = document.getElementById('lrc-embedded');
+                if (embedded) text = embedded.textContent.trim();
 
                 if (!text.trim()) {
-                    const embedded = document.getElementById('lrc-embedded');
-                    if (embedded) text = embedded.textContent.trim();
-                }
-
-                if (!text.trim()) {
-                    console.warn('song.lrc not loaded.');
+                    console.warn('No embedded lyrics found.');
                     return;
                 }
 
@@ -1639,7 +1632,7 @@
                 new THREE.IcosahedronGeometry(3, 1),
                 new THREE.MeshBasicMaterial({ color: 0xffcdb0, fog: false })
             );
-            sunMesh.position.set(16, 11, -50);
+            sunMesh.position.set(45, 11, -50); // Pushed X all the way to 45 to keep it clear of the umbrella
             scene.add(sunMesh);
 
             // ── Beach hut / bar (very simple low-poly) — sits on the sand,
