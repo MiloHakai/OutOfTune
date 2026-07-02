@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Press+Start+2P&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&family=VT323&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Press+Start+2P&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&family=VT323&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -25,19 +25,19 @@
 
     <style>
         :root {
-            --bg-dark: #00080f;
-            --primary: #f0f4ff;
-            --accent: #7c9cff;
-            --accent-glow: rgba(124, 156, 255, 0.22);
-            --text-main: #e8eef9;
-            --text-muted: rgba(180, 196, 224, 0.85);
-            --dark-gray: #152040;
-            --glow: rgba(140, 170, 255, 0.38);
-            --text-dim: rgba(220, 228, 255, 0.82);
-            --line: rgba(240, 245, 255, 0.92);
-            --line-soft: rgba(160, 185, 255, 0.55);
-            --wave-a: #f8fbff;
-            --wave-b: #5c7cff;
+            --bg-dark: #1c1220;
+            --primary: #fff3f6;
+            --accent: #ff92b4;
+            --accent-glow: rgba(255, 146, 180, 0.25);
+            --text-main: #fff0f3;
+            --text-muted: rgba(255, 214, 224, 0.82);
+            --dark-gray: #3a2432;
+            --glow: rgba(255, 170, 195, 0.42);
+            --text-dim: rgba(255, 224, 232, 0.85);
+            --line: rgba(255, 245, 248, 0.92);
+            --line-soft: rgba(255, 179, 205, 0.55);
+            --wave-a: #fff8f5;
+            --wave-b: #ff9ec4;
         }
 
         * {
@@ -80,6 +80,16 @@
             cursor: default;
             overflow: hidden;
             touch-action: none;
+            /* Chill "sea sky" palette as a CSS fallback — this is what mobile
+               renders on its own (no WebGL needed). Desktop layers a light
+               low-poly scene on top of this via canvas. */
+            background: linear-gradient(180deg,
+                    #bdeee2 0%,
+                    #d3ecdf 20%,
+                    #f3dccf 42%,
+                    #f6bccb 58%,
+                    #8fd8d6 78%,
+                    #4fb0b8 100%);
         }
 
         #constellation-container canvas {
@@ -89,6 +99,20 @@
             top: 0;
             width: 100% !important;
             height: 100% !important;
+        }
+
+        /* Soft dark scrim so existing light text/UI stays legible over the
+           bright beach palette. Sits above the background, below content. */
+        #bg-scrim {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: linear-gradient(115deg,
+                    rgba(20, 10, 20, 0.36) 0%,
+                    rgba(20, 10, 20, 0.24) 30%,
+                    rgba(20, 10, 20, 0.08) 55%,
+                    rgba(20, 10, 20, 0.20) 100%);
         }
 
         /* ── Main layout ── */
@@ -129,7 +153,7 @@
             max-height: 500px;
             min-width: 340px;
             min-height: 340px;
-            z-index: 1;
+            z-index: 3;
             opacity: 0.55;
             pointer-events: none;
         }
@@ -212,19 +236,23 @@
         }
 
         .track-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.48rem;
-            color: rgba(235, 245, 255, 0.42);
-            letter-spacing: 0.04em;
+            font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.01em;
+            color: rgba(255, 244, 230, 0.92);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .lyric-line {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.54rem;
-            color: rgba(235, 245, 255, 0.48);
-            line-height: 1.35;
-            min-height: 1.2em;
+            font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
+            font-weight: 400;
+            font-size: 0.78rem;
+            color: rgba(255, 240, 222, 0.92);
+            line-height: 1.5;
+            min-height: 1.3em;
             overflow-wrap: anywhere;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65), 0 0 12px rgba(0, 0, 0, 0.35);
         }
 
         .lyric-typed {
@@ -235,7 +263,7 @@
             display: inline-block;
             width: 0.5ch;
             margin-left: 1px;
-            color: rgba(180, 210, 255, 0.65);
+            color: rgba(255, 158, 196, 0.9);
             animation: caretBlink 0.65s step-end infinite;
             vertical-align: baseline;
         }
@@ -263,7 +291,7 @@
             bottom: 12px;
             z-index: 100;
             font-family: 'Press Start 2P', monospace;
-            color: rgba(220, 228, 255, 0.38);
+            color: rgba(255, 220, 232, 0.38);
             font-size: 0.42rem;
             letter-spacing: 0.5px;
             line-height: 1.75;
@@ -298,7 +326,7 @@
         .member-category {
             font-family: 'Press Start 2P', monospace;
             font-size: 0.42rem;
-            color: rgba(180, 196, 224, 0.5);
+            color: rgba(255, 220, 232, 0.5);
             letter-spacing: 0.1em;
             margin-bottom: 4px;
         }
@@ -330,7 +358,7 @@
         .member-hint {
             font-family: 'Press Start 2P', monospace;
             font-size: 0.35rem;
-            color: rgba(180, 196, 224, 0.45);
+            color: rgba(255, 220, 232, 0.45);
             margin-top: 5px;
             letter-spacing: 0.03em;
             opacity: 0;
@@ -359,9 +387,9 @@
             height: min(88svh, 820px);
             border-radius: 14px;
             overflow: hidden;
-            background: rgba(8, 12, 22, 0.96);
+            background: rgba(28, 16, 8, 0.96);
             box-shadow: 0 22px 90px rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(160, 190, 255, 0.15);
+            border: 1px solid rgba(255, 158, 196, 0.15);
             display: flex;
             flex-direction: column;
         }
@@ -372,8 +400,8 @@
             justify-content: space-between;
             gap: 10px;
             padding: 12px 16px;
-            background: rgba(10, 18, 42, 0.95);
-            border-bottom: 1px solid rgba(160, 190, 255, 0.12);
+            background: rgba(34, 19, 9, 0.95);
+            border-bottom: 1px solid rgba(255, 158, 196, 0.12);
             flex-shrink: 0;
         }
 
@@ -388,7 +416,7 @@
         .mini-site-url {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.56rem;
-            color: rgba(150, 180, 255, 0.6);
+            color: rgba(255, 200, 140, 0.6);
             letter-spacing: 0.01em;
             /* truncate long URLs on small screens */
             overflow: hidden;
@@ -418,11 +446,11 @@
         }
 
         .mini-site-action-link.open-full {
-            color: #7cbaff;
+            color: #ffb0d0;
         }
 
         .mini-site-action-link.close-btn {
-            color: #ff7c9c;
+            color: #ff6b5c;
         }
 
         .mini-site-action-link:hover {
@@ -433,7 +461,7 @@
             flex: 1;
             overflow: hidden;
             position: relative;
-            background: #050714;
+            background: #170d06;
         }
 
         .mini-site-frame {
@@ -445,7 +473,7 @@
             transform: translateX(-50%) scale(0.78);
             transform-origin: top center;
             border: none;
-            background: #050714;
+            background: #170d06;
         }
 
         .carousel-arrows {
@@ -459,7 +487,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: rgba(180, 196, 224, 0.45);
+            color: rgba(255, 220, 232, 0.45);
             padding: 4px 6px;
             line-height: 1;
             transition: color 0.15s ease;
@@ -606,11 +634,11 @@
             }
 
             .track-title {
-                font-size: 0.40rem;
+                font-size: 0.68rem;
             }
 
             .lyric-line {
-                font-size: 0.44rem;
+                font-size: 0.66rem;
             }
 
             /* ── Carousel: centered below the main text, sideways scroll ── */
@@ -802,6 +830,7 @@
 <body>
 
     <div id="constellation-container"></div>
+    <div id="bg-scrim"></div>
 
     <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="disclaimer-heading"
         aria-describedby="disclaimer-desc">
@@ -895,70 +924,62 @@
     </audio>
 
     <script type="text/plain" id="lrc-embedded">
-        [id: aixsnraf]
-        [ar: tokyona]
-        [al: Cold Lilac Bloom Core, Pt. 1]
-        [ti: Perpetual Descent]
-        [length: 04:48]
-
-        [00:21.14]Mmm, guess I'm better off alone
-        [00:24.06]Drove by your home and saw that nobody was home now
-        [00:27.67]Yeah, I got it on my own
-        [00:29.28]Independent chink, I buy my own silicone now
-        [00:32.85]Guess I'm be-be-be, al-al-al-al
-        [00:34.57]Dro-dro-dro-dro house and now that nobo-bo-bo home now
-        [00:38.18]Yeah, I got it on my own
-        [00:39.79]Independent chink, I buy my own silicone now
-        [00:42.71]
-        [01:24.73]Wish we never met
-        [01:27.54]I do not love you, I said what I said
-        [01:30.49]I will not forget
-        [01:32.97]Don't call me up now, I am not your friend
-        [01:35.72]Wish we never met
-        [01:38.27]I do not love you, I said what I said
-        [01:41.13]I will not forget
-        [01:43.87]Don't call me up now, I am not your friend
-        [01:46.41]Wish we never met
-        [01:48.98]I do not love you, I said what I said
-        [01:51.74]I will not forget
-        [01:54.37]Don't call me up now, I am not your friend
-        [01:57.17]Wish we never met
-        [01:59.81]I do not love you, I said what I said
-        [02:02.40]I will not forget
-        [02:05.14]Don't call me up now, I am not your friend
-        [02:11.63]Woah, oh
-        [02:16.97]Woah, oh
-        [02:22.22]Woah, oh
-        [02:27.63]Woah
-        [02:32.95]Woah, oh
-        [02:38.23]Woah, oh
-        [02:43.69]Woah, oh
-        [02:48.99]Woah
-        [02:50.50]Wish we never met
-        [02:52.76]I do not love you, I said what I said
-        [02:55.57]I will not forget
-        [02:58.04]Don't call me up now, I am not your friend
-        [03:01.14]Wish we never met
-        [03:03.65]I do not love you, I said what I said
-        [03:06.02]I will not forget
-        [03:08.88]Don't call me up now, I am not your friend
-        [03:11.69]Wish we never met
-        [03:14.20]I do not love you, I said what I said
-        [03:16.75]I will not forget
-        [03:19.70]Don't call me up now, I am not your friend
-        [03:22.77]Wish we never met
-        [03:24.87]I do not love you, I said what I said
-        [03:27.58]I will not forget
-        [03:29.97]Don't call me up now, I am not your friend
-        [03:54.63]Told me, you love me
-        [03:56.90]Then left me on read, yeah
-        [03:59.64]You played on my emotions
-        [04:01.90]And now I'm on the edge
-        [04:05.12]Told me, you love me
-        [04:07.14]Then left me on read, yeah
-        [04:10.25]You played on my emotions
-        [04:12.94]And now I'm on the edge
-        [04:22.31]
+        [00:11.39] 遠い日の思い出は
+        [00:17.45] どれも曖昧
+        [00:21.58] この身にほんとうに起きたことなのか
+        [00:31.89] 柔らかな頬に
+        [00:35.39] くちづけしたなら
+        [00:39.18] その温もりこそを信じたい
+        [00:42.67] How old?
+        [00:44.95] 曖昧だ
+        [00:46.94] 俺　今　いくつだっけ
+        [00:49.60] 俺　今　いくつだっけ
+        [00:52.96] How old?
+        [00:55.48] 曖昧だ
+        [00:57.37] 君　今　いくつなの
+        [00:59.99] 君　今　いくつなの
+        [01:03.49] How old?
+        [01:05.79] 曖昧だ
+        [01:08.30] 曖昧me
+        [01:11.05] I love you
+        [01:13.88] NOT TO DO LIST
+        [01:17.40] しなくていいことをあげてみる
+        [01:23.98] 反省は身体に毒だね　ほどほどに
+        [01:34.55] 未来も過去も
+        [01:38.58] ペンダントライトの光が照らす
+        [01:43.15] 淵までしかない
+        [01:45.26] How old?
+        [01:47.47] 曖昧だ
+        [01:49.46] 俺　今　いくつだっけ
+        [01:52.32] 俺　今　いくつだっけ
+        [01:55.56] How old?
+        [01:57.94] 曖昧だ
+        [01:59.86] 君　今　いくつなの
+        [02:02.70] 君　今　いくつなの
+        [02:05.97] How old?
+        [02:08.36] 曖昧だ
+        [02:10.98] 曖昧me
+        [02:13.56] I love you
+        [02:36.95] 柔らかな頬に
+        [02:40.60] くちづけしたなら
+        [02:44.25] その温もりこそを信じたい
+        [02:47.91] How old?
+        [02:50.08] 曖昧だ
+        [02:52.05] 俺　今　いくつだっけ
+        [02:54.88] 俺　今　いくつだっけ
+        [02:58.29] How old?
+        [03:00.63] 曖昧だ
+        [03:02.57] 君　今　いくつなの
+        [03:05.08] 君　今　いくつなの
+        [03:08.65] How old?
+        [03:11.05] 曖昧だ
+        [03:12.99] 俺　今　いくつだっけ
+        [03:15.73] 俺　今　いくつだっけ
+        [03:19.06] How old?
+        [03:21.52] 曖昧だ
+        [03:23.97] 曖昧me
+        [03:26.52] I love you
+        [03:39.80] 色褪せたの写真の中の新生児
     </script>
 
     <script>
@@ -1218,7 +1239,7 @@
             ];
             let lyrics = fallbackLyrics.slice();
             let committedLyricLine = '';
-            let trackTitle = 'Perpetual Descent — Tokyona';
+            let trackTitle = '曖昧me - Kirinji';
 
             trackName.textContent = trackTitle;
             lyricOutput.textContent = 'Continue from the welcome screen to play · lyrics sync to audio';
@@ -1440,12 +1461,286 @@
             }
 
             lyricsPromise = loadLyrics();
+            // Full ocean/particle background disabled — replaced by a chill
+            // low-poly sea/sky scene (desktop only; mobile just gets the
+            // CSS gradient already set on #constellation-container).
             try {
-                initBackgrounds();
+                initGlobeOnly();
             } catch (err) {
-                console.warn('WebGL background failed:', err);
+                console.warn('WebGL globe failed:', err);
+            }
+            try {
+                initChillSeaBackground();
+            } catch (err) {
+                console.warn('WebGL chill background failed:', err);
             }
         });
+
+        function initGlobeOnly() {
+            const globeBox = document.getElementById('globe-target');
+            if (!globeBox) return;
+
+            function safeSize(el, fallbackW, fallbackH) {
+                const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
+                const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
+                return { w, h, aspect: w / h };
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            const gScene = new THREE.Scene();
+            const gs = safeSize(globeBox, 400, 400);
+            const gCam = new THREE.PerspectiveCamera(75, gs.aspect, 0.1, 1000);
+            const gRen = new THREE.WebGLRenderer({
+                alpha: true,
+                antialias: true
+            });
+            gRen.setPixelRatio(dpr);
+            gRen.setSize(gs.w, gs.h);
+            globeBox.appendChild(gRen.domElement);
+
+            const globe = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(2.5, 3),
+                new THREE.MeshBasicMaterial({
+                    color: 0xffd6e8,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.90
+                })
+            );
+            gScene.add(globe);
+            gCam.position.z = 4.2;
+
+            function animateGlobe() {
+                requestAnimationFrame(animateGlobe);
+                globe.rotation.y += 0.002;
+                globe.rotation.x += 0.001;
+                gRen.render(gScene, gCam);
+            }
+
+            window.addEventListener('resize', () => {
+                const gs2 = safeSize(globeBox, 400, 400);
+                gCam.aspect = gs2.aspect;
+                gCam.updateProjectionMatrix();
+                gRen.setSize(gs2.w, gs2.h);
+            });
+
+            animateGlobe();
+        }
+
+        function initChillSeaBackground() {
+            // Mobile / small or touch-primary screens: skip WebGL entirely.
+            // #constellation-container already shows the "sea sky" CSS
+            // gradient fallback, which is exactly the chill flat palette
+            // wanted on mobile.
+            const isMobile = window.innerWidth < 820 || matchMedia('(pointer: coarse)').matches;
+            if (isMobile) return;
+
+            const cBox = document.getElementById('constellation-container');
+            if (!cBox || !window.THREE) return;
+
+            function safeSize(el, fallbackW, fallbackH) {
+                const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
+                const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
+                return { w, h, aspect: w / h };
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+            const scene = new THREE.Scene();
+            // Sky handled by the CSS gradient behind the transparent canvas —
+            // fog just softly blends the low-poly sea into it near the horizon.
+            scene.fog = new THREE.Fog(0x6cc9c8, 24, 78);
+
+            const s = safeSize(cBox, window.innerWidth, window.innerHeight);
+            const camera = new THREE.PerspectiveCamera(58, s.aspect, 0.1, 200);
+            // Low, close to the sand — like lying down looking across the beach
+            // toward the water and the bar off to the side.
+            camera.position.set(-3, 0.55, 15);
+            camera.lookAt(7, 0.55, -6);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setPixelRatio(dpr);
+            renderer.setSize(s.w, s.h);
+            cBox.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const sun = new THREE.DirectionalLight(0xffe3d6, 0.5);
+            sun.position.set(-10, 14, 8);
+            scene.add(sun);
+
+            // ── Sand (foreground, low poly, gentle warm tone variation) ──
+            let sandGeo = new THREE.PlaneGeometry(70, 34, 22, 12);
+            sandGeo = sandGeo.toNonIndexed();
+            sandGeo.rotateX(-Math.PI / 2);
+            sandGeo.translate(0, -1.56, 9);
+
+            const sandPos = sandGeo.attributes.position;
+            const sandColors = new Float32Array(sandPos.count * 3);
+            const sandLight = new THREE.Color(0xfbe6ea);
+            const sandShade = new THREE.Color(0xf0c9cf);
+            const sandWet = new THREE.Color(0xd9a3ad);
+            for (let i = 0; i < sandPos.count; i += 3) {
+                const z = sandPos.getZ(i);
+                // Darker, wetter sand near the shoreline (low/negative z), drying out
+                // toward the camera (higher z) — plus a bit of grain from randomness.
+                const wetness = Math.max(0, Math.min(1, 1 - (z + 8) / 20));
+                const grain = Math.random() * 0.5;
+                let c = sandLight.clone().lerp(sandShade, grain);
+                c = c.lerp(sandWet, wetness * 0.55);
+                for (let k = 0; k < 3; k++) {
+                    sandColors[(i + k) * 3] = c.r;
+                    sandColors[(i + k) * 3 + 1] = c.g;
+                    sandColors[(i + k) * 3 + 2] = c.b;
+                }
+            }
+            sandGeo.setAttribute('color', new THREE.BufferAttribute(sandColors, 3));
+            const sandMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, fog: true });
+            const sand = new THREE.Mesh(sandGeo, sandMat);
+            scene.add(sand);
+
+            // Low-poly faceted sea: flat shading gives the "chill low poly" look.
+            let seaGeo = new THREE.PlaneGeometry(100, 70, 34, 24);
+            seaGeo = seaGeo.toNonIndexed();
+            seaGeo.rotateX(-Math.PI / 2);
+            seaGeo.translate(0, 0, -38);
+
+            const seaPos = seaGeo.attributes.position;
+            const seaBase = new Float32Array(seaPos.count * 3);
+            for (let i = 0; i < seaPos.count; i++) {
+                seaBase[i * 3] = seaPos.getX(i);
+                seaBase[i * 3 + 1] = seaPos.getY(i);
+                seaBase[i * 3 + 2] = seaPos.getZ(i);
+            }
+
+            const seaColors = new Float32Array(seaPos.count * 3);
+            const shallow = new THREE.Color(0xaef0e0);
+            const deep = new THREE.Color(0x3f9fb8);
+            seaGeo.setAttribute('color', new THREE.BufferAttribute(seaColors, 3));
+
+            const seaMat = new THREE.MeshLambertMaterial({
+                vertexColors: true,
+                flatShading: true,
+                fog: true
+            });
+            const sea = new THREE.Mesh(seaGeo, seaMat);
+            sea.position.y = -1.5;
+            scene.add(sea);
+
+            // A couple of very simple low-poly "island" silhouettes on the horizon —
+            // static, just gives the scene some depth like the reference photo.
+            const islandMat = new THREE.MeshLambertMaterial({ color: 0x8a95ae, flatShading: true });
+            const island1 = new THREE.Mesh(new THREE.ConeGeometry(3.2, 2.2, 7), islandMat);
+            island1.position.set(-16, -0.6, -46);
+            scene.add(island1);
+            const island2 = new THREE.Mesh(new THREE.ConeGeometry(2, 1.4, 7), islandMat);
+            island2.position.set(-9, -0.9, -48);
+            scene.add(island2);
+
+            // Low-poly sun — echoes the warm accent color used across the site.
+            // fog: false keeps it reading as a bright peach dot instead of
+            // getting washed toward the fog/horizon color at that distance.
+            const sunMesh = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(3, 1),
+                new THREE.MeshBasicMaterial({ color: 0xffcdb0, fog: false })
+            );
+            sunMesh.position.set(16, 11, -50);
+            scene.add(sunMesh);
+
+            // ── Beach hut / bar (very simple low-poly) — sits on the sand,
+            // off to the side, like the reference photo. ──
+            const hut = new THREE.Group();
+            const postMat = new THREE.MeshLambertMaterial({ color: 0x6b4245, flatShading: true });
+            const woodMat = new THREE.MeshLambertMaterial({ color: 0x9c6560, flatShading: true });
+            const roofMat = new THREE.MeshLambertMaterial({ color: 0xe8a4a8, flatShading: true });
+
+            const counter = new THREE.Mesh(new THREE.BoxGeometry(5, 1.1, 2.2), woodMat);
+            counter.position.y = 0.55;
+            hut.add(counter);
+
+            const postGeo = new THREE.CylinderGeometry(0.09, 0.09, 3.1, 5);
+            const postOffsets = [
+                [-2.3, -0.9], [2.3, -0.9], [-2.3, 0.9], [2.3, 0.9]
+            ];
+            postOffsets.forEach(([px, pz]) => {
+                const post = new THREE.Mesh(postGeo, postMat);
+                post.position.set(px, 1.65, pz);
+                hut.add(post);
+            });
+
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(4.3, 2.1, 8), roofMat);
+            roof.rotation.y = Math.PI / 4;
+            roof.position.y = 4.3;
+            hut.add(roof);
+
+            hut.position.set(11, -1.56, 1);
+            hut.rotation.y = -0.5;
+            scene.add(hut);
+
+            function paintSea(t) {
+                const arr = seaPos.array;
+                for (let i = 0; i < seaPos.count; i++) {
+                    const bx = seaBase[i * 3], bz = seaBase[i * 3 + 2];
+                    // Big, slow, non-interactive swells for the chill feel...
+                    const swell = Math.sin(bx * 0.08 + t) * 0.28 + Math.sin(bz * 0.06 - t * 0.45) * 0.20;
+                    // ...plus a much finer, low-amplitude ripple layer just for surface texture.
+                    const ripple = Math.sin(bx * 0.55 + bz * 0.4 + t * 1.6) * 0.035 +
+                        Math.sin(bx * 0.9 - bz * 0.7 + t * 2.1) * 0.02;
+                    arr[i * 3 + 1] = swell + ripple;
+                }
+                seaPos.needsUpdate = true;
+                seaGeo.computeVertexNormals();
+
+                const triCount = seaPos.count / 3;
+                for (let tri = 0; tri < triCount; tri++) {
+                    const i0 = tri * 3, i1 = i0 + 1, i2 = i0 + 2;
+                    const avgY = (arr[i0 * 3 + 1] + arr[i1 * 3 + 1] + arr[i2 * 3 + 1]) / 3;
+                    const h = Math.max(0, Math.min(1, (avgY + 0.4) / 0.8));
+                    // Deterministic per-facet noise (based on base position, not time)
+                    // adds a subtle mottled/glinting texture instead of a flat gradient.
+                    const speck = (Math.sin(seaBase[i0 * 3] * 3.1 + seaBase[i0 * 3 + 2] * 2.3) * 0.5 + 0.5) * 0.12;
+                    const c = shallow.clone().lerp(deep, 1 - h);
+                    c.r = Math.min(1, c.r + speck);
+                    c.g = Math.min(1, c.g + speck * 0.6);
+                    c.b = Math.min(1, c.b + speck * 0.75);
+                    [i0, i1, i2].forEach((idx) => {
+                        seaColors[idx * 3] = c.r;
+                        seaColors[idx * 3 + 1] = c.g;
+                        seaColors[idx * 3 + 2] = c.b;
+                    });
+                }
+                seaGeo.attributes.color.needsUpdate = true;
+            }
+
+            let t = 0;
+            let running = true;
+            function animate() {
+                if (!running) return;
+                requestAnimationFrame(animate);
+                t += 0.0028;
+                paintSea(t);
+                sunMesh.rotation.y += 0.001;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            function layout() {
+                const s2 = safeSize(cBox, window.innerWidth, window.innerHeight);
+                camera.aspect = s2.aspect;
+                camera.updateProjectionMatrix();
+                renderer.setSize(s2.w, s2.h);
+            }
+            window.addEventListener('resize', layout);
+
+            // If the viewport is resized down into mobile range, stop rendering
+            // and let the CSS gradient take over — keeps things cheap.
+            window.addEventListener('resize', () => {
+                const nowMobile = window.innerWidth < 820 || matchMedia('(pointer: coarse)').matches;
+                if (nowMobile && running) {
+                    running = false;
+                    renderer.domElement.remove();
+                }
+            });
+        }
 
         function initBackgrounds() {
             function safeSize(el, fallbackW, fallbackH) {
@@ -1476,7 +1771,7 @@
             const globe = new THREE.Mesh(
                 new THREE.IcosahedronGeometry(2.5, 3),
                 new THREE.MeshBasicMaterial({
-                    color: 0xc0e0ff,
+                    color: 0xffd6e8,
                     wireframe: true,
                     transparent: true,
                     opacity: 0.90
@@ -1488,18 +1783,18 @@
             // Background terrain
             const cBox = document.getElementById('constellation-container');
             const cScene = new THREE.Scene();
-            cScene.fog = new THREE.Fog(0x00080f, 30, 110);
+            cScene.fog = new THREE.Fog(0x170d06, 30, 110);
 
-            const dirLight1 = new THREE.DirectionalLight(0x3355bb, 1.2);
+            const dirLight1 = new THREE.DirectionalLight(0xff9a4d, 1.2);
             dirLight1.position.set(20, 30, 10);
             cScene.add(dirLight1);
-            const dirLight2 = new THREE.DirectionalLight(0x1a2a77, 0.7);
+            const dirLight2 = new THREE.DirectionalLight(0x8a4a1a, 0.7);
             dirLight2.position.set(-15, 20, -8);
             cScene.add(dirLight2);
-            const dirLight3 = new THREE.DirectionalLight(0x080e30, 0.4);
+            const dirLight3 = new THREE.DirectionalLight(0x2a1608, 0.4);
             dirLight3.position.set(0, -10, 5);
             cScene.add(dirLight3);
-            cScene.add(new THREE.AmbientLight(0x050818, 0.6));
+            cScene.add(new THREE.AmbientLight(0x1f1006, 0.6));
 
             const cs = safeSize(cBox, window.innerWidth, window.innerHeight);
             const cCam = new THREE.PerspectiveCamera(60, cs.aspect, 0.1, 400);
@@ -1513,7 +1808,7 @@
             });
             cRen.setPixelRatio(dpr);
             cRen.setSize(cs.w, cs.h);
-            cRen.setClearColor(0x00080f, 1);
+            cRen.setClearColor(0x170d06, 1);
             cRen.shadowMap.enabled = true;
             cRen.shadowMap.type = THREE.PCFSoftShadowMap;
             cBox.appendChild(cRen.domElement);
@@ -1547,7 +1842,7 @@
             cScene.add(planeMesh);
 
             const wireMat = new THREE.MeshBasicMaterial({
-                color: 0x0d1a3a,
+                color: 0x4a2a12,
                 wireframe: true,
                 fog: true,
                 transparent: true,
@@ -1579,8 +1874,8 @@
             ];
 
             const d20Material = new THREE.MeshStandardMaterial({
-                color: 0x8faeff,
-                emissive: 0x1d3f7a,
+                color: 0xffb066,
+                emissive: 0x7a3d10,
                 roughness: 0.22,
                 metalness: 0.28,
                 flatShading: true,
@@ -1588,7 +1883,7 @@
                 opacity: 0.88,
             });
             const d20EdgeMaterial = new THREE.LineBasicMaterial({
-                color: 0xc8e2ff,
+                color: 0xffe0b3,
                 transparent: true,
                 opacity: 0.45
             });
@@ -1675,7 +1970,7 @@
 
             const roundParticles = [];
             const roundMat = new THREE.MeshBasicMaterial({
-                color: 0xe6f3ff,
+                color: 0xfff0dd,
                 transparent: true,
                 opacity: 0.82
             });
@@ -1708,7 +2003,7 @@
             const particleGeo = new THREE.BufferGeometry();
             const pPos = new Float32Array(particleCount * 3);
             const pCol = new Float32Array(particleCount * 3);
-            const pColor = new THREE.Color(0x7c9cff);
+            const pColor = new THREE.Color(0xff8c3a);
             for (let i = 0; i < particleCount; i++) {
                 pPos[i * 3] = (Math.random() - 0.5) * 250;
                 pPos[i * 3 + 1] = Math.random() * 50;
