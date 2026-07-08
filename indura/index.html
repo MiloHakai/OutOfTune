@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Indura</title>
+    <meta name="description" content="Indura" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Indura" />
+    <meta property="og:description" content="Indura" />
+    <meta property="og:url" content="https://outoftune.dev/indura" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Indura" />
+    <meta name="twitter:description" content="Indura" />
+    <link class="icon" type="image/svg+xml" href="assets/icons/logo.svg">
+    
+    <!-- GOOGLE FONTS: Noto Sans JP and KR for clean Japanese/Korean character fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        :root {
+            /* INDURA: TEAL & GOLD NIGHT PALETTE */
+            --bg-base: #050814;          /* very dark navy */
+            --bg-base-dark: #020311;     /* near-black */
+            --primary: #ff7ab6;          /* bright pink accent */
+            --accent: #ffd36b;           /* warm gold accent */
+            --text-main: #fff6fb;        /* soft, warm white */
+            --text-muted: #b49bb0;       /* desaturated pink/cool neutral */
+
+            /* Glowing text wave palette */
+            --wave-light: #ffdfec;       /* pale pink */
+            --wave-dark: #ff6fa6;        /* deeper pink */
+
+            /* CELESTIAL BACKGROUND ELEMENTS (warmer highlights) */
+            --moon-rim: rgba(255, 211, 107, 0.95);
+            --moon-rim-soft: rgba(255, 211, 107, 0.20);
+            --moon-halo: rgba(255, 211, 107, 0.06);
+
+            --band-strong: rgba(255, 211, 107, 0.05);
+            --band-soft: rgba(255, 211, 107, 0.012);
+            --mist: rgba(255, 122, 182, 0.03);
+            --dust: rgba(255, 210, 230, 0.12);
+
+            /* CRT Overlay properties */
+            --scanline: rgba(255, 255, 255, 0.012);
+            --vignette: rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            height: 100svh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #000000;
+            position: relative;
+        }
+
+        .video-background {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            filter: saturate(0.95) brightness(0.8);
+            display: block;
+            background: #000000;
+        }
+
+        .video-background::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(2, 4, 10, 0.72) 0%, rgba(2, 4, 10, 0.25) 45%, rgba(2, 4, 10, 0.72) 100%);
+            pointer-events: none;
+        }
+
+        .space-plate,
+        .moon,
+        #starCanvas,
+        .crt-overlay {
+            display: none !important;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           CELESTIAL BACKGROUND SYSTEM
+           ───────────────────────────────────────────────────────────── */
+        .space-plate {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-base-dark) 100%);
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+
+        body.ambient-active .space-plate {
+            opacity: 1;
+        }
+
+        .space-plate::before {
+            content: "";
+            position: absolute;
+            inset: -25%;
+            transform: rotate(-14deg) scale(1.15);
+            opacity: 0.85;
+            background:
+                radial-gradient(ellipse 160% 20% at 68% 55%,
+                    var(--band-strong) 0%,
+                    var(--band-soft) 40%,
+                    transparent 75%),
+                radial-gradient(ellipse 60% 35% at 20% 30%,
+                    var(--mist) 0%,
+                    transparent 70%);
+        }
+
+        .space-plate::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+            background-image: radial-gradient(var(--dust) 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+
+        .moon {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            filter: drop-shadow(0 0 25px var(--moon-halo));
+            transition: opacity 1.5s ease 0.3s, transform 1.5s ease;
+        }
+
+        body.ambient-active .moon {
+            opacity: 0.9;
+        }
+
+        .moon.big {
+            width: 180px;
+            height: 180px;
+            top: 15%;
+            right: 10%;
+            background: radial-gradient(circle at 34% 36%,
+                transparent 58%,
+                var(--moon-rim) 59%,
+                var(--moon-rim) 62%,
+                var(--moon-rim-soft) 66%,
+                transparent 72%);
+            animation: moon-bob 16s ease-in-out infinite;
+        }
+
+        @keyframes moon-bob {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(0.5deg); }
+        }
+
+        #starCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        
+        body.ambient-active #starCanvas {
+            opacity: 0.85;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           CRT SCANLINE LAYER
+           ───────────────────────────────────────────────────────────── */
+        .crt-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .crt-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                var(--scanline) 0px,
+                var(--scanline) 1px,
+                transparent 1px,
+                transparent 4px);
+        }
+
+        .crt-overlay::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 120% 110% at 50% 50%,
+                transparent 0%,
+                transparent 65%,
+                var(--vignette) 100%);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           UI CORE WORKSPACE (DESKTOP MODES)
+           ───────────────────────────────────────────────────────────── */
+        .content-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
+            z-index: 10;
+            width: 100%;
+            padding-left: 40px;
+            padding-right: 40px;
+            position: relative;
+        }
+
+        .brand-section {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+            z-index: 20;
+        }
+
+        .brand-section h1.wave-text {
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+            font-weight: 400;
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: 0.02em;
+            cursor: default;
+            user-select: none;
+            color: var(--primary);
+            display: inline-block;
+        }
+
+        .brand-section h1.wave-text.glow-active {
+            background: linear-gradient(90deg, 
+                var(--wave-light) 0%, 
+                var(--wave-dark) 25%, 
+                var(--wave-light) 50%, 
+                var(--wave-dark) 75%, 
+                var(--wave-light) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: wave-slide 4s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(199, 215, 255, 0.65));
+        }
+
+        @keyframes wave-slide {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            font-weight: 400;
+            max-width: 500px;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+        }
+
+        .socials-row {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .social-icon-link {
+            color: var(--primary);
+            transition: transform 0.18s ease, color 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 6px;
+            background: transparent;
+            text-decoration: none;
+        }
+
+        .social-icon-link:hover {
+            color: var(--accent);
+            transform: translateY(-2px) scale(1.06);
+        }
+
+        .social-icon-link svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            transition: filter 0.18s ease, transform 0.18s ease;
+        }
+
+        .social-icon-link:hover svg {
+            filter: drop-shadow(0 0 12px var(--primary));
+            transform: scale(1.08);
+        }
+        .social-icon-link i {
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        /* Audio Lyrics Display Box */
+        .lyrics-container {
+            position: fixed;
+            left: 28px;
+            bottom: 28px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: min(540px, calc(100vw - 80px));
+            padding-left: 6px;
+        }
+
+        .track-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.5rem;
+            color: var(--text-muted);
+            font-weight: bold;
+            letter-spacing: 0.04em;
+            padding-left: 4px;
+        }
+
+        .lyric-line {
+            font-family: 'Press Start 2P', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+            font-size: 0.43rem; 
+            color: var(--text-main);
+            line-height: 1.7;
+            min-height: 3.2em; 
+            transition: color 0.3s ease;
+            letter-spacing: 0.04em;
+            padding-left: 4px;
+        }
+
+        .lyric-typed {
+            display: inline;
+        }
+
+        .lyric-caret {
+            display: inline-block;
+            width: 0.5ch;
+            margin-left: 4px;
+            color: var(--primary);
+            animation: caretBlink 0.65s step-end infinite;
+            vertical-align: baseline;
+        }
+
+        @keyframes caretBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Stacked bottom-right footer system */
+        .footer-right {
+            position: fixed;
+            right: 40px;
+            bottom: 40px;
+            z-index: 100;
+            font-family: 'Press Start 2P', monospace;
+            color: var(--text-muted);
+            font-size: 0.42rem;
+            line-height: 1.7;
+            letter-spacing: 0.5px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .footer-copy {
+            opacity: 0.6;
+        }
+
+        .footer-author {
+            opacity: 0.85;
+            color: var(--primary);
+        }
+
+        .lanyard-card {
+            position: fixed;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(7, 11, 20, 0.45); /* Increased transparency from 0.8 to 0.45 for a premium glass aesthetic */
+            border: 1px solid rgba(255, 122, 182, 0.14);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            min-width: min(280px, calc(100vw - 80px));
+        }
+
+        .lanyard-avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .lanyard-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .lanyard-status-dot {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(10, 14, 24, 0.9);
+            background-color: #80848e;
+        }
+
+        .lanyard-status-dot.online { background-color: #23a55a; }
+        .lanyard-status-dot.idle { background-color: #f0b232; }
+        .lanyard-status-dot.dnd { background-color: #f23f43; }
+        .lanyard-status-dot.offline { background-color: #80848e; }
+
+        .lanyard-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .lanyard-username {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.42rem;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .lanyard-custom-status,
+        .lanyard-status-text {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.34rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* TEXT INTRO SLIDE OVERLAY ARCHITECTURE */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-base);
+            transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-holder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            user-select: none;
+        }
+
+        .intro-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.1rem, 2.8vw, 1.6rem); 
+            color: var(--primary);
+            opacity: 0;
+            transform: translateY(25px);
+            animation: introSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
+        }
+
+        .intro-sub-click {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.45rem, 1.2vw, 0.52rem); 
+            color: var(--text-muted);
+            opacity: 0;
+            letter-spacing: 1px;
+            animation: fadeInSimple 0.8s ease forwards 0.9s;
+        }
+
+        @keyframes introSlideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInSimple {
+            to { opacity: 0.75; }
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           UPDATED: CENTERED & VERTICALLY BALANCED MOBILE ARCHITECTURE
+           ───────────────────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            body {
+                justify-content: center; /* FIXED: Vertically centers everything on the screen */
+                align-items: center;     /* Horizontally centers everything */
+                padding: 24px; 
+            }
+
+            .content-wrapper {
+                padding: 0;
+                justify-content: center;
+                align-items: center; 
+                text-align: center;  
+                height: auto;
+                width: 100%;
+            }
+
+            .brand-section {
+                gap: 10px;
+                width: 100%;
+                align-items: center; 
+            }
+
+            .brand-section h1.wave-text {
+                font-size: 1.4rem; 
+            }
+
+            .socials-row {
+                justify-content: center; 
+                width: 100%;
+            }
+
+            .moon.big {
+                width: 90px;
+                height: 90px;
+                top: 8%; /* FIXED: Pushed down slightly from the very top border edge */
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%); 
+                animation: moon-bob-mobile 16s ease-in-out infinite;
+            }
+
+            @keyframes moon-bob-mobile {
+                0%, 100% { transform: translate(-50%, 0); }
+                50% { transform: translate(-50%, -8px); }
+            }
+
+            .socials-row { gap: 14px; }
+
+            .lyrics-container {
+                position: fixed;
+                left: 24px;
+                right: 24px;
+                bottom: 85px; /* Shifted up to completely avoid overlapping with the bottom footer */
+                margin-top: 0;
+                width: calc(100% - 48px);
+                gap: 8px;
+                align-items: center; /* Center align container items for clean mobile aesthetics */
+                z-index: 100;
+            }
+
+            .lanyard-card {
+                position: relative;
+                right: auto;
+                top: auto;
+                transform: none;
+                margin: 12px auto 0;
+                align-self: center;
+            }
+
+            .track-title {
+                font-size: 0.55rem; /* Made slightly bigger (was 0.44rem) */
+                line-height: 1.5;
+                text-align: center;
+            }
+
+            .lyric-line {
+                font-size: 0.48rem; /* Made smaller for cleaner visual hierarchy (was 0.58rem) */
+                text-align: center; 
+                min-height: 4.0em; 
+                width: 100%;
+            }
+
+            .footer-right {
+                position: fixed;
+                left: 24px;
+                right: 24px;
+                bottom: 24px;
+                text-align: center;
+                align-items: center;
+                flex-direction: row;
+                justify-content: space-between;
+                width: calc(100% - 48px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Native controls are optimized for auto-loop, scaling, and zero thread-block -->
+    <video id="bg-video" class="video-background" autoplay muted loop playsinline preload="auto">
+        <source src="bg.mp4" type="video/mp4">
+    </video>
+
+    <div class="space-plate" aria-hidden="true"></div>
+    <div class="moon big" aria-hidden="true"></div>
+    <canvas id="starCanvas" aria-hidden="true"></canvas>
+
+    <div class="crt-overlay" aria-hidden="true"></div>
+
+    <div id="overlay" class="overlay">
+        <div class="intro-holder">
+            <div class="intro-title">Indura</div>
+            <div class="intro-sub-click">click here to continue</div>
+        </div>
+    </div>
+
+    <main class="content-wrapper">
+        <section class="brand-section">
+            <h1 id="brand-title" class="wave-text">Indura</h1>
+            <p class="subtitle">Gacha Lover and League Masochist</p>
+            
+            <div class="socials-row">
+                <a href="https://www.youtube.com/@TypicalIndra" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="YouTube - TypicalIndra"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+                <a href="https://www.twitch.tv/ry_vt" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Twitch - ry_vt"><i class="fab fa-twitch" aria-hidden="true"></i></a>
+                
+                <!-- Tilted Square Roblox SVG Icon: Mathematically cut-out block to prevent solid visual triangle issues -->
+                <a href="https://www.roblox.com/users/45612960/profile" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Roblox profile">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true" focusable="false">
+                        <defs>
+                            <!-- Creating an SVG mask so the center hollow square is completely transparent to the background video -->
+                            <mask id="roblox-hollow-mask">
+                                <rect width="24" height="24" fill="white" />
+                                <rect x="10" y="10" width="4" height="4" fill="black" transform="rotate(-14 12 12)" />
+                            </mask>
+                        </defs>
+                        <!-- Main tilted block utilizing our transparency mask -->
+                        <rect x="3.5" y="3.5" width="17" height="17" fill="currentColor" transform="rotate(-14 12 12)" mask="url(#roblox-hollow-mask)" />
+                    </svg>
+                </a>
+                
+                <a href="https://discord.com/invite/4R79YzBdwc" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Discord invite"><i class="fab fa-discord" aria-hidden="true"></i></a>
+            </div>
+        </section>
+    </main>
+
+    <div class="lyrics-container">
+        <div id="track-name" class="track-title">Loading track…</div>
+        <div class="lyric-line" id="lyric-line-box">
+            <span class="lyric-typed" id="lyric-output"></span><span class="lyric-caret" id="lyric-caret">|</span>
+        </div>
+    </div>
+
+    <div class="lanyard-card" id="lanyardCard" aria-label="Discord status card">
+        <div class="lanyard-avatar-wrap">
+            <img class="lanyard-avatar" id="lanyardAvatar" src="" alt="Discord avatar" />
+            <div class="lanyard-status-dot" id="lanyardStatusDot"></div>
+        </div>
+        <div class="lanyard-info">
+            <div class="lanyard-username" id="lanyardUsername">Loading…</div>
+            <div class="lanyard-custom-status" id="lanyardCustomStatus">Addict</div>
+            <div class="lanyard-status-text" id="lanyardStatusText">offline</div>
+        </div>
+    </div>
+
+    <div class="footer-right">
+        <div class="footer-copy">© 2026 - OutOfTune</div>
+        <div class="footer-author">Indura</div>
+    </div>
+
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <script type="text/plain" id="lrc-content">
+        [00:00.99]Tip of my tongue
+        [00:02.63]Tip of my tongue
+        [00:06.42]I see the lights with the cables
+        [00:08.98]Technicolor labels
+        [00:10.70]Static with the lights out
+        [00:12.51]Danger's looking nice now
+        [00:14.22]Walking on a tightrope
+        [00:16.03]Know I shouldn't get close
+        [00:17.93]You still lit the flame
+        [00:19.41]Even though it might be fatal
+        [00:21.60]Almost past the exit sign
+        [00:24.57]'Cause now you're something
+        [00:25.56]That I wanna forget
+        [00:26.95](Something that I wanna forget)
+        [00:28.12]I guess the feelings don't lie
+        [00:30.17]You twist your knife
+        [00:31.71]And you're replaying like the song in my head
+        [00:35.92]Face to face
+        [00:38.65]I think I'm gonna say it
+        [00:41.45]I can barely take it
+        [00:43.11]Heart beats so fast
+        [00:46.75]Start a little drama
+        [00:48.09]'Cause I think it's on the tip of my tongue
+        [00:51.23]Tip of my tongue
+        [00:53.17]Tip of my tongue
+        [00:54.96]Tip of my tongue
+        [00:56.80]Tip of my tongue
+        [00:58.73]I know you're bad for me but I don't care
+        [01:02.66]You can call me like it's truth or dare
+        [01:06.08]Let me breathe your air
+        [01:09.55]'Cause I need you there
+        [01:13.86]Almost past the exit sign
+        [01:16.71]'Cause now you're something
+        [01:17.98]That I wanna forget (forget)
+        [01:20.54]I guess the feelings don't lie
+        [01:22.41]You twist your knife
+        [01:24.18]You're replaying like the song in my head
+        [01:26.75](Song in my head)
+        [01:28.33]Face to face
+        [01:31.00]I think I'm gonna say it
+        [01:33.75]I can barely take it
+        [01:35.52]Heart beats so fast
+        [01:39.17]Start a little drama
+        [01:40.51]'Cause I think it's on the tip of my tongue
+        [01:43.67]Tip of my tongue
+        [01:45.39]Tip of my tongue
+        [01:46.40]Start a little drama (Tip of my tongue)
+        [01:47.68]'Cause I think its on the (Tip of my tongue)
+        [01:50.11]Walking on a tightrope (Tip of my tongue)
+        [01:51.83]Know I shouldn't get close (Tip of my tongue)
+        [01:53.62]Start a little drama (Tip of my tongue)
+        [01:54.92]'Cause I think its on the (Tip of my tongue)
+    </script>
+
+    <script>
+        /* STARS DRAWING ENGINE */
+        const starEngine = (function () {
+            const canvas = document.getElementById('starCanvas');
+            const ctx = canvas.getContext('2d', { alpha: true });
+            let W = 0, H = 0;
+            let stars = [];
+            let fallbackInterval = null;
+            let animFrameId = null;
+            let isRunning = false;
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                W = canvas.width = Math.floor(window.innerWidth * dpr);
+                H = canvas.height = Math.floor(window.innerHeight * dpr);
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                initStars();
+            }
+
+            function rand(min, max) { return min + Math.random() * (max - min); }
+
+            function initStars() {
+                stars = [];
+                const area = window.innerWidth * window.innerHeight;
+                const count = Math.min(Math.floor(area / 1800), 450); 
+
+                for (let i = 0; i < count; i++) {
+                    const r = Math.random();
+                    stars.push({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        size: r < 0.85 ? rand(0.5, 1.2) : rand(1.2, 2.0),
+                        a: rand(0.4, 0.95),
+                        tw: rand(0.005, 0.015),
+                        off: rand(0, Math.PI * 2)
+                    });
+                }
+            }
+
+            function draw(t) {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                ctx.fillStyle = "rgba(230, 242, 255, 1)"; 
+                
+                for (const s of stars) {
+                    const twinkle = Math.sin(t * s.tw * 60 + s.off);
+                    const alpha = s.a * (0.5 + 0.5 * twinkle);
+                    ctx.globalAlpha = alpha;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0;
+            }
+
+            function tick(t) {
+                if (!isRunning) return;
+                draw(t);
+                animFrameId = requestAnimationFrame(tick);
+            }
+
+            function start() {
+                isRunning = true;
+                if (fallbackInterval) {
+                    clearInterval(fallbackInterval);
+                    fallbackInterval = null;
+                }
+                if (!animFrameId) {
+                    animFrameId = requestAnimationFrame(tick);
+                }
+            }
+
+            function switchToFallback() {
+                // If window loses focus, requestAnimationFrame stops completely. 
+                // We pivot onto an independent timer thread to keep rendering.
+                if (animFrameId) {
+                    cancelAnimationFrame(animFrameId);
+                    animFrameId = null;
+                }
+                if (!fallbackInterval && isRunning) {
+                    fallbackInterval = setInterval(() => {
+                        draw(performance.now());
+                    }, 33); // Enforces rendering clock even during active games
+                }
+            }
+
+            window.addEventListener('resize', resize);
+            
+            // Listeners to override tab dormancy immediately
+            window.addEventListener('focus', start);
+            window.addEventListener('blur', switchToFallback);
+
+            resize();
+            start();
+
+            return { start, switchToFallback };
+        })();
+
+        /* CORE AUDIO & LYRICS INTERACTION ENGINE */
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('overlay');
+            const audio = document.getElementById('bgm');
+            const video = document.getElementById('bg-video');
+            const brandTitle = document.getElementById('brand-title');
+            const bodyNode = document.body;
+            
+            const lyricOutput = document.getElementById('lyric-output');
+            const lanyardUsername = document.getElementById('lanyardUsername');
+            const lanyardStatusDot = document.getElementById('lanyardStatusDot');
+            const lanyardStatusText = document.getElementById('lanyardStatusText');
+            const lanyardCustomStatus = document.getElementById('lanyardCustomStatus');
+            const lanyardAvatar = document.getElementById('lanyardAvatar');
+            const trackName = document.getElementById('track-name');
+            const lyricCaret = document.getElementById('lyric-caret');
+
+            let parsedLyrics = [];
+            let currentLineIndex = -1;
+
+            trackName.textContent = 'Tip of My Tongue — Rudywave';
+            lyricOutput.textContent = '';
+
+            function parseLRC() {
+                const lrcText = document.getElementById('lrc-content').textContent;
+                const lines = lrcText.split('\n');
+                const timeReg = /\[(\d+):(\d+)\.(\d+)\]/;
+
+                lines.forEach(line => {
+                    const match = timeReg.exec(line);
+                    if (match) {
+                        const minutes = parseInt(match[1]);
+                        const seconds = parseInt(match[2]);
+                        const milliseconds = parseInt(match[3]) * 10;
+                        const timeInSeconds = (minutes * 60) + seconds + (milliseconds / 1000);
+                        const text = line.replace(timeReg, '').trim();
+                        if(text) {
+                            parsedLyrics.push({ time: timeInSeconds, text: text });
+                        }
+                    }
+                });
+                parsedLyrics.sort((a, b) => a.time - b.time);
+            }
+            parseLRC();
+
+            async function fetchLanyard() {
+                try {
+                    const response = await fetch('https://api.lanyard.rest/v1/users/292953257997762563');
+                    const payload = await response.json();
+                    if (!payload.success) throw new Error('No Lanyard data');
+
+                    const data = payload.data;
+                    const user = data.discord_user || {};
+                    const status = data.discord_status || 'offline';
+                    const activities = Array.isArray(data.activities) ? data.activities : [];
+                    const customActivity = activities.find(activity => activity.type === 4);
+
+                    lanyardUsername.textContent = user.username || 'indura';
+                    lanyardStatusDot.className = `lanyard-status-dot ${status}`;
+                    lanyardStatusText.textContent = status === 'offline' ? 'offline' : status;
+
+                    if (user.avatar) {
+                        lanyardAvatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
+                    } else {
+                        lanyardAvatar.removeAttribute('src');
+                    }
+
+                    if (customActivity) {
+                        let text = customActivity.state || '';
+                        if (customActivity.emoji) {
+                            text = `${customActivity.emoji.name || ''} ${text}`.trim();
+                        }
+                        lanyardCustomStatus.textContent = text || 'Addict';
+                    } else {
+                        lanyardCustomStatus.textContent = 'Addict';
+                    }
+                } catch (error) {
+                    lanyardStatusText.textContent = 'status unavailable';
+                    lanyardCustomStatus.textContent = 'Addict';
+                    console.warn('Lanyard fetch failed:', error);
+                }
+            }
+
+            let isOverlayClosed = false;
+            let lastKnownTime = -1;
+            let stallCounter = 0;
+            
+            // Watchdog: Triggers when the GPU / browser freezes rendering on your secondary screen
+            const handleVideoPlayback = () => {
+                if (!isOverlayClosed) return;
+                
+                // Force playback if paused
+                if (video.paused) {
+                    video.play().catch(() => {});
+                }
+
+                // If the clock isn't moving, the decoder is sleeping
+                if (video.currentTime === lastKnownTime && !video.paused) {
+                    stallCounter++;
+                    if (stallCounter >= 2) { 
+                        // Seek forward a fraction of a second to wake up the compositor
+                        video.currentTime = video.currentTime + 0.05 >= video.duration ? 0 : video.currentTime + 0.05;
+                        video.play().catch(() => {});
+                        stallCounter = 0;
+                    }
+                } else {
+                    stallCounter = 0;
+                }
+                lastKnownTime = video.currentTime;
+            };
+
+            overlay.addEventListener('click', () => {
+                overlay.classList.add('hidden');
+                bodyNode.classList.add('ambient-active');
+                brandTitle.classList.add('glow-active');
+                isOverlayClosed = true;
+                
+                audio.volume = 0.25;
+                video.play().catch(() => {});
+                audio.play()
+                    .then(() => {
+                        startLyricSyncLoop();
+                    })
+                    .catch(err => {
+                        console.warn('Audio playback handled safely:', err);
+                        lyricOutput.textContent = 'Playback initialized. Stream paused.';
+                    });
+            });
+
+            fetchLanyard();
+            setInterval(fetchLanyard, 15000);
+
+            // Visibility changes wake up the animation context
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    starEngine.start();
+                    handleVideoPlayback();
+                } else {
+                    starEngine.switchToFallback();
+                }
+            });
+            
+            // Continuous watchdog running every second
+            setInterval(handleVideoPlayback, 1000);
+
+            function startLyricSyncLoop() {
+                function frameCheck() {
+                    if (!audio.paused && !audio.ended) {
+                        const currentTime = audio.currentTime;
+                        let activeIndex = -1;
+
+                        for (let i = 0; i < parsedLyrics.length; i++) {
+                            if (currentTime >= parsedLyrics[i].time) {
+                                activeIndex = i;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (activeIndex !== -1 && activeIndex !== currentLineIndex) {
+                            currentLineIndex = activeIndex;
+                            triggerLinePrint(parsedLyrics[currentLineIndex].text);
+                        }
+                    }
+                    requestAnimationFrame(frameCheck);
+                }
+                requestAnimationFrame(frameCheck);
+            }
+
+            let printInterval = null;
+            function triggerLinePrint(fullText) {
+                if (printInterval) clearInterval(printInterval);
+                lyricOutput.textContent = '';
+                lyricCaret.hidden = false;
+                
+                let charIdx = 0;
+                printInterval = setInterval(() => {
+                    if (charIdx < fullText.length) {
+                        lyricOutput.textContent += fullText[charIdx];
+                        charIdx++;
+                    } else {
+                        clearInterval(printInterval);
+                    }
+                }, 25); 
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Low Poly Beach - Dreamy Twilight</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            /* Bright, highly saturated sunset gradient */
+            background: linear-gradient(180deg,
+                    #bdeee2 0%,
+                    #d3ecdf 20%,
+                    #f3dccf 42%,
+                    #f6bccb 58%,
+                    #8fd8d6 78%,
+                    #4fb0b8 100%);
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ── UI Overlay ── */
+        #ui-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none; /* Lets you click through to the canvas if needed */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .center-content h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.4rem, 2.8vw, 2.8rem); /* Elegant, smaller sizing */
+            margin: 0;
+            color: #ffccd8;
+            /* Rich, hot neon glow restored */
+            text-shadow: 
+                0 0 8px rgba(255, 20, 147, 0.95),
+                0 0 20px rgba(255, 20, 147, 0.65),
+                0 0 30px rgba(255, 20, 147, 0.45);
+            letter-spacing: 1px;
+            text-transform: none;
+        }
+
+        .center-content p {
+            font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+            font-size: clamp(0.8rem, 1.1vw, 1.1rem); /* Slightly larger for visibility */
+            margin: 20px 0 0 0;
+            font-weight: 500; /* Thicker weight for better contrast */
+            color: #ffffff;
+            letter-spacing: 1.5px;
+            /* Stronger dual shadow to pop against the light gradient */
+            text-shadow: 
+                0 2px 12px rgba(0, 0, 0, 0.75),
+                0 1px 4px rgba(0, 0, 0, 0.45);
+        }
+
+        .bottom-right {
+            position: absolute;
+            bottom: 24px;
+            right: 32px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: #ffffff;
+            /* Enhanced shadow for ultimate readability over the bright water */
+            text-shadow: 
+                0 2px 10px rgba(0, 0, 0, 0.85),
+                0 1px 4px rgba(0, 0, 0, 0.55);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Overlay Text ── -->
+    <div id="ui-layer">
+        <div class="center-content">
+            <h1>OutOfTune</h1>
+            <p>Made with love</p>
+        </div>
+        <div class="bottom-right">
+            &copy; 2026 OutOfTune
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initScene();
+        });
+
+        function initScene() {
+            const container = document.getElementById('canvas-container');
+            if (!container || !window.THREE) return;
+
+            function safeSize(el, fallbackW, fallbackH) {
+                const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
+                const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
+                return { w, h, aspect: w / h };
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2); 
+            const scene = new THREE.Scene();
+            
+            // Bright glowing cyan fog restored
+            scene.fog = new THREE.Fog(0x6cc9c8, 24, 78);
+
+            const s = safeSize(container, window.innerWidth, window.innerHeight);
+            const camera = new THREE.PerspectiveCamera(58, s.aspect, 0.1, 200);
+            camera.position.set(-3.0, 0.55, 15.0);
+            camera.lookAt(new THREE.Vector3(5, -0.5, 0));
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+            renderer.setPixelRatio(dpr);
+            renderer.setSize(s.w, s.h);
+            container.appendChild(renderer.domElement);
+
+            // Bright skylight ambient glow restored
+            scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+            
+            // Strong sun highlights restored
+            const sun = new THREE.DirectionalLight(0xffe3d6, 0.55);
+            sun.position.set(-10, 14, 8);
+            scene.add(sun);
+
+            // ── Sand ──
+            let sandGeo = new THREE.PlaneGeometry(70, 34, 22, 12);
+            sandGeo = sandGeo.toNonIndexed();
+            sandGeo.rotateX(-Math.PI / 2);
+            sandGeo.translate(0, -1.56, 9);
+
+            const sandPos = sandGeo.attributes.position;
+            const sandColors = new Float32Array(sandPos.count * 3);
+            const sandLight = new THREE.Color(0xfbe6ea);
+            const sandShade = new THREE.Color(0xf0c9cf);
+            const sandWet = new THREE.Color(0xd9a3ad);
+            for (let i = 0; i < sandPos.count; i += 3) {
+                const z = sandPos.getZ(i);
+                const wetness = Math.max(0, Math.min(1, 1 - (z + 8) / 20));
+                const grain = Math.random() * 0.5;
+                let c = sandLight.clone().lerp(sandShade, grain);
+                c = c.lerp(sandWet, wetness * 0.55);
+                for (let k = 0; k < 3; k++) {
+                    sandColors[(i + k) * 3] = c.r;
+                    sandColors[(i + k) * 3 + 1] = c.g;
+                    sandColors[(i + k) * 3 + 2] = c.b;
+                }
+            }
+            sandGeo.setAttribute('color', new THREE.BufferAttribute(sandColors, 3));
+            const sandMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, fog: true });
+            const sand = new THREE.Mesh(sandGeo, sandMat);
+            scene.add(sand);
+
+            // ── Sea ──
+            let seaGeo = new THREE.PlaneGeometry(100, 70, 34, 24);
+            seaGeo = seaGeo.toNonIndexed();
+            seaGeo.rotateX(-Math.PI / 2);
+            seaGeo.translate(0, 0, -38);
+
+            const seaPos = seaGeo.attributes.position;
+            const seaBase = new Float32Array(seaPos.count * 3);
+            for (let i = 0; i < seaPos.count; i++) {
+                seaBase[i * 3] = seaPos.getX(i);
+                seaBase[i * 3 + 1] = seaPos.getY(i);
+                seaBase[i * 3 + 2] = seaPos.getZ(i);
+            }
+
+            const seaColors = new Float32Array(seaPos.count * 3);
+            const shallow = new THREE.Color(0xaef0e0); 
+            const deep = new THREE.Color(0x3f9fb8);    
+            seaGeo.setAttribute('color', new THREE.BufferAttribute(seaColors, 3));
+
+            const seaMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, fog: true });
+            const sea = new THREE.Mesh(seaGeo, seaMat);
+            sea.position.y = -1.5;
+            scene.add(sea);
+
+            // ── Background Islands & Sun ──
+            const islandMat = new THREE.MeshLambertMaterial({ color: 0x8a95ae, flatShading: true });
+            const island1 = new THREE.Mesh(new THREE.ConeGeometry(3.2, 2.2, 7), islandMat);
+            island1.position.set(-16, -0.6, -46);
+            scene.add(island1);
+            
+            const island2 = new THREE.Mesh(new THREE.ConeGeometry(2, 1.4, 7), islandMat);
+            island2.position.set(-9, -0.9, -48);
+            scene.add(island2);
+
+            const sunMesh = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(3, 1),
+                new THREE.MeshBasicMaterial({ color: 0xffcdb0, fog: false })
+            );
+            sunMesh.position.set(45, 11, -50);
+            scene.add(sunMesh);
+
+            // ── Beach Hut ──
+            const hut = new THREE.Group();
+            const postMat = new THREE.MeshLambertMaterial({ color: 0x6b4245, flatShading: true });
+            const woodMat = new THREE.MeshLambertMaterial({ color: 0x9c6560, flatShading: true });
+            const roofMat = new THREE.MeshLambertMaterial({ color: 0xe8a4a8, flatShading: true });
+
+            const counter = new THREE.Mesh(new THREE.BoxGeometry(5, 1.1, 2.2), woodMat);
+            counter.position.y = 0.55;
+            hut.add(counter);
+
+            const postGeo = new THREE.CylinderGeometry(0.09, 0.09, 3.1, 5);
+            const postOffsets = [[-2.3, -0.9], [2.3, -0.9], [-2.3, 0.9], [2.3, 0.9]];
+            postOffsets.forEach(([px, pz]) => {
+                const post = new THREE.Mesh(postGeo, postMat);
+                post.position.set(px, 1.65, pz);
+                hut.add(post);
+            });
+
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(4.3, 2.1, 8), roofMat);
+            roof.rotation.y = Math.PI / 4;
+            roof.position.y = 4.3;
+            hut.add(roof);
+
+            hut.position.set(11, -1.56, 1);
+            hut.rotation.y = -0.5;
+            scene.add(hut);
+
+            // ── Beach Chairs ──
+            function createBeachChair() {
+                const chair = new THREE.Group();
+                const fabricMat = new THREE.MeshLambertMaterial({ color: 0x1a45b8, flatShading: true });
+                const frameMat = new THREE.MeshLambertMaterial({ color: 0x9ca3af, flatShading: true });
+
+                const seat = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 1.8), fabricMat);
+                seat.position.set(0, 0.3, 0);
+                chair.add(seat);
+
+                const back = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 1.3), fabricMat);
+                back.position.set(0, 0.65, -1.4);
+                back.rotation.x = -0.6;
+                chair.add(back);
+
+                function addULeg(zPos) {
+                    const legGrp = new THREE.Group();
+                    const hBar = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.06, 0.06), frameMat);
+                    hBar.position.set(0, 0.03, 0);
+                    legGrp.add(hBar);
+                    const vBarL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.27, 0.06), frameMat);
+                    vBarL.position.set(-0.42, 0.165, 0);
+                    legGrp.add(vBarL);
+                    const vBarR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.27, 0.06), frameMat);
+                    vBarR.position.set(0.42, 0.165, 0);
+                    legGrp.add(vBarR);
+                    legGrp.position.z = zPos;
+                    chair.add(legGrp);
+                }
+
+                addULeg(0.7); addULeg(-0.7); addULeg(-1.7);
+                chair.scale.set(0.7, 0.7, 0.7);
+                return chair;
+            }
+
+            const chair1 = createBeachChair();
+            chair1.position.set(4, -1.56, 3);
+            chair1.rotation.y = -0.3;
+            scene.add(chair1);
+
+            const chair2 = createBeachChair();
+            chair2.position.set(0.5, -1.56, 5.5);
+            chair2.rotation.y = 0.2;
+            scene.add(chair2);
+
+            const chair3 = createBeachChair();
+            chair3.position.set(-2.8, -1.56, 5);
+            chair3.rotation.y = 0.45;
+            scene.add(chair3);
+
+            // ── Beach Umbrella ──
+            const umbrellaGrp = new THREE.Group();
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.5, 6), new THREE.MeshLambertMaterial({color: 0xd1d5db}));
+            pole.position.y = 1.75;
+            umbrellaGrp.add(pole);
+            const canopy = new THREE.Mesh(new THREE.ConeGeometry(2.2, 0.8, 9), new THREE.MeshLambertMaterial({color: 0xff9ec4, flatShading: true}));
+            canopy.position.y = 3.5;
+            umbrellaGrp.add(canopy);
+            
+            umbrellaGrp.position.set(-1.5, -1.56, 5.5);
+            umbrellaGrp.rotation.z = 0.18; 
+            umbrellaGrp.rotation.x = -0.1;
+            umbrellaGrp.rotation.y = -0.8;
+            scene.add(umbrellaGrp);
+
+            // ── Surfboards ──
+            const board1 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.5, 7), new THREE.MeshLambertMaterial({color: 0x8fd8d6, flatShading: true}));
+            board1.scale.z = 0.15;
+            board1.position.set(8.8, -0.4, 1.8);
+            board1.rotation.set(-0.2, -0.4, 0.1);
+            scene.add(board1);
+
+            const board2 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.6, 7), new THREE.MeshLambertMaterial({color: 0xffb3cd, flatShading: true}));
+            board2.scale.z = 0.15;
+            board2.position.set(9.4, -0.35, 2.2);
+            board2.rotation.set(-0.25, -0.1, -0.15);
+            scene.add(board2);
+
+            // ── Palm Trees ──
+            function createPalmTree() {
+                const tree = new THREE.Group();
+                const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b, flatShading: true });
+                const leafMatDark = new THREE.MeshLambertMaterial({ color: 0x3f9fb8, flatShading: true }); 
+                const leafMatLight = new THREE.MeshLambertMaterial({ color: 0x6cc9c8, flatShading: true });
+                
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.45, 4.5, 6), trunkMat);
+                trunk.position.y = 2.25;
+                tree.add(trunk);
+                
+                const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(0.6, 0), leafMatDark);
+                crown.position.y = 4.3;
+                crown.scale.y = 0.8;
+                tree.add(crown);
+
+                function createFrond(material, scale, outwardSpread, tipDroop) {
+                    const frond = new THREE.Group();
+                    const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.05, 2.2, 5), material);
+                    seg1.geometry.translate(0, 1.1, 0); 
+                    seg1.geometry.scale(1, 1, 0.35);
+                    seg1.rotation.x = outwardSpread;              
+                    const seg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.0, 0.28, 2.0, 5), material);
+                    seg2.geometry.translate(0, 1.0, 0); 
+                    seg2.geometry.scale(1, 1, 0.35);
+                    seg2.position.y = 2.2;              
+                    seg2.rotation.x = tipDroop;              
+                    seg1.add(seg2);
+                    frond.add(seg1);
+                    frond.scale.set(scale, scale, scale);
+                    return frond;
+                }
+                
+                for(let i = 0; i < 8; i++) {
+                    const frond = createFrond(leafMatDark, 1.3, 1.2, 0.8);
+                    frond.position.y = 4.1;
+                    frond.rotation.y = (i / 8) * Math.PI * 2;
+                    tree.add(frond);
+                }
+                for(let i = 0; i < 7; i++) {
+                    const frond = createFrond(leafMatLight, 1.1, 0.7, 0.5);
+                    frond.position.y = 4.3;
+                    frond.rotation.y = (i / 7) * Math.PI * 2 + 0.3; 
+                    tree.add(frond);
+                }
+                for(let i = 0; i < 5; i++) {
+                    const frond = createFrond(leafMatLight, 0.8, 0.3, 0.3);
+                    frond.position.y = 4.6;
+                    frond.rotation.y = (i / 5) * Math.PI * 2 + 0.6; 
+                    tree.add(frond);
+                }
+                
+                const cocoMat = new THREE.MeshLambertMaterial({ color: 0x5c3a21, flatShading: true });
+                for(let i = 0; i < 4; i++) {
+                    const coco = new THREE.Mesh(new THREE.DodecahedronGeometry(0.28, 0), cocoMat);
+                    coco.position.set(Math.cos(i * 1.6) * 0.4, 4.1, Math.sin(i * 1.6) * 0.4);
+                    tree.add(coco);
+                }
+                return tree;
+            }
+
+            const palm1 = createPalmTree();
+            palm1.position.set(13, -1.56, -1);
+            palm1.rotation.z = -0.15;
+            scene.add(palm1);
+
+            const palm2 = createPalmTree();
+            palm2.position.set(-6, -1.56, 5);
+            palm2.rotation.z = 0.2;
+            palm2.rotation.x = 0.1;
+            scene.add(palm2);
+            
+            const palm3 = createPalmTree();
+            palm3.position.set(24.5, -1.56, 3.5);
+            palm3.rotation.z = -0.15;
+            palm3.rotation.x = 0.1;
+            scene.add(palm3);
+
+            // ── Ultrawide Extra Elements ──
+            const ultrawideGroup = new THREE.Group();
+            
+            const boatGrp = new THREE.Group();
+            const hull = new THREE.Mesh(new THREE.BoxGeometry(2, 0.4, 0.8), new THREE.MeshLambertMaterial({color: 0xffffff, flatShading: true}));
+            hull.position.y = 0.2;
+            boatGrp.add(hull);
+            const sail = new THREE.Mesh(new THREE.ConeGeometry(0.1, 2.5, 3), new THREE.MeshLambertMaterial({color: 0xff9ec4, flatShading: true}));
+            sail.position.set(0, 1.6, 0);
+            sail.rotation.y = Math.PI / 2;
+            boatGrp.add(sail);
+            boatGrp.position.set(-25, -1.5, -20);
+            boatGrp.rotation.y = 0.5;
+            ultrawideGroup.add(boatGrp);
+
+            const island3 = new THREE.Mesh(new THREE.ConeGeometry(5, 3.5, 7), islandMat);
+            island3.position.set(32, -1.0, -35);
+            ultrawideGroup.add(island3);
+
+            const birdMat = new THREE.MeshBasicMaterial({color: 0x3f9fb8});
+            for(let i = 0; i < 6; i++) {
+                const bird = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 3), birdMat);
+                bird.rotation.x = Math.PI / 2;
+                bird.rotation.z = Math.PI / 2;
+                bird.position.set(-18 + Math.random() * 6, 9 + Math.random() * 3, -22 + Math.random() * 6);
+                bird.userData = { offset: Math.random() * Math.PI * 2, speed: 0.5 + Math.random() * 0.5 };
+                ultrawideGroup.add(bird);
+            }
+            scene.add(ultrawideGroup);
+
+            // ── Campfire ──
+            const animatedFlames = [];
+            const campfire = new THREE.Group();
+            
+            const stoneMat = new THREE.MeshLambertMaterial({color: 0x8a95ae, flatShading: true});
+            for(let i = 0; i < 9; i++) {
+                const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.15, 0), stoneMat);
+                const angle = (i / 9) * Math.PI * 2;
+                stone.position.set(Math.cos(angle) * 0.5, 0.05, Math.sin(angle) * 0.5);
+                stone.rotation.set(Math.random(), Math.random(), Math.random());
+                campfire.add(stone);
+            }
+            
+            const flame1 = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.7, 4), new THREE.MeshLambertMaterial({color: 0xffaa00, flatShading: true}));
+            flame1.position.y = 0.35;
+            campfire.add(flame1);
+            animatedFlames.push({ mesh: flame1, baseScale: 1, speed: 20, offset: 0 });
+            
+            const flame2 = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, 4), new THREE.MeshLambertMaterial({color: 0xff3300, flatShading: true}));
+            flame2.position.set(0.1, 0.25, 0.1);
+            campfire.add(flame2);
+            animatedFlames.push({ mesh: flame2, baseScale: 1, speed: 25, offset: Math.PI });
+
+            const fireLight = new THREE.PointLight(0xff7700, 0.9, 10);
+            fireLight.position.y = 0.6;
+            campfire.add(fireLight);
+
+            campfire.position.set(1.5, -1.56, 4.8);
+            scene.add(campfire);
+
+            // ── Right Side Pier & Rocks ──
+            const pier = new THREE.Group();
+            const woodMatDark = new THREE.MeshLambertMaterial({color: 0x5c3a21, flatShading: true});
+            const woodMatLight = new THREE.MeshLambertMaterial({color: 0x8b5a2b, flatShading: true});
+
+            for (let i = 0; i < 24; i++) {
+                const plank = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.1, 0.45), woodMatLight);
+                plank.position.set(0, 0, 2 - i * 0.5);
+                plank.rotation.y = (Math.random() - 0.5) * 0.06;
+                plank.rotation.z = (Math.random() - 0.5) * 0.03;
+                pier.add(plank);
+            }
+
+            const beam1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 12), woodMatDark);
+            beam1.position.set(-1.2, -0.15, -3.75);
+            pier.add(beam1);
+            const beam2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 12), woodMatDark);
+            beam2.position.set(1.2, -0.15, -3.75);
+            pier.add(beam2);
+
+            const pileGeo = new THREE.CylinderGeometry(0.12, 0.15, 3, 5);
+            const pilePositions = [[-1.4, -9], [1.4, -9], [-1.4, -5], [1.4, -5], [-1.4, -1], [1.4, -1], [-1.4, 2.5], [1.4, 2.5]];
+            pilePositions.forEach(([px, pz]) => {
+                const pile = new THREE.Mesh(pileGeo, woodMatDark);
+                pile.position.set(px, -1.2, pz);
+                pile.rotation.set( (Math.random()-0.5)*0.1, Math.random(), (Math.random()-0.5)*0.1 );
+                pier.add(pile);
+            });
+
+            pier.position.set(22, -1.0, 3);
+            pier.rotation.y = -0.15;
+            scene.add(pier);
+
+            const sceneRockMat = new THREE.MeshLambertMaterial({color: 0x8a95ae, flatShading: true});
+            function addRock(x, z, s) {
+                const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(s, 0), sceneRockMat);
+                rock.position.set(x, -1.56 + s * 0.4, z);
+                rock.rotation.set(Math.random(), Math.random(), Math.random());
+                scene.add(rock);
+            }
+            addRock(16, 5, 0.4); addRock(17, 4.5, 0.25); addRock(23, 7, 0.5); addRock(24.5, 6, 0.3); addRock(28, 4, 0.8);
+
+            const starfMat = new THREE.MeshLambertMaterial({color: 0xff9ec4, flatShading: true}); 
+            function addStarfish(x, z, rot) {
+                const star = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.05, 0.06, 5), starfMat);
+                star.position.set(x, -1.53, z);
+                star.rotation.set(0, rot, 0);
+                scene.add(star);
+            }
+            addStarfish(15, 7, 0.4); addStarfish(21.5, 8.5, 1.2); addStarfish(26, 5, 2.0);
+
+            // ── Stars ──
+            const starsGeo = new THREE.BufferGeometry();
+            const starsCount = 150;
+            const starsPos = new Float32Array(starsCount * 3);
+            for(let i=0; i<starsCount; i++) {
+                starsPos[i*3] = (Math.random() - 0.5) * 120;
+                starsPos[i*3+1] = 15 + Math.random() * 40;
+                starsPos[i*3+2] = -40 - Math.random() * 60;
+            }
+            starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+            const skyStars = new THREE.Points(starsGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.15, transparent: true, opacity: 0.8, fog: false}));
+            scene.add(skyStars);
+
+            function paintSea(t) {
+                const arr = seaPos.array;
+                for (let i = 0; i < seaPos.count; i++) {
+                    const bx = seaBase[i * 3], bz = seaBase[i * 3 + 2];
+                    const swell = Math.sin(bx * 0.08 + t) * 0.28 + Math.sin(bz * 0.06 - t * 0.45) * 0.20;
+                    const ripple = Math.sin(bx * 0.55 + bz * 0.4 + t * 1.6) * 0.035 + Math.sin(bx * 0.9 - bz * 0.7 + t * 2.1) * 0.02;
+                    arr[i * 3 + 1] = swell + ripple;
+                }
+                seaPos.needsUpdate = true;
+                seaGeo.computeVertexNormals();
+
+                const triCount = seaPos.count / 3;
+                for (let tri = 0; tri < triCount; tri++) {
+                    const i0 = tri * 3, i1 = i0 + 1, i2 = i0 + 2;
+                    const avgY = (arr[i0 * 3 + 1] + arr[i1 * 3 + 1] + arr[i2 * 3 + 1]) / 3;
+                    const h = Math.max(0, Math.min(1, (avgY + 0.4) / 0.8));
+                    const speck = (Math.sin(seaBase[i0 * 3] * 3.1 + seaBase[i0 * 3 + 2] * 2.3) * 0.5 + 0.5) * 0.12;
+                    const c = shallow.clone().lerp(deep, 1 - h);
+                    c.r = Math.min(1, c.r + speck);
+                    c.g = Math.min(1, c.g + speck * 0.6);
+                    c.b = Math.min(1, c.b + speck * 0.75);
+                    [i0, i1, i2].forEach((idx) => {
+                        seaColors[idx * 3] = c.r; seaColors[idx * 3 + 1] = c.g; seaColors[idx * 3 + 2] = c.b;
+                    });
+                }
+                seaGeo.attributes.color.needsUpdate = true;
+            }
+
+            let t = 0;
+            function animate() {
+                requestAnimationFrame(animate);
+                t += 0.0028;
+                paintSea(t);
+                sunMesh.rotation.y += 0.001;
+
+                animatedFlames.forEach(f => {
+                    const flicker = Math.sin(t * f.speed + f.offset);
+                    const scaleY = f.baseScale + Math.max(0, flicker * 0.4);
+                    const scaleXZ = f.baseScale + flicker * 0.1;
+                    f.mesh.scale.set(scaleXZ, scaleY, scaleXZ);
+                    f.mesh.rotation.y = t * 6;
+                });
+                
+                fireLight.intensity = 0.8 + Math.sin(t * 50) * 0.1 + Math.random() * 0.05;
+                skyStars.rotation.y = t * 0.03;
+
+                if (ultrawideGroup.visible) {
+                    boatGrp.position.y = -1.5 + Math.sin(t * 1.5) * 0.15;
+                    boatGrp.rotation.z = Math.sin(t * 1.2) * 0.05;
+                    boatGrp.position.x = -25 + Math.sin(t * 0.2) * 2;
+                    ultrawideGroup.children.forEach(child => {
+                        if (child.userData.speed) {
+                            child.position.y += Math.sin(t * child.userData.speed * 5 + child.userData.offset) * 0.01;
+                        }
+                    });
+                }
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            function layout() {
+                const s2 = safeSize(container, window.innerWidth, window.innerHeight);
+                camera.aspect = s2.aspect;
+                camera.fov = 60;
+                
+                // Perfectly balanced coordinates to prevent edge-clipping of trees
+                if (s2.aspect < 1.0) { 
+                    // Portrait Mobile
+                    camera.position.set(-1.0, 3.2, 22.0); 
+                    ultrawideGroup.visible = false;
+                } else { 
+                    // Desktop / landscape matching original perfectly
+                    camera.position.set(-3.0, 0.55, 15.0);
+                    ultrawideGroup.visible = true; 
+                }
+                
+                camera.lookAt(new THREE.Vector3(5, -0.5, 0));
+                camera.updateProjectionMatrix();
+                renderer.setSize(s2.w, s2.h);
+            }
+            window.addEventListener('resize', layout);
+            layout();
+
+            // ── Screenshot Feature (Pristine Dedicated Offline 5K Render Engine!) ──
+            window.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 's') {
+                    // Standard cinematic 5K Ultra HD layout (Slight upscale from 4K)
+                    const targetW = 5120; 
+                    const targetH = 2880;
+
+                    // 1. Setup a completely dedicated offscreen WebGL renderer
+                    // This ensures DOM layout changes or live canvas viewport resizing do NOT clear WebGL buffers
+                    const offlineRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+                    offlineRenderer.setSize(targetW, targetH);
+                    
+                    // Duplicate camera precisely for 5K 16:9 projection matrix
+                    const offlineCamera = new THREE.PerspectiveCamera(58, targetW / targetH, 0.1, 200);
+                    offlineCamera.position.set(-3.0, 0.55, 15.0);
+                    offlineCamera.lookAt(new THREE.Vector3(5, -0.5, 0));
+                    offlineCamera.updateProjectionMatrix();
+
+                    // Force calculate all positions in world space prior to capture to prevent element dropping (culling issues)
+                    scene.updateMatrixWorld(true);
+                    offlineCamera.updateMatrixWorld(true);
+
+                    // Draw WebGL scene to offline buffer
+                    offlineRenderer.render(scene, offlineCamera);
+
+                    // 2. Setup 2D Compositing canvas
+                    const exportCanvas = document.createElement('canvas');
+                    exportCanvas.width = targetW;
+                    exportCanvas.height = targetH;
+                    const ctx = exportCanvas.getContext('2d');
+
+                    // Draw gorgeous high-fidelity sky sunset backdrop
+                    const skyGrad = ctx.createLinearGradient(0, 0, 0, targetH);
+                    skyGrad.addColorStop(0.0, '#bdeee2');
+                    skyGrad.addColorStop(0.2, '#d3ecdf');
+                    skyGrad.addColorStop(0.42, '#f3dccf');
+                    skyGrad.addColorStop(0.58, '#f6bccb');
+                    skyGrad.addColorStop(0.78, '#8fd8d6');
+                    skyGrad.addColorStop(1.0, '#4fb0b8');
+                    ctx.fillStyle = skyGrad;
+                    ctx.fillRect(0, 0, targetW, targetH);
+
+                    // Composite WebGL elements perfectly over background gradient
+                    ctx.drawImage(offlineRenderer.domElement, 0, 0);
+
+                    // Dispose of offline WebGL instance instantly to free up GPU memory
+                    offlineRenderer.dispose();
+
+                    // 3. Draw high-contrast text on the high-res snapshot canvas
+                    // Font scaling factors based on output canvas width
+                    const scaleFactor = targetW / 1920; 
+                    const titlePx = 38 * scaleFactor;
+
+                    // Draw Title "OutOfTune" (Hot-pink retro neon glow)
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.save();
+                    ctx.fillStyle = '#ffccd8';
+                    ctx.shadowColor = 'rgba(255, 20, 147, 0.95)';
+                    ctx.shadowBlur = 15 * scaleFactor;
+                    ctx.shadowOffsetY = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.font = `${titlePx}px 'Press Start 2P', monospace`;
+                    ctx.fillText('OutOfTune', targetW / 2, targetH / 2 - (titlePx * 0.3));
+                    ctx.restore();
+
+                    // Draw Subtitle "Made with love" (Strong dark contrast drop shadow)
+                    ctx.save();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+                    ctx.shadowBlur = 12 * scaleFactor;
+                    ctx.shadowOffsetY = 3 * scaleFactor;
+                    ctx.textAlign = 'center';
+                    const subPx = 13.5 * scaleFactor;
+                    ctx.font = `400 ${subPx}px 'Poppins', sans-serif`;
+                    ctx.fillText('Made with love', targetW / 2, targetH / 2 + (titlePx * 1.15));
+                    ctx.restore();
+
+                    // Draw Copyright (Pristine bottom-right visibility over sea/sand boundary)
+                    ctx.save();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                    ctx.shadowBlur = 10 * scaleFactor;
+                    ctx.shadowOffsetY = 2 * scaleFactor;
+                    ctx.textAlign = 'right';
+                    const copyPx = 13.5 * scaleFactor; 
+                    ctx.font = `500 ${copyPx}px 'Poppins', sans-serif`;
+                    ctx.fillText('© 2026 OutOfTune', targetW - (32 * scaleFactor), targetH - (24 * scaleFactor));
+                    ctx.restore();
+
+                    // 4. Download the perfect, razor-sharp 5K wallpaper
+                    const link = document.createElement('a');
+                    link.download = 'outoftune-wallpaper-5k.jpg';
+                    link.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+                    link.click();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

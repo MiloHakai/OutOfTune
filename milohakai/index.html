@@ -769,6 +769,309 @@
         animation: none !important;
       }
     }
+
+    /* ─────────────────────────────────────────────────────────────
+       LANYARD WIDGET SYSTEM (Discord & Spotify Status Card)
+       ───────────────────────────────────────────────────────────── */
+    .lanyard-card {
+      position: fixed;
+      right: calc(var(--gutter) + 24px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: 280px;
+      padding: 14px;
+      background: color-mix(in srgb, var(--bg2) 65%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px var(--glow);
+      z-index: 1001;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      font-family: 'Lexend', 'Noto Sans JP', sans-serif;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      opacity: 0;
+      pointer-events: none;
+      overflow: visible; /* allow outer border glow to show */
+    }
+
+    /* Animated snake border for Lanyard card — mirrors the page border system */
+    .lanyard-border-top,
+    .lanyard-border-right,
+    .lanyard-border-bottom,
+    .lanyard-border-left {
+      position: absolute;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .lanyard-border-top    { top: 0;    left: 0;   right: 0;    height: 2px; }
+    .lanyard-border-right  { top: 0;    right: 0;  bottom: 0;   width: 2px; }
+    .lanyard-border-bottom { bottom: 0; left: 0;   right: 0;    height: 2px; }
+    .lanyard-border-left   { top: 0;    left: 0;   bottom: 0;   width: 2px; }
+
+    /* Single rounded border glow for the card */
+    .lanyard-card::before {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      border-radius: 16px;
+      pointer-events: none;
+      z-index: -1;
+      background: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 60%, transparent 40%), transparent 60%);
+      filter: blur(14px) saturate(120%);
+      opacity: 0.9;
+      mix-blend-mode: screen;
+    }
+
+    /* Subtle colored outline to match border shape */
+    .lanyard-card {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 12px color-mix(in srgb, var(--accent) 50%, transparent 50%);
+    }
+
+    /* Use two line elements per side (line-1 and line-2) so there are
+       exactly two snakes circling the card, matching the main page system. */
+    /* No per-line animation delays needed for static glow */
+
+    .lanyard-card.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lanyard-card:hover {
+      transform: translateY(-52%) scale(1.02);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 25px var(--glow);
+      border-color: var(--line);
+    }
+
+    .lanyard-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lanyard-avatar-container {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+
+    .lanyard-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--line-soft);
+      transition: border-color 0.3s ease;
+    }
+
+    .lanyard-status-dot {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      background-color: #80848e; /* default offline */
+      transition: background-color 0.3s ease;
+    }
+
+    .lanyard-status-dot.online { background-color: #23a55a; animation: status-pulse-green 2s infinite; }
+    .lanyard-status-dot.idle { background-color: #f0b232; }
+    .lanyard-status-dot.dnd { background-color: #f23f43; }
+    .lanyard-status-dot.offline { background-color: #80848e; }
+
+    @keyframes status-pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(35, 165, 90, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0); }
+    }
+
+    .lanyard-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .lanyard-username {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.52rem;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lanyard-custom-status {
+      font-size: 0.52rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .lanyard-custom-emoji {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      vertical-align: text-bottom;
+      margin-right: 4px;
+    }
+
+    .lanyard-status-text {
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      opacity: 0.8;
+      letter-spacing: 0.03em;
+    }
+
+    /* Spotify presence section */
+    .lanyard-spotify {
+      border-top: 1px solid var(--line-soft);
+      padding-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .lanyard-spotify-header {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.42rem;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .lanyard-spotify-header i {
+      color: #1db954; /* Spotify Green */
+      font-size: 0.6rem;
+    }
+
+    .lanyard-spotify-content {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .lanyard-spotify-album {
+      width: 46px;
+      height: 46px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--line-soft);
+      flex-shrink: 0;
+    }
+
+    /* No spin — album art is a static thumbnail */
+
+
+    .lanyard-spotify-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex-grow: 1;
+    }
+
+    .lanyard-spotify-track {
+      font-weight: 500;
+      font-size: 0.54rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+
+    .lanyard-spotify-artist {
+      font-size: 0.48rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+    }
+
+    .lanyard-spotify-progress-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lanyard-spotify-progress-bar {
+      height: 3px;
+      width: 100%;
+      background: var(--line-soft);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .lanyard-spotify-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s linear;
+      border-radius: 2px;
+    }
+
+    .lanyard-spotify-time {
+      display: flex;
+      justify-content: space-between;
+      font-family: monospace;
+      font-size: 0.45rem;
+      color: var(--text-dim);
+      opacity: 0.7;
+    }
+
+    /* Responsive Adaptation */
+    @media (max-width: 768px) {
+      .lanyard-card {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(var(--gutter) + 68px); /* above footer */
+        top: auto;
+        width: auto;
+        min-width: 240px;
+        max-width: calc(100% - var(--gutter) * 2 - 24px);
+        padding: 10px 14px;
+        box-sizing: border-box;
+      }
+      .lanyard-card:hover {
+        transform: translateX(-50%) scale(1.01);
+      }
+      .lanyard-header {
+        justify-content: center;
+      }
+      .lanyard-username {
+        font-size: 0.62rem;
+      }
+      .lanyard-custom-status {
+        font-size: 0.62rem;
+      }
+      .lanyard-status-text {
+        font-size: 0.54rem;
+      }
+      .lanyard-spotify-track {
+        font-size: 0.64rem;
+      }
+      .lanyard-spotify-artist {
+        font-size: 0.56rem;
+      }
+      .lanyard-spotify-time {
+        font-size: 0.52rem;
+      }
+    }
   </style>
 </head>
 
@@ -814,7 +1117,7 @@
 
     <!-- Social links -->
     <div class="icons">
-      <a href="https://discord.gg/mhfnh6j9uQ" title="Discord" target="_blank" rel="noopener"><i
+      <a href="https://discord.gg/HjvZ3hqyqA" title="Discord" target="_blank" rel="noopener"><i
           class="fab fa-discord"></i></a>
       <a href="https://github.com/MiloHakai" title="GitHub" target="_blank" rel="noopener"><i
           class="fab fa-github"></i></a>
@@ -822,6 +1125,51 @@
           class="fab fa-steam"></i></a>
       <a href="https://twitch.tv/MiloHakai" title="Twitch" target="_blank" rel="noopener"><i
           class="fab fa-twitch"></i></a>
+    </div>
+  </div>
+
+  <!-- Discord presence Lanyard Card -->
+  <div class="lanyard-card" id="lanyardCard" aria-label="Discord Status Card">
+    <!-- Animated snake border segments (mirrors page border system): two lines -->
+    <div class="lanyard-border-top lanyard-line-1" aria-hidden="true"></div>
+    <div class="lanyard-border-right lanyard-line-1" aria-hidden="true"></div>
+    <div class="lanyard-border-bottom lanyard-line-1" aria-hidden="true"></div>
+    <div class="lanyard-border-left lanyard-line-1" aria-hidden="true"></div>
+    <div class="lanyard-border-top lanyard-line-2" aria-hidden="true"></div>
+    <div class="lanyard-border-right lanyard-line-2" aria-hidden="true"></div>
+    <div class="lanyard-border-bottom lanyard-line-2" aria-hidden="true"></div>
+    <div class="lanyard-border-left lanyard-line-2" aria-hidden="true"></div>
+    <div class="lanyard-header">
+      <div class="lanyard-avatar-container">
+        <img class="lanyard-avatar" id="lanyardAvatar" src="" alt="Discord Avatar" />
+        <div class="lanyard-status-dot" id="lanyardStatusDot"></div>
+      </div>
+      <div class="lanyard-info">
+        <div class="lanyard-username" id="lanyardUsername">Loading...</div>
+        <div class="lanyard-custom-status" id="lanyardCustomStatus"></div>
+        <div class="lanyard-status-text" id="lanyardStatusText">offline</div>
+      </div>
+    </div>
+    <div class="lanyard-spotify" id="lanyardSpotify" style="display: none;">
+      <div class="lanyard-spotify-header">
+        <i class="fab fa-spotify"></i> <span>Listening to Spotify</span>
+      </div>
+      <div class="lanyard-spotify-content">
+        <img class="lanyard-spotify-album" id="lanyardSpotifyAlbum" src="" alt="Album Art" />
+        <div class="lanyard-spotify-details">
+          <div class="lanyard-spotify-track" id="lanyardSpotifyTrack">Song Title</div>
+          <div class="lanyard-spotify-artist" id="lanyardSpotifyArtist">Artist Name</div>
+        </div>
+      </div>
+      <div class="lanyard-spotify-progress-container">
+        <div class="lanyard-spotify-progress-bar">
+          <div class="lanyard-spotify-progress-fill" id="lanyardSpotifyProgressFill"></div>
+        </div>
+        <div class="lanyard-spotify-time">
+          <span id="lanyardSpotifyTimeCurrent">0:00</span>
+          <span id="lanyardSpotifyTimeTotal">0:00</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1587,6 +1935,209 @@
       window.updateSunFromClock = updateSunFromClock;
       window.getCachedSunInstants = getCachedSunInstants;
       window.pickPaletteFromInstant = pickPaletteFromInstant;
+    })();
+  </script>
+
+  <!-- Lanyard Integration Script -->
+  <script>
+    (function() {
+      const discordId = '379002314226401320';
+      const card = document.getElementById('lanyardCard');
+      const avatar = document.getElementById('lanyardAvatar');
+      const statusDot = document.getElementById('lanyardStatusDot');
+      const username = document.getElementById('lanyardUsername');
+      const customStatus = document.getElementById('lanyardCustomStatus');
+      const statusText = document.getElementById('lanyardStatusText');
+      const spotifySection = document.getElementById('lanyardSpotify');
+      const spotifyAlbum = document.getElementById('lanyardSpotifyAlbum');
+      const spotifyTrack = document.getElementById('lanyardSpotifyTrack');
+      const spotifyArtist = document.getElementById('lanyardSpotifyArtist');
+      const spotifyProgressFill = document.getElementById('lanyardSpotifyProgressFill');
+      const spotifyTimeCurrent = document.getElementById('lanyardSpotifyTimeCurrent');
+      const spotifyTimeTotal = document.getElementById('lanyardSpotifyTimeTotal');
+
+      let spotifyProgressTimer = null;
+      let spotifyStart = 0;
+      let spotifyEnd = 0;
+
+      function formatTime(ms) {
+        if (isNaN(ms) || ms < 0) return '0:00';
+        const seconds = Math.floor(ms / 1000);
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return mins + ':' + (secs < 10 ? '0' : '') + secs;
+      }
+
+      function updateSpotifyProgress() {
+        if (!spotifyStart || !spotifyEnd) return;
+        const now = Date.now();
+        const total = spotifyEnd - spotifyStart;
+        const current = Math.min(total, Math.max(0, now - spotifyStart));
+        
+        const pct = (current / total) * 100;
+        spotifyProgressFill.style.width = pct.toFixed(1) + '%';
+        spotifyTimeCurrent.textContent = formatTime(current);
+
+        if (now < spotifyEnd) {
+          spotifyProgressTimer = requestAnimationFrame(updateSpotifyProgress);
+        } else {
+          spotifyProgressFill.style.width = '100%';
+          spotifyTimeCurrent.textContent = formatTime(total);
+        }
+      }
+
+      function fetchLanyard() {
+        fetch(`https://api.lanyard.rest/v1/users/${discordId}`)
+          .then(res => res.json())
+          .then(res => {
+            if (!res.success) return;
+            const data = res.data;
+
+            // Show card when data is loaded
+            card.classList.add('visible');
+
+            // 1. Update Profile Information
+            const user = data.discord_user;
+            username.textContent = user.global_name || user.username || 'MiloHakai';
+            
+            // Set Avatar
+            if (user.avatar) {
+              const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
+              avatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=128`;
+            } else {
+              // Default Discord avatar formula
+              const defaultIndex = user.discriminator === '0' 
+                ? (BigInt(user.id) >> 22n) % 6n 
+                : parseInt(user.discriminator) % 5;
+              avatar.src = `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`;
+            }
+
+            // 2. Update Status Dot & Text
+            const status = data.discord_status;
+            statusDot.className = 'lanyard-status-dot ' + status;
+            
+            let displayStatus = status;
+            if (status === 'dnd') displayStatus = 'Do Not Disturb';
+            else if (status === 'online') displayStatus = 'Online';
+            else if (status === 'idle') displayStatus = 'Idle';
+            else if (status === 'offline') displayStatus = 'Offline';
+            statusText.textContent = displayStatus;
+
+            // 3. Custom Status Message
+            const customActivity = data.activities.find(act => act.type === 4);
+            if (customActivity) {
+              let text = '';
+              if (customActivity.emoji) {
+                if (customActivity.emoji.id) {
+                  // Custom Discord emoji
+                  text += `<img class="lanyard-custom-emoji" src="https://cdn.discordapp.com/emojis/${customActivity.emoji.id}.${customActivity.emoji.animated ? 'gif' : 'png'}?size=16" alt="${customActivity.emoji.name}" />`;
+                } else {
+                  // Standard unicode emoji
+                  text += customActivity.emoji.name + ' ';
+                }
+              }
+              text += customActivity.state || '';
+              customStatus.innerHTML = text;
+              customStatus.style.display = text ? 'block' : 'none';
+            } else {
+              customStatus.textContent = '';
+              customStatus.style.display = 'none';
+            }
+
+            // 4. Update Spotify / Music Activity
+            cancelAnimationFrame(spotifyProgressTimer);
+            
+            let music = null;
+            let isSpotify = false;
+
+            if (data.listening_to_spotify && data.spotify) {
+              music = data.spotify;
+              isSpotify = true;
+            } else {
+              // Fallback: look for a Listening activity (type 2) or an activity named "Spotify"
+              const act = data.activities.find(a => a.type === 2 || a.name === 'Spotify');
+              if (act) {
+                music = {
+                  song: act.details || act.name,
+                  artist: act.state || 'Unknown Artist',
+                  album: act.assets ? act.assets.large_text : '',
+                  album_art_url: '',
+                  timestamps: act.timestamps
+                };
+                
+                if (act.assets && act.assets.large_image) {
+                  const img = act.assets.large_image;
+                  if (img.startsWith('spotify:')) {
+                    music.album_art_url = `https://i.scdn.co/image/${img.substring(8)}`;
+                    isSpotify = true;
+                  } else if (img.startsWith('mp:')) {
+                    music.album_art_url = img.replace('mp:', 'https://media.discordapp.net/');
+                  } else if (act.application_id) {
+                    music.album_art_url = `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`;
+                  }
+                }
+                if (act.name === 'Spotify') {
+                  isSpotify = true;
+                }
+              }
+            }
+
+            if (music) {
+              spotifySection.style.display = 'flex';
+              
+              // Update title of the header if it's not Spotify
+              const spotifyHeaderSpan = spotifySection.querySelector('.lanyard-spotify-header span');
+              const spotifyHeaderIcon = spotifySection.querySelector('.lanyard-spotify-header i');
+              if (isSpotify) {
+                spotifyHeaderSpan.textContent = 'Listening to Spotify';
+                spotifyHeaderIcon.className = 'fab fa-spotify';
+                spotifyHeaderIcon.style.color = '#1db954';
+              } else {
+                spotifyHeaderSpan.textContent = 'Listening to Music';
+                spotifyHeaderIcon.className = 'fas fa-music';
+                spotifyHeaderIcon.style.color = 'var(--accent)';
+              }
+
+              spotifyTrack.textContent = music.song;
+              spotifyArtist.textContent = music.artist;
+              
+              if (music.album_art_url) {
+                spotifyAlbum.src = music.album_art_url;
+                spotifyAlbum.style.display = 'block';
+                spotifyAlbum.classList.add('playing');
+              } else {
+                spotifyAlbum.src = '';
+                spotifyAlbum.style.display = 'none';
+                spotifyAlbum.classList.remove('playing');
+              }
+
+              const progressContainer = card.querySelector('.lanyard-spotify-progress-container');
+              if (music.timestamps && music.timestamps.start && music.timestamps.end) {
+                spotifyTimeTotal.textContent = formatTime(music.timestamps.end - music.timestamps.start);
+                spotifyStart = music.timestamps.start;
+                spotifyEnd = music.timestamps.end;
+                updateSpotifyProgress();
+                if (progressContainer) progressContainer.style.display = 'flex';
+              } else {
+                if (progressContainer) progressContainer.style.display = 'none';
+                spotifyStart = 0;
+                spotifyEnd = 0;
+              }
+            } else {
+              spotifySection.style.display = 'none';
+              spotifyAlbum.classList.remove('playing');
+              spotifyStart = 0;
+              spotifyEnd = 0;
+            }
+          })
+          .catch(err => {
+            console.error('Lanyard API error:', err);
+          });
+      }
+
+      // Initial Fetch & Poll every 15s
+      fetchLanyard();
+      setInterval(fetchLanyard, 15000);
     })();
   </script>
 </body>
