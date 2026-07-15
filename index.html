@@ -137,15 +137,14 @@
         }
 
         /* ── Globe ── */
-        #globe-target {
-            position: fixed;
-            /* Clamp left so the sphere doesn't drift too far on ultrawide screens.
-               At 16:9 (1920px) -15vw ≈ -288px which looks right.
-               At 21:9 (2560px) -15vw ≈ -384px — too much.
-               max() keeps it no further left than -288px regardless of viewport width. */
-            left: max(-288px, -15vw);
-            top: 50%;
-            transform: translateY(-50%);
+          /* Globe is positioned fixed and its `left` is computed at runtime so
+              it's anchored to the content edge instead of the raw viewport. This
+              keeps alignment stable on ultrawide displays and when the
+              `.content-wrapper` padding changes. */
+          #globe-target {
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
             /* Size: grow with viewport but cap earlier on wide screens */
             width: min(56vw, 500px);
             height: min(56vw, 500px);
@@ -989,9 +988,54 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
+            // tiny human touch: a handwritten console signature
+            console.log('%cOutOfTune', 'color: #ff9ec4; font-weight: 700');
+            // Easter egg: secret shortcut (Ctrl+Shift+E) to reveal a playful dev message
+            function revealEasterEgg() {
+                console.log('%cHey there, been lurkin here?', 'color:#ffb0d0; font-size:14px; font-weight:700');
+                console.log('Thank fuck Claude is a thing');
+                const sub = document.querySelector('.subtitle');
+                if (sub) {
+                    const orig = sub.textContent;
+                    try {
+                        sub.textContent = 'Had to use Claude for the sphere, kms';
+                        setTimeout(() => { sub.textContent = orig; }, 4200);
+                    } catch (e) {}
+                }
+            }
+            window.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e')) revealEasterEgg();
+            });
+            // expose to the console for curious humans
+            window.outoftuneEaster = revealEasterEgg;
+
+            // Compute globe horizontal position so it visually anchors to the
+            // `.logo-container` (the actual brand block) instead of the raw
+            // viewport. Add clamping so the globe never drifts fully off-screen
+            // on extreme aspect ratios.
+            function nudgeGlobeToLogo() {
+                    const globe = document.getElementById('globe-target');
+                    const logo = document.querySelector('.logo-container');
+                    if (!globe || !logo) return;
+                    const logoRect = logo.getBoundingClientRect();
+                    // Keep previous behavior: prefer a -15vw nudge but cap at 288px.
+                    const vwOffset = Math.round(window.innerWidth * 0.15);
+                    const offset = -Math.min(288, vwOffset);
+                    let left = Math.round(logoRect.left + offset);
+                    const globeW = Math.max(1, globe.offsetWidth || 500);
+                    const minLeft = -Math.round(globeW * 0.6);
+                    const maxLeft = Math.round(window.innerWidth * 0.05);
+                    left = Math.max(minLeft, Math.min(left, maxLeft));
+                    globe.style.left = left + 'px';
+                }
+
+                window.addEventListener('resize', nudgeGlobeToLogo);
+                // run once to sync initial position
+                nudgeGlobeToLogo();
+
             // Member Carousel
             const allMembers = [
-                // Founders (keep first)
+                // Founders (Mom I'm here :3)
                 {
                     display: 'MiloHakai',
                     path: 'milohakai',
@@ -1424,6 +1468,8 @@
                     if (/^\[(?:id|al|length|offset|by|re|ver):/i.test(line))
                 return; // Skip metadata lines
 
+                    // This timestamp regex was fiddly to get right —
+                    // "Thank fuck Claude saved my ass" (true story)
                     const timeRe = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
                     const stampMatches = [...line.matchAll(
                     timeRe)]; // Find all timestamp matches in the line
@@ -1469,18 +1515,18 @@
             // low-poly sea/sky scene (desktop only; mobile just gets the
             // CSS gradient already set on #constellation-container).
             try {
-                initGlobeOnly();
+                initGlobe(); // old name was initGlobeOnly — renamed for personality
             } catch (err) {
                 console.warn('WebGL globe failed:', err);
             }
             try {
-                initChillSeaBackground();
+                initChillSea(); // renamed: sounds friendlier
             } catch (err) {
-                console.warn('WebGL chill background failed:', err);
+                console.warn('WebGL background failed:', err);
             }
         });
 
-        function initGlobeOnly() {
+        function initGlobe() {
             const globeBox = document.getElementById('globe-target');
             if (!globeBox) return;
 
@@ -1492,47 +1538,40 @@
 
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-            const gScene = new THREE.Scene();
-            const gs = safeSize(globeBox, 400, 400);
-            const gCam = new THREE.PerspectiveCamera(75, gs.aspect, 0.1, 1000);
-            const gRen = new THREE.WebGLRenderer({
-                alpha: true,
-                antialias: true
-            });
-            gRen.setPixelRatio(dpr);
-            gRen.setSize(gs.w, gs.h);
-            globeBox.appendChild(gRen.domElement);
+            const globeScene = new THREE.Scene();
+            const globeSize = safeSize(globeBox, 400, 400);
+            const globeCam = new THREE.PerspectiveCamera(75, globeSize.aspect, 0.1, 1000);
+            const globeRen = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            globeRen.setPixelRatio(dpr);
+            globeRen.setSize(globeSize.w, globeSize.h);
+            globeBox.appendChild(globeRen.domElement);
 
             const globe = new THREE.Mesh(
                 new THREE.IcosahedronGeometry(2.5, 3),
-                new THREE.MeshBasicMaterial({
-                    color: 0xffd6e8,
-                    wireframe: true,
-                    transparent: true,
-                    opacity: 0.90
-                })
+                new THREE.MeshBasicMaterial({ color: 0xffd6e8, wireframe: true, transparent: true, opacity: 0.90 })
             );
-            gScene.add(globe);
-            gCam.position.z = 4.2;
+            globeScene.add(globe);
+            globeCam.position.z = 4.2;
 
             function animateGlobe() {
                 requestAnimationFrame(animateGlobe);
                 globe.rotation.y += 0.002;
                 globe.rotation.x += 0.001;
-                gRen.render(gScene, gCam);
+                globeRen.render(globeScene, globeCam);
             }
 
             window.addEventListener('resize', () => {
                 const gs2 = safeSize(globeBox, 400, 400);
-                gCam.aspect = gs2.aspect;
-                gCam.updateProjectionMatrix();
-                gRen.setSize(gs2.w, gs2.h);
+                globeCam.aspect = gs2.aspect;
+                globeCam.updateProjectionMatrix();
+                globeRen.setSize(gs2.w, gs2.h);
             });
 
             animateGlobe();
         }
 
-        function initChillSeaBackground() {
+        // ok this bit is my favorite — messy little waves, handcrafted
+        function initChillSea() {
             const cBox = document.getElementById('constellation-container');
             if (!cBox || !window.THREE) return;
 

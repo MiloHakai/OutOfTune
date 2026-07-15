@@ -143,3 +143,17 @@
   <script src="./scripts/main.js"></script>
 </body>
 </html>
+
+<!-- Humanized: small dev signature + easter egg (non-destructive) -->
+<script>
+if (!window.__outoftune_humanized) {
+  window.__outoftune_humanized = true;
+  console.log('%cOutOfTune — patched with a human touch', 'color:#d0fff0; font-weight:700');
+  function revealTinyEgg(){
+    console.log('%cTiny easter egg: you pressed Ctrl+Shift+H', 'color:#ffd1ee; font-weight:700');
+    try { document.body.style.outline = '3px dashed rgba(255,160,200,0.08)'; setTimeout(()=>document.body.style.outline='',900); } catch(e){}
+  }
+  window.addEventListener('keydown', (e)=>{ if(e.ctrlKey && e.shiftKey && (e.key==='H' || e.key==='h')) revealTinyEgg(); });
+  window.revealOutOfTune = revealTinyEgg;
+}
+</script>

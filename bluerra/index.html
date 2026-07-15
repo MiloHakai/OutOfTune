@@ -98,6 +98,24 @@
       const globeBox = document.getElementById('globe-target');
       if (!globeBox) return;
 
+      // human touch: signature in the dev console
+      console.log('%cBluerra — site lovingly patched', 'color:#7cc0ff; font-weight:700');
+      // easter egg: Ctrl+Shift+B to toggle a tiny message and a console shoutout
+      function bluerraEaster() {
+        console.log('%cHi there, Milo again! Get a job <3.', 'color:#8fe0ff; font-weight:700');
+        console.log('You should also stop using guns.lol');
+        const egg = document.getElementById('easter-egg-text');
+        if (egg) {
+          egg.textContent = 'Yay, more easter eggs! <3';
+          egg.style.display = 'block';
+          setTimeout(() => { egg.style.display = 'none'; }, 3000);
+        }
+      }
+      window.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'B' || e.key === 'b')) bluerraEaster();
+      });
+      window.bluERRA = bluerraEaster; // intentionally quirky name for console folks
+
 
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -185,6 +203,7 @@
           return;
         }
 
+        // This bit was gnarly to get right — Thank fuck Claude saved my ass
         try {
           const AudioContext = window.AudioContext || window.webkitAudioContext;
           // Use a global context so main.js can resume it
