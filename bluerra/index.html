@@ -17,19 +17,23 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     crossorigin="anonymous" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Press+Start+2P&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&family=VT323&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&family=VT323&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="./styles/style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 
 
 <body>
-  <div id="intro-screen" aria-hidden="true">
-    <img src="./images/logo.png" alt="Bluerra-Sai intro logo" class="intro-logo">
-  </div>
+  <video id="bg-video" autoplay muted loop playsinline>
+    <source src="./images/background.mp4" type="video/mp4">
+  </video>
 
-  <div id="globe-target"></div>
+  <div id="intro-screen" role="dialog" aria-label="Welcome to Bluerra">
+    <div class="intro-content">
+      <img src="./images/logo.png" alt="Bluerra-Sai intro logo" class="intro-logo">
+    </div>
+    <div class="intro-hint">click to continue</div>
+  </div>
 
   <div class="page-shell">
     <div class="border-segments">
@@ -52,16 +56,47 @@
         <p id="description">I changed name, wip</p>
         <p id="easter-egg-text" class="easter-egg-message" style="display: none;">boop</p>
 
-        <div class="icons">
-          <a href="https://discord.gg/Fxb2czS6v4" title="Discord" target="_blank"><i class="fab fa-discord"></i></a>
-          <a href="https://open.spotify.com/artist/3WciAVM3DxjIWwV3aSugVa?si=S43FoBBCRRi9NMNqg-lYdA" title="Spotify"
-            target="_blank"><i class="fab fa-spotify"></i></a>
-          <a href="https://www.tiktok.com/@bluerra" title="TikTok" target="_blank"><i class="fab fa-tiktok"></i></a>
-          <a href="https://twitch.tv/SaiaMantaray" title="Twitch" target="_blank"><i class="fab fa-twitch"></i></a>
-          <a href="https://x.com/SaiaMantaray" title="X / Twitter" target="_blank"><i class="fab fa-x-twitter"></i></a>
-          <a href="https://trello.com/b/g332ctkw/bluerrasai-projects" title="Trello (Projects)" target="_blank"><i
-              class="fab fa-trello"></i></a>
-          <a href="https://www.youtube.com/@SaiaMantaray" title="Youtube" target="_blank"><i class="fab fa-youtube"></i></a>
+        <div class="carousel-container">
+          <button class="carousel-btn prev-btn" aria-label="Previous app" onclick="slideCarousel(-1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="carousel-track-wrapper" id="carouselWrapper">
+            <div class="carousel-track" id="iconsTrack">
+              <a href="https://discord.gg/Fxb2czS6v4" class="carousel-item" target="_blank" title="Discord">
+                <i class="fab fa-discord"></i>
+                <span class="app-name">Discord</span>
+              </a>
+              <a href="https://open.spotify.com/artist/3WciAVM3DxjIWwV3aSugVa?si=S43FoBBCRRi9NMNqg-lYdA" class="carousel-item" target="_blank" title="Spotify">
+                <i class="fab fa-spotify"></i>
+                <span class="app-name">Spotify</span>
+              </a>
+              <a href="https://www.tiktok.com/@bluerra" class="carousel-item" target="_blank" title="TikTok">
+                <i class="fab fa-tiktok"></i>
+                <span class="app-name">TikTok</span>
+              </a>
+              <a href="https://twitch.tv/SaiaMantaray" class="carousel-item" target="_blank" title="Twitch">
+                <i class="fab fa-twitch"></i>
+                <span class="app-name">Twitch</span>
+              </a>
+              <a href="https://x.com/SaiaMantaray" class="carousel-item" target="_blank" title="X / Twitter">
+                <i class="fab fa-x-twitter"></i>
+                <span class="app-name">X / Twitter</span>
+              </a>
+              <a href="https://trello.com/b/g332ctkw/bluerrasai-projects" class="carousel-item" target="_blank" title="Trello">
+                <i class="fab fa-trello"></i>
+                <span class="app-name">Trello</span>
+              </a>
+              <a href="https://www.youtube.com/@SaiaMantaray" class="carousel-item" target="_blank" title="YouTube">
+                <i class="fab fa-youtube"></i>
+                <span class="app-name">YouTube</span>
+              </a>
+            </div>
+          </div>
+
+          <button class="carousel-btn next-btn" aria-label="Next app" onclick="slideCarousel(1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -72,17 +107,12 @@
     </footer>
 
     <div class="now-playing">
-      <div class="visualizer">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </div>
-      <span class="song-title">desert sand feels warm at night - 私は私です</span>
+      <div class="song-title">desert sand feels warm at night - 私は私です</div>
+      <div class="song-subtitle">...</div>
     </div>
   </div>
 
-  <audio id="backgroundAudio" preload="auto" loop crossorigin="anonymous">
+  <audio id="backgroundAudio" preload="auto" loop>
     <source src="./audio/bgm.mp3" type="audio/mpeg">
   </audio>
 
@@ -90,241 +120,15 @@
     <source src="./audio/click-sound.mp3" type="audio/mpeg">
   </audio>
 
+  <audio id="carouselForwardSound" preload="auto">
+    <source src="./audio/carousel-forward.WAV" type="audio/wav">
+  </audio>
+
+  <audio id="carouselBackSound" preload="auto">
+    <source src="./audio/carousel-back.WAV" type="audio/wav">
+  </audio>
+
   <script src="./scripts/main.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof THREE === 'undefined') return;
-
-      const globeBox = document.getElementById('globe-target');
-      if (!globeBox) return;
-
-      // human touch: signature in the dev console
-      console.log('%cBluerra — site lovingly patched', 'color:#7cc0ff; font-weight:700');
-      // easter egg: Ctrl+Shift+B to toggle a tiny message and a console shoutout
-      function bluerraEaster() {
-        console.log('%cHi there, Milo again! Get a job <3.', 'color:#8fe0ff; font-weight:700');
-        console.log('You should also stop using guns.lol');
-        const egg = document.getElementById('easter-egg-text');
-        if (egg) {
-          egg.textContent = 'Yay, more easter eggs! <3';
-          egg.style.display = 'block';
-          setTimeout(() => { egg.style.display = 'none'; }, 3000);
-        }
-      }
-      window.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey && (e.key === 'B' || e.key === 'b')) bluerraEaster();
-      });
-      window.bluERRA = bluerraEaster; // intentionally quirky name for console folks
-
-
-
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const gScene = new THREE.Scene();
-      const gCam = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-      const gRen = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      gRen.setPixelRatio(dpr);
-      gRen.setSize(400, 400); // Temporary size, layoutGlobe will fix it immediately
-      globeBox.appendChild(gRen.domElement);
-
-      // Main wireframe globe (Slightly smaller radius to prevent overflow)
-      const globeGeo = new THREE.IcosahedronGeometry(1.8, 3);
-      const globeMat = new THREE.MeshBasicMaterial({
-        color: 0xc0e0ff,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.90
-      });
-      const globe = new THREE.Mesh(globeGeo, globeMat);
-      gScene.add(globe);
-
-      // Inner glow sphere
-      const innerGeo = new THREE.SphereGeometry(1.7, 16, 16);
-      const innerMat = new THREE.MeshBasicMaterial({
-        color: 0x7cb9ff,
-        transparent: true,
-        opacity: 0.0,
-        side: THREE.BackSide
-      });
-      const innerGlow = new THREE.Mesh(innerGeo, innerMat);
-      gScene.add(innerGlow);
-
-
-
-      gCam.position.z = 5.2; // Further back to keep sphere in bounds
-
-      function layoutGlobe() {
-        const rect = globeBox.getBoundingClientRect();
-        const w = rect.width || globeBox.clientWidth || 400;
-        const h = rect.height || globeBox.clientHeight || 400;
-        const aspect = w / h;
-
-        gCam.aspect = aspect;
-        gCam.updateProjectionMatrix();
-        gRen.setSize(w, h, false);
-      }
-
-      window.addEventListener('resize', layoutGlobe);
-      if (typeof ResizeObserver !== 'undefined') {
-        new ResizeObserver(layoutGlobe).observe(globeBox);
-      }
-      layoutGlobe();
-
-      // Audio analysis state
-      let analyser = null;
-      let dataArray = null;
-      let audioInitialized = false;
-      let smoothBass = 0, smoothMid = 0, smoothHigh = 0, smoothEnergy = 0;
-
-      // Beat detection
-      let beatCooldown = 0;
-      let beatFlash = 0;
-      const BEAT_THRESHOLD = 0.32;
-
-      // Color lerp helper
-      function lerpColor(a, b, t) {
-        t = Math.max(0, Math.min(1, t));
-        const ar = (a >> 16) & 0xff, ag = (a >> 8) & 0xff, ab = a & 0xff;
-        const br = (b >> 16) & 0xff, bg = (b >> 8) & 0xff, bb = b & 0xff;
-        return (
-          (Math.round(ar + (br - ar) * t) << 16) |
-          (Math.round(ag + (bg - ag) * t) << 8) |
-          Math.round(ab + (bb - ab) * t)
-        );
-      }
-
-      // Called from main.js audio setup — wires analyser to the existing AudioContext
-      function initAnalyser(audioEl) {
-        if (audioInitialized) return;
-
-        // Browsers block audio analysis on the file:// protocol for security reasons.
-        // If we detect file://, we skip the analyser so the audio can at least play normally.
-        if (window.location.protocol === 'file:') {
-          console.warn("OutOfTune: Audio reactivity is disabled on file:// protocol due to browser security. Use a local server (like Live Server) to see the globe react!");
-          return;
-        }
-
-        // This bit was gnarly to get right — Thank fuck Claude saved my ass
-        try {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          // Use a global context so main.js can resume it
-          if (!window._audioCtx) {
-            window._audioCtx = new AudioContext();
-          }
-          
-          const source = window._audioCtx.createMediaElementSource(audioEl);
-          analyser = window._audioCtx.createAnalyser();
-          analyser.fftSize = 512;
-          analyser.smoothingTimeConstant = 0.8;
-          
-          // Connect source -> analyser -> destination
-          source.connect(analyser);
-          analyser.connect(window._audioCtx.destination);
-          
-          dataArray = new Uint8Array(analyser.frequencyBinCount);
-          audioInitialized = true;
-          console.log("OutOfTune: Audio analyser successfully connected.");
-
-          if (window._audioCtx.state === 'suspended') {
-            window._audioCtx.resume();
-          }
-        } catch (e) {
-          console.log('Audio analyser init failed:', e);
-        }
-      }
-
-      // Hook into the background audio element
-      const bgAudio = document.getElementById('backgroundAudio');
-      if (bgAudio) {
-        // Try on first play event
-        bgAudio.addEventListener('play', () => initAnalyser(bgAudio), { once: true });
-        // Also try immediately if already playing
-        if (!bgAudio.paused) initAnalyser(bgAudio);
-      }
-
-      // Expose so main.js click handler can trigger it too
-      window._globeInitAnalyser = () => {
-        if (bgAudio && !audioInitialized) initAnalyser(bgAudio);
-      };
-
-      let tField = 0;
-
-      function animate() {
-        requestAnimationFrame(animate);
-        tField++;
-
-        let bass = 0, mid = 0, high = 0;
-
-        if (analyser && dataArray) {
-          analyser.getByteFrequencyData(dataArray);
-          const binCount = dataArray.length;
-
-          // Bass: ~20–250 Hz (first ~12% of bins)
-          const bassEnd = Math.floor(binCount * 0.12);
-          for (let i = 0; i < bassEnd; i++) bass += dataArray[i];
-          bass = (bass / bassEnd) / 255;
-
-          // Mid: ~250–2000 Hz
-          const midEnd = Math.floor(binCount * 0.45);
-          for (let i = bassEnd; i < midEnd; i++) mid += dataArray[i];
-          mid = (mid / (midEnd - bassEnd)) / 255;
-
-          // High: ~2000 Hz+
-          for (let i = midEnd; i < binCount; i++) high += dataArray[i];
-          high = (high / (binCount - midEnd)) / 255;
-        }
-
-        // Faster, more responsive smoothing
-        const s = 0.15;
-        smoothBass += (bass - smoothBass) * s;
-        smoothMid += (mid - smoothMid) * s;
-        smoothHigh += (high - smoothHigh) * s;
-        smoothEnergy = (smoothBass + smoothMid + smoothHigh) / 3;
-
-        // Beat detection (Very subtle)
-        if (beatCooldown > 0) beatCooldown--;
-        if (bass > BEAT_THRESHOLD && beatCooldown === 0) {
-          beatFlash = 1.0;
-          beatCooldown = 24; 
-        }
-        beatFlash *= 0.85; 
-
-        // Idle ambient pulse (slower)
-        const idle = Math.sin(tField * 0.012) * 0.5 + 0.5;
-
-        // --- Rotation: slow and steady ---
-        globe.rotation.y += 0.002 + smoothMid * 0.01;
-        globe.rotation.x += 0.001 + smoothMid * 0.005;
-
-        // --- Breathing & Ripples (Slightly boosted) ---
-        // Using a mix of smooth and raw for better responsiveness
-        const breathing = 1.0 + (smoothBass * 0.38) + (mid * 0.12);
-        const ripple = Math.sin(tField * 0.05) * (high * 0.08);
-        
-        const targetScale = (analyser && smoothEnergy > 0.01) ? breathing + ripple : 1 + idle * 0.03;
-
-        // Apply smooth scale
-        globe.scale.x += (targetScale - globe.scale.x) * 0.12;
-        globe.scale.y += (targetScale - globe.scale.y) * 0.12;
-        globe.scale.z += (targetScale - globe.scale.z) * 0.12;
-
-        // --- Calm Color & Opacity ---
-        const colorT = Math.min(smoothEnergy * 1.8, 1);
-        globeMat.color.setHex(lerpColor(0x7cb9ff, 0xe0f0ff, colorT));
-
-        // Opacity follows the breathing/bass
-        globeMat.opacity = (analyser && smoothEnergy > 0.01) 
-          ? 0.58 + smoothBass * 0.32 + smoothEnergy * 0.1
-          : 0.65 + idle * 0.15;
-
-        // Inner glow 'pulses' deep within
-        innerMat.opacity = smoothBass * 0.35 + (bass * 0.1);
-        innerMat.color.setHex(lerpColor(0x4a8fcf, 0xa0d0ff, smoothBass));
-
-        gRen.render(gScene, gCam);
-      }
-      animate();
-    });
-  </script>
 </body>
 
 </html>

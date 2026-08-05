@@ -122,7 +122,8 @@
             flex-direction: column;
             justify-content: center;
             height: 100svh;
-            padding-left: 24px;
+            --content-edge: 24px;
+            padding-left: var(--content-edge);
             z-index: 10;
         }
 
@@ -145,6 +146,7 @@
                 position: fixed;
                 top: 50%;
                 transform: translateY(-50%);
+                left: max(-288px, -15vw);
             /* Size: grow with viewport but cap earlier on wide screens */
             width: min(56vw, 500px);
             height: min(56vw, 500px);
@@ -152,7 +154,7 @@
             max-height: 500px;
             min-width: 340px;
             min-height: 340px;
-            z-index: 3;
+            z-index: 1;
             opacity: 0.55;
             pointer-events: none;
         }
@@ -592,7 +594,8 @@
 
             /* Center content and hide globe for a clean mobile look, like Bluerra */
             .content-wrapper {
-                padding-left: 16px;
+                --content-edge: 16px;
+                padding-left: var(--content-edge);
                 padding-right: 16px;
                 justify-content: center;
                 align-items: center;
@@ -802,9 +805,10 @@
                 min-height: 0;
             }
 
-            /* Shift text content slightly right so it clears the globe comfortably */
+            /* Reduce the extra left spacing on ultrawide screens. */
             .content-wrapper {
-                padding-left: clamp(24px, 4vw, 96px);
+                --content-edge: clamp(24px, 2vw, 56px);
+                padding-left: var(--content-edge);
             }
         }
 
@@ -1009,29 +1013,8 @@
             // expose to the console for curious humans
             window.outoftuneEaster = revealEasterEgg;
 
-            // Compute globe horizontal position so it visually anchors to the
-            // `.logo-container` (the actual brand block) instead of the raw
-            // viewport. Add clamping so the globe never drifts fully off-screen
-            // on extreme aspect ratios.
-            function nudgeGlobeToLogo() {
-                    const globe = document.getElementById('globe-target');
-                    const logo = document.querySelector('.logo-container');
-                    if (!globe || !logo) return;
-                    const logoRect = logo.getBoundingClientRect();
-                    // Keep previous behavior: prefer a -15vw nudge but cap at 288px.
-                    const vwOffset = Math.round(window.innerWidth * 0.15);
-                    const offset = -Math.min(288, vwOffset);
-                    let left = Math.round(logoRect.left + offset);
-                    const globeW = Math.max(1, globe.offsetWidth || 500);
-                    const minLeft = -Math.round(globeW * 0.6);
-                    const maxLeft = Math.round(window.innerWidth * 0.05);
-                    left = Math.max(minLeft, Math.min(left, maxLeft));
-                    globe.style.left = left + 'px';
-                }
-
-                window.addEventListener('resize', nudgeGlobeToLogo);
-                // run once to sync initial position
-                nudgeGlobeToLogo();
+            // Globe horizontal positioning is handled by CSS so it remains
+            // stable across resizes and does not use inline style overrides.
 
             // Member Carousel
             const allMembers = [
