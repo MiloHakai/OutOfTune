@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ren Yi</title>
+  <meta name="description" content="Ren Yi on OutOfTune." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ren Yi" />
+  <meta property="og:description" content="Ren Yi on OutOfTune." />
+  <meta property="og:url" content="https://outoftune.dev/ren" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Ren Yi" />
+  <meta name="twitter:description" content="Ren Yi on OutOfTune." />
+  <link rel="icon" type="image/png" href="assets/images/mini-logo.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+       ============================================================ */
+    :root {
+      /* White / pastel pink / light gold palette */
+      --bg-base: #fdf8fa;
+      --primary: #f0c868;          /* vibrant light gold */
+      --primary-soft: #f5d78e;     /* soft gold */
+      --text-main: #ffffff;        /* crisp white text for wallpaper contrast */
+      --text-muted: rgba(255, 255, 255, 0.85);
+
+      /* Glowing text wave palette (pastel pink -> light gold) */
+      --wave-light: #ffcce1;
+      --wave-dark: #f0c868;
+
+      /* CRT overlay properties */
+      --scanline: rgba(240, 200, 104, 0.02);
+      --vignette: rgba(25, 12, 22, 0.25);
+
+      /* Shared icon sizing (keeps SVG + IMG icons consistent) */
+      --icon-size: 24px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+    }
+
+    body {
+      height: 100svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      color: var(--text-main);
+      background:
+        linear-gradient(rgba(25, 12, 22, 0.28), rgba(25, 12, 22, 0.28)),
+        url('assets/images/background.png') no-repeat center center / cover fixed;
+    }
+
+    /* ============================================================
+       ANIMATED BORDER GLOW LINES
+       ============================================================ */
+    .edges {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .edge-t,
+    .edge-r,
+    .edge-b,
+    .edge-l {
+      position: absolute;
+      background: rgba(240, 200, 104, 0.25);
+    }
+
+    .edge-t { top: 0; left: 0; right: 0; height: 3px; }
+    .edge-r { top: 0; right: 0; bottom: 0; width: 3px; }
+    .edge-b { bottom: 0; left: 0; right: 0; height: 3px; }
+    .edge-l { top: 0; left: 0; bottom: 0; width: 3px; }
+
+    .edge-t::after,
+    .edge-r::after,
+    .edge-b::after,
+    .edge-l::after {
+      content: '';
+      position: absolute;
+      opacity: 0;
+    }
+
+    .edge-t::after,
+    .edge-b::after {
+      top: -1px;
+      bottom: -1px;
+      width: 15vw;
+    }
+
+    .edge-t::after {
+      left: 0;
+      background: linear-gradient(90deg, transparent, var(--primary), #ffffff, var(--primary), transparent);
+      animation: goRight 12s linear infinite;
+    }
+
+    .edge-b::after {
+      right: 0;
+      background: linear-gradient(270deg, transparent, var(--primary), #ffffff, var(--primary), transparent);
+      animation: goLeft 12s linear infinite;
+    }
+
+    .edge-r::after,
+    .edge-l::after {
+      left: -1px;
+      right: -1px;
+      height: 15vh;
+    }
+
+    .edge-r::after {
+      top: 0;
+      background: linear-gradient(180deg, transparent, var(--primary), #ffffff, var(--primary), transparent);
+      animation: goDown 12s linear infinite;
+    }
+
+    .edge-l::after {
+      bottom: 0;
+      background: linear-gradient(0deg, transparent, var(--primary), #ffffff, var(--primary), transparent);
+      animation: goUp 12s linear infinite;
+    }
+
+    .line-1.edge-t::after { animation-delay: 0s; }
+    .line-1.edge-r::after { animation-delay: 3s; }
+    .line-1.edge-b::after { animation-delay: 6s; }
+    .line-1.edge-l::after { animation-delay: 9s; }
+    .line-2.edge-t::after { animation-delay: 6s; }
+    .line-2.edge-r::after { animation-delay: 9s; }
+    .line-2.edge-b::after { animation-delay: 0s; }
+    .line-2.edge-l::after { animation-delay: 3s; }
+
+    @keyframes goRight {
+      0%             { transform: translateX(-15vw); opacity: 1; }
+      25%            { transform: translateX(100vw); opacity: 1; }
+      25.01%, 100%   { transform: translateX(100vw); opacity: 0; }
+    }
+
+    @keyframes goDown {
+      0%             { transform: translateY(-15vh); opacity: 1; }
+      25%            { transform: translateY(100vh); opacity: 1; }
+      25.01%, 100%   { transform: translateY(100vh); opacity: 0; }
+    }
+
+    @keyframes goLeft {
+      0%             { transform: translateX(15vw); opacity: 1; }
+      25%            { transform: translateX(-100vw); opacity: 1; }
+      25.01%, 100%   { transform: translateX(-100vw); opacity: 0; }
+    }
+
+    @keyframes goUp {
+      0%             { transform: translateY(15vh); opacity: 1; }
+      25%            { transform: translateY(-100vh); opacity: 1; }
+      25.01%, 100%   { transform: translateY(-100vh); opacity: 0; }
+    }
+
+    /* ============================================================
+       CRT SCANLINE OVERLAY
+       ============================================================ */
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .crt-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg,
+        var(--scanline) 0px,
+        var(--scanline) 1px,
+        transparent 1px,
+        transparent 4px);
+    }
+
+    .crt-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 120% 110% at 50% 50%,
+        transparent 0%,
+        transparent 65%,
+        var(--vignette) 100%);
+    }
+
+    /* ============================================================
+       MAIN CONTENT
+       ============================================================ */
+    .content-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: left;
+      z-index: 10;
+      width: 100%;
+      padding-left: 45px;
+      padding-right: 45px;
+    }
+
+    .brand-section {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .brand-section h1.wave-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+      font-weight: 400;
+      margin: 0;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+      cursor: default;
+      user-select: none;
+      color: #f0c868;
+      display: inline-block;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 8px rgba(240, 200, 104, 0.4);
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .brand-section h1.wave-text.glow-active {
+      animation: text-pulse 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes text-pulse {
+      0% {
+        color: #f0c868;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 10px rgba(240, 200, 104, 0.7);
+      }
+      50% {
+        color: #ffcce1;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 16px rgba(255, 204, 225, 0.85), 0 0 24px rgba(240, 200, 104, 0.6);
+      }
+      100% {
+        color: #f5d78e;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 12px rgba(245, 215, 142, 0.8);
+      }
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.65rem;
+      font-weight: 400;
+      max-width: 500px;
+      line-height: 1.6;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 6px rgba(25, 12, 22, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
+    }
+
+    /* ---- Social icons row -------------------------------------- */
+    .socials-row {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .social-icon-link {
+      color: #f0c868;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      transition: transform 0.2s ease, color 0.2s ease, filter 0.2s ease;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.95));
+    }
+
+    .social-icon-link:hover {
+      color: #ffcce1;
+      transform: scale(1.18);
+      filter: drop-shadow(0 0 10px rgba(255, 204, 225, 0.85));
+    }
+
+    /* Inline SVG icons (X, Twitch, Bluesky) */
+    .social-icon-link svg {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      fill: currentColor;
+    }
+
+    /* Image-based icons (e.g. VGen).
+       The source file is a flat black SVG. CSS mask-image was tried
+       first but proved unreliable (luminance-mode + mask-mode support
+       varies by browser and can hide the icon entirely). Filter-based
+       recoloring is more universally supported: the image always
+       renders, and `filter` shifts its color from black to gold. */
+    .social-icon-link img.vgen-icon {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      object-fit: contain;
+      display: block;
+
+      /* Approximates #f0c868 (gold) starting from black source pixels */
+      filter: invert(75%) sepia(46%) saturate(600%) hue-rotate(358deg) brightness(101%) contrast(94%);
+      transition: filter 0.2s ease;
+    }
+
+    .social-icon-link:hover img.vgen-icon {
+      /* Approximates #ffcce1 (pastel pink) on hover, to match the SVG icons */
+      filter: invert(88%) sepia(11%) saturate(1200%) hue-rotate(292deg) brightness(103%) contrast(101%);
+    }
+
+    /* ---- Now-playing / lyrics box -------------------------------- */
+    .lyrics-container {
+      position: fixed;
+      left: 45px;
+      bottom: 45px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: min(540px, calc(100vw - 90px));
+    }
+
+    .track-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
+      color: var(--primary);
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 6px rgba(25, 12, 22, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
+    }
+
+    .lyric-line {
+      font-family: 'Press Start 2P', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC', sans-serif;
+      font-size: 0.5rem;
+      color: var(--text-main);
+      line-height: 1.7;
+      min-height: 3.2em;
+      transition: color 0.3s ease;
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 6px rgba(25, 12, 22, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
+    }
+
+    .lyric-typed {
+      display: inline;
+    }
+
+    .lyric-caret {
+      display: inline-block;
+      width: 0.5ch;
+      margin-left: 4px;
+      color: var(--primary);
+      animation: caretBlink 0.65s step-end infinite;
+      vertical-align: baseline;
+      text-shadow: 0 2px 6px rgba(25, 12, 22, 0.95);
+    }
+
+    @keyframes caretBlink {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0; }
+    }
+
+    /* ---- Footer --------------------------------------------------- */
+    .footer-right {
+      position: fixed;
+      right: 45px;
+      bottom: 45px;
+      z-index: 100;
+      font-family: 'Press Start 2P', monospace;
+      color: var(--text-muted);
+      font-size: 0.42rem;
+      line-height: 1.7;
+      letter-spacing: 0.5px;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-shadow: 0 2px 6px rgba(25, 12, 22, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
+    }
+
+    .footer-copy   { opacity: 0.8; }
+    .footer-author { opacity: 1; color: var(--primary); }
+
+    /* ============================================================
+       INTRO SPLASH OVERLAY
+       ============================================================ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #fdf5f8 0%, #f7e6ee 55%, #fcecf4 100%);
+      transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      cursor: pointer;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .intro-holder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-align: center;
+      user-select: none;
+    }
+
+    .intro-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+      color: #d8ab4e;
+      opacity: 0;
+      transform: translateY(25px);
+      animation: introSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
+      text-shadow: 0 2px 8px rgba(216, 171, 78, 0.2);
+    }
+
+    .intro-sub-click {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.45rem, 1.2vw, 0.52rem);
+      color: rgba(125, 107, 119, 0.8);
+      opacity: 0;
+      letter-spacing: 1px;
+      animation: fadeInSimple 0.8s ease forwards 0.9s;
+    }
+
+    @keyframes introSlideUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInSimple {
+      to { opacity: 0.75; }
+    }
+
+    /* ============================================================
+       MOBILE RESPONSIVE
+       ============================================================ */
+    @media (max-width: 768px) {
+      body {
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+      }
+
+      .content-wrapper {
+        padding: 0;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: auto;
+        width: 100%;
+      }
+
+      .brand-section {
+        gap: 10px;
+        width: 100%;
+        align-items: center;
+      }
+
+      .brand-section h1.wave-text {
+        font-size: 1.4rem;
+      }
+
+      .lyrics-container {
+        position: relative;
+        left: auto;
+        bottom: auto;
+        top: auto;
+        margin-top: 32px;
+        width: 100%;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .track-title {
+        font-size: 0.44rem;
+        line-height: 1.5;
+        text-align: center;
+      }
+
+      .lyric-line {
+        font-size: 0.58rem;
+        text-align: center;
+        min-height: 4.5em;
+        width: 100%;
+      }
+
+      .footer-right {
+        position: fixed;
+        left: 24px;
+        right: 24px;
+        bottom: 24px;
+        text-align: center;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        width: calc(100% - 48px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Animated glowing edge lines -->
+  <div class="edges" aria-hidden="true">
+    <div class="edge-t line-1"></div>
+    <div class="edge-r line-1"></div>
+    <div class="edge-b line-1"></div>
+    <div class="edge-l line-1"></div>
+    <div class="edge-t line-2"></div>
+    <div class="edge-r line-2"></div>
+    <div class="edge-b line-2"></div>
+    <div class="edge-l line-2"></div>
+  </div>
+
+  <!-- CRT overlay layer -->
+  <div class="crt-overlay" aria-hidden="true"></div>
+
+  <!-- Intro splash screen -->
+  <div id="overlay" class="overlay">
+    <div class="intro-holder">
+      <div class="intro-title">Ren Yi</div>
+      <div class="intro-sub-click">click here to continue</div>
+    </div>
+  </div>
+
+  <!-- Main workspace -->
+  <main class="content-wrapper">
+    <section class="brand-section">
+      <h1 id="brand-title" class="wave-text">Ren Yi</h1>
+      <p class="subtitle">Sample Text</p>
+
+      <div class="socials-row">
+        <a href="https://x.com/PrincessRenYi" target="_blank" rel="noopener noreferrer"
+           class="social-icon-link" aria-label="X (Twitter) - PrincessRenYi">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+
+        <a href="https://www.twitch.tv/ren__yi" target="_blank" rel="noopener noreferrer"
+           class="social-icon-link" aria-label="Twitch - ren__yi">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M11.571 4.714h1.715v5.143h-1.715zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+          </svg>
+        </a>
+
+        <a href="https://bsky.app/profile/renyi.bsky.social" target="_blank" rel="noopener noreferrer"
+           class="social-icon-link" aria-label="Bluesky - renyi.bsky.social">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.58 6.874-1.198 7.823-4.57.949 3.372 2.81 10.15 7.823 4.57 4.557-5.073 1.082-6.498-2.83-7.078-.139-.016-.277-.034-.415-.056.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.689-.139-1.86-.902-2.204-.659-.299-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.686 12 10.8z"/>
+          </svg>
+        </a>
+
+        <a href="https://vgen.co/PrincessRenYi" target="_blank" rel="noopener noreferrer"
+           class="social-icon-link social-icon-link--img" aria-label="VGen - PrincessRenYi">
+          <img src="assets/images/vgen.svg" alt="VGen" class="vgen-icon" aria-hidden="true">
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Track info box -->
+  <div class="lyrics-container">
+    <div id="track-name" class="track-title">Peach Blossom Blood (桃花血)</div>
+    <div class="lyric-line" id="lyric-line-box">
+      <span class="lyric-typed">I'm vibin to this</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-right">
+    <div class="footer-copy">© 2026 - OutOfTune</div>
+    <div class="footer-author">Ren Yi</div>
+  </div>
+
+  <!-- BGM audio -->
+  <audio id="bgm" loop>
+    <source src="assets/sounds/bgm.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    /* Core audio & interaction engine */
+    document.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('overlay');
+      const audio = document.getElementById('bgm');
+      const brandTitle = document.getElementById('brand-title');
+
+      overlay.addEventListener('click', () => {
+        overlay.classList.add('hidden');
+        brandTitle.classList.add('glow-active');
+
+        if (audio) {
+          audio.volume = 0.25;
+          audio.play().catch(err => {
+            console.warn('Audio playback handled safely:', err);
+          });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
