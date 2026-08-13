@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^python -c \"import re, pathlib, subprocess, tempfile; root = pathlib\\.Path\\(r'd:\\\\GH Clones\\\\OutOfTune\\\\umiseii'\\);\nfor html_name in \\['index\\.html','gallery/index\\.html'\\]:\n    text = \\(root / html_name\\)\\.read_text\\(encoding='utf-8'\\); scripts = re\\.findall\\(r'<script>\\(\\.\\*\\?\\)</script>', text, flags=re\\.S\\); js_path = pathlib\\.Path\\(tempfile\\.gettempdir\\(\\)\\) / \\(html_name\\.replace\\('/', '_'\\) \\+ '\\.js'\\); js_path\\.write_text\\('\\\\n\\\\n'\\.join\\(scripts\\), encoding='utf-8'\\); print\\(f'Checking \\{html_name\\} -> \\{js_path\\.name\\}'\\); res = subprocess\\.run\\(\\['node', '--check', str\\(js_path\\)\\], capture_output=True, text=True\\); print\\('exit:', res\\.returncode\\); \n    if res\\.stdout\\.strip\\(\\): print\\(res\\.stdout\\.strip\\(\\)\\);\n    if res\\.stderr\\.strip\\(\\): print\\(res\\.stderr\\.strip\\(\\)\\);\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

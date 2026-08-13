@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Umiseii — Gallery</title>
+  <meta name="description" content="Umiseii gallery.">
+
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css">
+
+  <style>
+    :root {
+      --fg: #ffffff;
+      --muted: rgba(255, 255, 255, 0.8);
+      --pop: #f3c2ff;
+      --pop2: #b5e2ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    body {
+      color: var(--fg);
+      background:
+        linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
+        url('../assets/images/background.png') no-repeat center center / cover fixed;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    body.page-ready {
+      opacity: 1;
+    }
+
+    body.page-leave {
+      opacity: 0;
+    }
+
+    main {
+      min-height: 100vh;
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    .top {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem 0 2.5rem;
+    }
+
+    .back {
+      position: absolute;
+      left: 0;
+      color: var(--pop2);
+      text-decoration: none;
+      font-size: 0.75rem;
+      transition:
+        color 0.18s ease,
+        transform 0.18s ease;
+    }
+
+    .back:hover {
+      color: var(--pop);
+      transform: translateX(-2px);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.1rem, 3.5vw, 1.7rem);
+      text-shadow: 0 2px 6px rgba(20, 14, 35, 0.95);
+    }
+
+    /*
+      ============================================================
+      GALLERY
+      ============================================================
+
+      Images are automatically discovered from:
+
+        ../assets/images/
+
+      Supported:
+        PNG
+        JPG / JPEG
+        WebP
+        GIF
+        AVIF
+
+      You don't need to add images manually to this HTML.
+      Just put them in assets/images/ and refresh.
+      ============================================================
+    */
+
+    .gallery {
+      column-count: 2;
+      column-gap: 1.25rem;
+    }
+
+    .piece {
+      break-inside: avoid;
+      margin: 0 0 1.25rem;
+      cursor: pointer;
+      opacity: 0.94;
+
+      transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+    }
+
+    .piece:hover {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+
+    .piece img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 2px;
+    }
+
+    .piece figcaption {
+      margin-top: 0.55rem;
+      color: var(--muted);
+      font-size: 0.48rem;
+      line-height: 1.6;
+    }
+
+    .empty {
+      width: 100%;
+      margin: 2rem 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.55rem;
+      line-height: 1.8;
+    }
+
+    /*
+      ============================================================
+      FULLSCREEN ARTWORK VIEWER
+      ============================================================
+    */
+
+    .viewer {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 2rem;
+
+      background: rgba(20, 14, 35, 0.88);
+
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+
+      transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+    }
+
+    .viewer.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .viewer img {
+      max-width: 94vw;
+      max-height: 90vh;
+
+      width: auto;
+      height: auto;
+
+      object-fit: contain;
+
+      box-shadow:
+        0 8px 35px rgba(20, 14, 35, 0.55);
+    }
+
+    .viewer-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.5rem;
+
+      color: var(--pop2);
+
+      background: none;
+      border: 0;
+
+      padding: 0.5rem;
+
+      font: inherit;
+      font-size: 0.9rem;
+
+      cursor: pointer;
+
+      transition:
+        color 0.18s ease,
+        transform 0.18s ease;
+    }
+
+    .viewer-close:hover {
+      color: var(--pop);
+      transform: scale(1.08);
+    }
+
+    /*
+      ============================================================
+      MOBILE
+      ============================================================
+    */
+
+    @media (max-width: 650px) {
+      main {
+        padding:
+          1.5rem
+          0.8rem
+          3rem;
+      }
+
+      .gallery {
+        column-count: 1;
+      }
+
+      .back {
+        left: 0.25rem;
+        font-size: 0.65rem;
+      }
+
+      .piece {
+        margin-bottom: 1.4rem;
+      }
+
+      .piece figcaption {
+        font-size: 0.45rem;
+      }
+
+      .viewer {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background music -->
+  <audio id="bgm" preload="auto" loop>
+    <source src="../assets/audio/bgm.mp3" type="audio/mpeg">
+  </audio>
+
+  <main>
+
+    <header class="top">
+
+      <a
+        href="../index.html"
+        class="back site-nav"
+        aria-label="Back to Umiseii"
+        title="Back"
+      >
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      </a>
+
+      <h1>Gallery</h1>
+
+    </header>
+
+    <section
+      class="gallery"
+      id="gallery"
+      aria-label="Gallery"
+    >
+      <p
+        class="empty"
+        id="empty-message"
+      >
+        Gallery coming soon.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- Fullscreen artwork viewer -->
+  <div
+    class="viewer"
+    id="viewer"
+    aria-hidden="true"
+  >
+
+    <button
+      class="viewer-close"
+      id="viewer-close"
+      aria-label="Close artwork"
+    >
+      <i
+        class="fa-solid fa-xmark"
+        aria-hidden="true"
+      ></i>
+    </button>
+
+    <img
+      id="viewer-image"
+      src=""
+      alt=""
+    >
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      const gallery =
+        document.getElementById('gallery');
+
+      const emptyMessage =
+        document.getElementById('empty-message');
+
+      const viewer =
+        document.getElementById('viewer');
+
+      const viewerImage =
+        document.getElementById('viewer-image');
+
+      const viewerClose =
+        document.getElementById('viewer-close');
+
+      /*
+        ============================================================
+        MUSIC
+        ============================================================
+      */
+
+      const bgm =
+        document.getElementById('bgm');
+
+      const MUSIC_TIME_KEY =
+        'umiseii-music-time';
+
+      const MUSIC_PLAYING_KEY =
+        'umiseii-music-playing';
+
+      const RETURNING_FROM_SITE_KEY =
+        'umiseii-returning-from-site';
+
+      if (bgm) {
+
+        bgm.volume = 0.18;
+
+        try {
+
+          const savedTime =
+            Number(
+              sessionStorage.getItem(
+                MUSIC_TIME_KEY
+              )
+            );
+
+          if (
+            Number.isFinite(savedTime) &&
+            savedTime >= 0
+          ) {
+            bgm.currentTime =
+              savedTime;
+          }
+
+          if (
+            sessionStorage.getItem(
+              MUSIC_PLAYING_KEY
+            ) === '1'
+          ) {
+            bgm.play().catch(() => {});
+          }
+
+        } catch (_) {}
+
+        /*
+          Browsers may block autoplay when Gallery
+          is opened directly.
+
+          The first interaction starts the music.
+        */
+
+        const startMusicFromGesture = () => {
+
+          bgm.play().catch(() => {});
+
+        };
+
+        document.addEventListener(
+          'pointerdown',
+          startMusicFromGesture,
+          { once: true }
+        );
+
+        document.addEventListener(
+          'keydown',
+          startMusicFromGesture,
+          { once: true }
+        );
+
+        bgm.addEventListener(
+          'timeupdate',
+          () => {
+
+            try {
+
+              sessionStorage.setItem(
+                MUSIC_TIME_KEY,
+                String(
+                  bgm.currentTime
+                )
+              );
+
+              sessionStorage.setItem(
+                MUSIC_PLAYING_KEY,
+                bgm.paused
+                  ? '0'
+                  : '1'
+              );
+
+            } catch (_) {}
+
+          }
+        );
+
+        bgm.addEventListener(
+          'play',
+          () => {
+
+            try {
+
+              sessionStorage.setItem(
+                MUSIC_PLAYING_KEY,
+                '1'
+              );
+
+            } catch (_) {}
+
+          }
+        );
+
+        bgm.addEventListener(
+          'pause',
+          () => {
+
+            try {
+
+              sessionStorage.setItem(
+                MUSIC_PLAYING_KEY,
+                '0'
+              );
+
+            } catch (_) {}
+
+          }
+        );
+      }
+
+      /*
+        ============================================================
+        IMAGE SCANNER
+        ============================================================
+
+        http-server exposes a directory listing for
+        ../assets/images/
+
+        We read that listing and automatically find
+        supported image files.
+        ============================================================
+      */
+
+      const IMAGE_EXTENSIONS =
+        /\.(png|jpe?g|webp|gif|avif)$/i;
+
+      async function loadGallery() {
+
+        try {
+
+          const response =
+            await fetch(
+              '../assets/images/',
+              {
+                cache: 'no-store'
+              }
+            );
+
+          if (!response.ok) {
+
+            throw new Error(
+              `Image directory returned ${response.status}`
+            );
+
+          }
+
+          const listing =
+            await response.text();
+
+          const parsed =
+            new DOMParser()
+              .parseFromString(
+                listing,
+                'text/html'
+              );
+
+          const files =
+            [
+              ...parsed.querySelectorAll(
+                'a[href]'
+              )
+            ]
+
+              .map(link => {
+
+                const url =
+                  new URL(
+                    link.getAttribute('href'),
+                    response.url
+                  );
+
+                const parts =
+                  url.pathname
+                    .split('/')
+                    .filter(Boolean);
+
+                const name =
+                  decodeURIComponent(
+                    parts[parts.length - 1] || ''
+                  );
+
+                return {
+                  name,
+                  url: url.href
+                };
+
+              })
+
+              .filter(file =>
+                IMAGE_EXTENSIONS.test(
+                  file.name
+                )
+              )
+
+              .sort((a, b) =>
+                a.name.localeCompare(
+                  b.name
+                )
+              );
+
+          if (!files.length) {
+            return;
+          }
+
+          emptyMessage.remove();
+
+          files.forEach(file => {
+
+            const figure =
+              document.createElement(
+                'figure'
+              );
+
+            figure.className =
+              'piece';
+
+            const image =
+              document.createElement(
+                'img'
+              );
+
+            image.src =
+              file.url;
+
+            image.alt =
+              file.name
+                .replace(
+                  /\.[^.]+$/,
+                  ''
+                )
+                .replace(
+                  /[-_]+/g,
+                  ' '
+                );
+
+            image.loading =
+              'lazy';
+
+            const caption =
+              document.createElement(
+                'figcaption'
+              );
+
+            caption.textContent =
+              image.alt;
+
+            figure.append(
+              image,
+              caption
+            );
+
+            gallery.appendChild(
+              figure
+            );
+
+          });
+
+          attachViewerHandlers();
+
+        } catch (error) {
+
+          console.error(
+            '[Umiseii Gallery]',
+            error
+          );
+
+          emptyMessage.textContent =
+            'Could not read the image directory. Start the site with: npx http-server .';
+
+        }
+
+      }
+
+      /*
+        ============================================================
+        VIEWER
+        ============================================================
+      */
+
+      function attachViewerHandlers() {
+
+        gallery
+          .querySelectorAll(
+            '.piece img'
+          )
+          .forEach(image => {
+
+            if (
+              image.dataset.viewerBound === '1'
+            ) {
+              return;
+            }
+
+            image.dataset.viewerBound =
+              '1';
+
+            image.addEventListener(
+              'click',
+              () => {
+
+                viewerImage.src =
+                  image.src;
+
+                viewerImage.alt =
+                  image.alt;
+
+                viewer.classList.add(
+                  'open'
+                );
+
+                viewer.setAttribute(
+                  'aria-hidden',
+                  'false'
+                );
+
+              }
+            );
+
+          });
+
+      }
+
+      function closeViewer() {
+
+        viewer.classList.remove(
+          'open'
+        );
+
+        viewer.setAttribute(
+          'aria-hidden',
+          'true'
+        );
+
+        viewerImage.src =
+          '';
+
+      }
+
+      viewerClose.addEventListener(
+        'click',
+        closeViewer
+      );
+
+      viewer.addEventListener(
+        'click',
+        event => {
+
+          if (
+            event.target === viewer
+          ) {
+            closeViewer();
+          }
+
+        }
+      );
+
+      document.addEventListener(
+        'keydown',
+        event => {
+
+          if (
+            event.key === 'Escape'
+          ) {
+            closeViewer();
+          }
+
+        }
+      );
+
+      /*
+        ============================================================
+        NAVIGATION
+        ============================================================
+      */
+
+      document
+        .querySelectorAll(
+          'a.site-nav'
+        )
+        .forEach(link => {
+
+          link.addEventListener(
+            'click',
+            event => {
+
+              const href =
+                link.getAttribute(
+                  'href'
+                );
+
+              if (!href) {
+                return;
+              }
+
+              event.preventDefault();
+
+              if (bgm) {
+
+                try {
+
+                  sessionStorage.setItem(
+                    MUSIC_TIME_KEY,
+                    String(
+                      bgm.currentTime
+                    )
+                  );
+
+                  sessionStorage.setItem(
+                    MUSIC_PLAYING_KEY,
+                    bgm.paused
+                      ? '0'
+                      : '1'
+                  );
+
+                  sessionStorage.setItem(
+                    RETURNING_FROM_SITE_KEY,
+                    '1'
+                  );
+
+                } catch (_) {}
+
+              }
+
+              document.body.classList.add(
+                'page-leave'
+              );
+
+              setTimeout(
+                () => {
+                  window.location.href =
+                    href;
+                },
+                300
+              );
+
+            }
+          );
+
+        });
+
+      /*
+        ============================================================
+        PAGE TRANSITIONS
+        ============================================================
+      */
+
+      requestAnimationFrame(() => {
+
+        document.body.classList.add(
+          'page-ready'
+        );
+
+      });
+
+      /*
+        Fix browser Back / Forward cache.
+      */
+
+      window.addEventListener(
+        'pageshow',
+        event => {
+
+          document.body.classList.remove(
+            'page-leave'
+          );
+
+          document.body.classList.add(
+            'page-ready'
+          );
+
+          if (
+            event.persisted &&
+            bgm
+          ) {
+
+            bgm.play().catch(
+              () => {}
+            );
+
+          }
+
+        }
+      );
+
+      /*
+        Start scanning the image directory.
+      */
+
+      loadGallery();
+
+    });
+  </script>
+
+</body>
+</html>
