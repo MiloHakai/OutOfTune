@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "scripts": {
+    "gallery:manifest": "node scripts/generate-gallery.mjs"
+  }
+}

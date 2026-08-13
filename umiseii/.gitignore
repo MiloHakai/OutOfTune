@@ -1,4 +1,3 @@
-node_modules/
 # Local development
 __pycache__/
 *.py[cod]
