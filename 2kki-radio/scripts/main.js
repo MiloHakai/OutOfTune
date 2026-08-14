@@ -1,3 +1,4 @@
+// Changing
 const CONFIG = {
   streamUrl: 'http://217.154.126.21:8000/live.flac',
   statusUrl: 'http://217.154.126.21:8080/nowplaying',
