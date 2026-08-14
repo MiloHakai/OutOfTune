@@ -1,8 +1,6 @@
-// --- CONFIGURAZIONE ---
 const CONFIG = {
-  streamUrl: 'https://2kkiendpoint.outoftune.dev/yume.mp3',
-  statusUrl: 'https://2kkiendpoint.outoftune.dev/status-json.xsl',
-  mount: '/yume.mp3',
+  streamUrl: 'http://217.154.126.21:8000/live.flac',
+  statusUrl: 'http://217.154.126.21:8080/nowplaying',   // <-- new endpoint
   recentTitlesLimit: 12,
   metadataPollMs: 10000
 };
