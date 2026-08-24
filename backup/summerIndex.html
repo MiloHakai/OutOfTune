@@ -1,0 +1,2611 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OutOfTune</title>
+    <meta name="description" content="Open source project — built for creators, streamers, and friends." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="OutOfTune" />
+    <meta property="og:description" content="Open source project — built for creators, streamers, and friends." />
+    <meta property="og:url" content="https://outoftune.dev/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="OutOfTune" />
+    <meta name="twitter:description" content="Open source project — built for creators, streamers, and friends." />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Press+Start+2P&family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400&family=VT323&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-dark: #1c1220;
+            --primary: #fff3f6;
+            --accent: #ff92b4;
+            --accent-glow: rgba(255, 146, 180, 0.25);
+            --text-main: #fff0f3;
+            --text-muted: rgba(255, 214, 224, 0.82);
+            --dark-gray: #3a2432;
+            --glow: rgba(255, 170, 195, 0.42);
+            --text-dim: rgba(255, 224, 232, 0.85);
+            --line: rgba(255, 245, 248, 0.92);
+            --line-soft: rgba(255, 179, 205, 0.55);
+            --wave-a: #fff8f5;
+            --wave-b: #ff9ec4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Full-page container that handles both desktop and mobile */
+        body {
+            height: 100svh;
+            /* use svh so mobile browser chrome is accounted for */
+        }
+
+        .pixel-font {
+            font-family: 'VT323', monospace;
+        }
+
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ── Background canvas ── */
+        #constellation-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: default;
+            overflow: hidden;
+            touch-action: none;
+            /* Chill "sea sky" palette as a CSS fallback — this is what mobile
+               renders on its own (no WebGL needed). Desktop layers a light
+               low-poly scene on top of this via canvas. */
+            background: linear-gradient(180deg,
+                    #bdeee2 0%,
+                    #d3ecdf 20%,
+                    #f3dccf 42%,
+                    #f6bccb 58%,
+                    #8fd8d6 78%,
+                    #4fb0b8 100%);
+        }
+
+        #constellation-container canvas {
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Soft dark scrim so existing light text/UI stays legible over the
+           bright beach palette. Sits above the background, below content. */
+        #bg-scrim {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: linear-gradient(115deg,
+                    rgba(20, 10, 20, 0.36) 0%,
+                    rgba(20, 10, 20, 0.24) 30%,
+                    rgba(20, 10, 20, 0.08) 55%,
+                    rgba(20, 10, 20, 0.20) 100%);
+        }
+
+        /* ── Main layout ── */
+        .content-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100svh;
+            --content-edge: 24px;
+            padding-left: var(--content-edge);
+            z-index: 10;
+        }
+
+        .brand-section {
+            position: relative;
+            z-index: 20;
+        }
+
+        .logo-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* ── Globe ── */
+          /* Globe is positioned fixed and its `left` is computed at runtime so
+              it's anchored to the content edge instead of the raw viewport. This
+              keeps alignment stable on ultrawide displays and when the
+              `.content-wrapper` padding changes. */
+          #globe-target {
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
+                left: max(-288px, -15vw);
+            /* Size: grow with viewport but cap earlier on wide screens */
+            width: min(56vw, 500px);
+            height: min(56vw, 500px);
+            max-width: 500px;
+            max-height: 500px;
+            min-width: 340px;
+            min-height: 340px;
+            z-index: 1;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        /* ── Title ── */
+        .brand-section h1.wave-text {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.5rem, 5vw, 3.2rem);
+            margin: 0;
+            line-height: 1.1;
+            letter-spacing: 0;
+            cursor: default;
+            user-select: none;
+            background: linear-gradient(90deg,
+                    var(--wave-a) 0%,
+                    var(--wave-a) 38%,
+                    var(--wave-b) 50%,
+                    var(--wave-a) 62%,
+                    var(--wave-a) 100%);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: wave-effect 6s linear infinite, titlePulse 4s ease-in-out infinite;
+            text-shadow:
+                0 0 12px var(--glow),
+                0 0 22px color-mix(in srgb, var(--accent) 55%, transparent);
+            -webkit-text-stroke: 0.22px color-mix(in srgb, var(--line-soft) 70%, transparent);
+        }
+
+        @keyframes titlePulse {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 40%, transparent));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent) 55%, transparent)) drop-shadow(0 0 6px var(--line-soft));
+            }
+        }
+
+        @keyframes wave-effect {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -100% 0;
+            }
+        }
+
+        .status-badge {
+            display: none;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 300;
+            max-width: 320px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* ── Lyrics (bottom-left) ── */
+        .lyrics-container {
+            position: fixed;
+            left: 24px;
+            bottom: 24px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            /* Wide enough on desktop, constrained on mobile */
+            width: min(340px, calc(100vw - 48px));
+            /* On mobile keep it from overlapping the carousel */
+            max-width: calc(60vw - 24px);
+        }
+
+        .track-title {
+            font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.01em;
+            color: rgba(255, 244, 230, 0.92);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .lyric-line {
+            font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
+            font-weight: 400;
+            font-size: 0.78rem;
+            color: rgba(255, 240, 222, 0.92);
+            line-height: 1.5;
+            min-height: 1.3em;
+            overflow-wrap: anywhere;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65), 0 0 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .lyric-typed {
+            display: inline;
+        }
+
+        .lyric-caret {
+            display: inline-block;
+            width: 0.5ch;
+            margin-left: 1px;
+            color: rgba(255, 158, 196, 0.9);
+            animation: caretBlink 0.65s step-end infinite;
+            vertical-align: baseline;
+        }
+
+        .lyric-caret[hidden] {
+            display: none;
+        }
+
+        @keyframes caretBlink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* ── Footer (bottom-right) ── */
+        .footer-right {
+            position: fixed;
+            right: 16px;
+            bottom: 12px;
+            z-index: 100;
+            font-family: 'Press Start 2P', monospace;
+            color: rgba(255, 220, 232, 0.38);
+            font-size: 0.42rem;
+            letter-spacing: 0.5px;
+            line-height: 1.75;
+            text-align: right;
+        }
+
+        /* ── Member Carousel ── */
+        .member-carousel {
+            position: fixed;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            width: fit-content;
+        }
+
+        .carousel-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .carousel-text {
+            text-align: right;
+            cursor: pointer;
+        }
+
+        .carousel-text:hover .member-hint {
+            opacity: 1;
+        }
+
+        .member-category {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.42rem;
+            color: rgba(255, 220, 232, 0.5);
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+        }
+
+        .member-name {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.55rem, 2vw, 0.7rem);
+            color: var(--primary);
+            /* prevent long names from wrapping badly */
+            white-space: nowrap;
+        }
+
+        .member-name.animate {
+            animation: memberSwitch 0.45s ease-out;
+        }
+
+        @keyframes memberSwitch {
+            0% {
+                opacity: 0;
+                transform: translateX(8px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .member-hint {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.35rem;
+            color: rgba(255, 220, 232, 0.45);
+            margin-top: 5px;
+            letter-spacing: 0.03em;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* ── Mini-site modal ── */
+        .mini-site-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 250;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(6px);
+            padding: 12px;
+        }
+
+        .mini-site-modal.open {
+            display: flex;
+        }
+
+        .mini-site-panel {
+            width: min(92vw, 1120px);
+            height: min(88svh, 820px);
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(28, 16, 8, 0.96);
+            box-shadow: 0 22px 90px rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 158, 196, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mini-site-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 16px;
+            background: rgba(34, 19, 9, 0.95);
+            border-bottom: 1px solid rgba(255, 158, 196, 0.12);
+            flex-shrink: 0;
+        }
+
+        .mini-site-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .mini-site-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.56rem;
+            color: rgba(255, 200, 140, 0.6);
+            letter-spacing: 0.01em;
+            /* truncate long URLs on small screens */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 48vw;
+        }
+
+        .mini-site-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .mini-site-action-link {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.58rem;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.15s ease;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .mini-site-action-link.open-full {
+            color: #ffb0d0;
+        }
+
+        .mini-site-action-link.close-btn {
+            color: #ff6b5c;
+        }
+
+        .mini-site-action-link:hover {
+            opacity: 0.75;
+        }
+
+        .mini-site-frame-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: #170d06;
+        }
+
+        .mini-site-frame {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 128%;
+            height: 128%;
+            transform: translateX(-50%) scale(0.78);
+            transform-origin: top center;
+            border: none;
+            background: #170d06;
+        }
+
+        .carousel-arrows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .carousel-nav {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(255, 220, 232, 0.45);
+            padding: 4px 6px;
+            line-height: 1;
+            transition: color 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* larger tap target on mobile */
+            min-width: 36px;
+            min-height: 36px;
+        }
+
+        .carousel-nav:hover {
+            color: var(--primary);
+        }
+
+        .carousel-nav svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        /* ── Splash overlay ── */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 18px;
+            background: var(--bg-dark);
+            cursor: pointer;
+            transition: opacity 0.75s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .disclaimer-panel {
+            max-width: 22rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .disclaimer-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.48rem, 1.05vw, 0.62rem);
+            line-height: 1.65;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            text-shadow:
+                0 0 12px var(--glow),
+                0 0 20px color-mix(in srgb, var(--accent) 45%, transparent);
+            margin: 0 0 1rem;
+        }
+
+        .disclaimer-body {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.34rem, 0.78vw, 0.44rem);
+            line-height: 1.9;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .disclaimer-body p {
+            margin: 0 0 0.85rem;
+        }
+
+        .disclaimer-body p:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .disclaimer-hint {
+            font-family: 'Press Start 2P', monospace;
+            margin: 1.35rem 0 0;
+            font-size: clamp(0.3rem, 0.7vw, 0.38rem);
+            letter-spacing: 0.09em;
+            color: color-mix(in srgb, var(--accent) 72%, var(--text-muted));
+            text-shadow: 0 0 14px var(--accent-glow);
+            opacity: 0;
+            animation: disclaimerHintIn 0.85s ease forwards;
+            animation-delay: 0.65s;
+        }
+
+        @keyframes disclaimerHintIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────
+           MOBILE & TABLET OVERRIDES (screens ≤ 1024px)
+        ───────────────────────────────────────────────────── */
+        @media (max-width: 1024px) {
+
+            /* Center content and hide globe for a clean mobile look, like Bluerra */
+            .content-wrapper {
+                --content-edge: 16px;
+                padding-left: var(--content-edge);
+                padding-right: 16px;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                padding-top: 0;
+            }
+
+            .brand-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            /* Globe: completely hidden on mobile/tablet */
+            #globe-target {
+                display: none;
+            }
+
+            .brand-section h1.wave-text {
+                font-size: clamp(1.25rem, 8vw, 2rem);
+                line-height: 1.15;
+            }
+
+            .subtitle {
+                font-size: 0.75rem;
+                margin-top: 12px;
+                margin-bottom: 12px;
+                max-width: 100%;
+            }
+
+            /* ── Lyrics: bottom strip, full width minus carousel ── */
+            .lyrics-container {
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 24px;
+                width: 90vw;
+                max-width: 400px;
+                align-items: center;
+                text-align: center;
+                gap: 3px;
+            }
+
+            .track-title {
+                font-size: 0.55rem;
+            }
+
+            .lyric-line {
+                font-size: 0.55rem;
+            }
+
+            /* ── Carousel: centered below the main text, sideways scroll ── */
+            .member-carousel {
+                right: auto;
+                left: 50%;
+                top: calc(50% + 60px);
+                /* Position it just below the centered brand text */
+                bottom: auto;
+                transform: translateX(-50%);
+            }
+
+            .carousel-inner {
+                flex-direction: column;
+                /* Stack text above arrows */
+                align-items: center;
+                gap: 12px;
+            }
+
+            .carousel-text {
+                text-align: center;
+                /* Center text instead of right-align */
+            }
+
+            .carousel-arrows {
+                flex-direction: row;
+                /* Arrange arrows sideways */
+                gap: 24px;
+            }
+
+            /* Rotate vertical chevrons into horizontal chevrons */
+            .carousel-up {
+                transform: rotate(-90deg);
+            }
+
+            .carousel-down {
+                transform: rotate(-90deg);
+            }
+
+            .member-category {
+                font-size: 0.36rem;
+            }
+
+            .member-name {
+                font-size: 0.52rem;
+            }
+
+            .member-hint {
+                display: none;
+            }
+
+            /* Touch-friendly navigation arrows */
+            .carousel-nav {
+                min-width: 44px;
+                min-height: 44px;
+                padding: 10px;
+            }
+
+            .carousel-nav svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            /* ── Footer ── */
+            .footer-right {
+                right: 10px;
+                bottom: 6px;
+                font-size: 0.36rem;
+            }
+
+            /* ── Mini-site modal: full-screen ── */
+            .mini-site-modal {
+                padding: 0;
+            }
+
+            .mini-site-panel {
+                width: 100vw;
+                height: 100svh;
+                border-radius: 0;
+            }
+
+            .mini-site-toolbar {
+                padding: 10px 12px;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .mini-site-title {
+                font-size: 0.6rem;
+            }
+
+            .mini-site-url {
+                font-size: 0.48rem;
+                max-width: 55vw;
+            }
+
+            .mini-site-action-link {
+                font-size: 0.5rem;
+            }
+
+            .mini-site-actions {
+                gap: 12px;
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────
+           SMALL LANDSCAPE  (phones in landscape, short height)
+        ───────────────────────────────────────────────────── */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .content-wrapper {
+                padding-top: 12px;
+                justify-content: center;
+            }
+
+            #globe-target {
+                left: -10vw;
+                width: 46vw;
+                height: 46vw;
+                min-width: 0;
+                min-height: 0;
+                opacity: 0.35;
+            }
+
+            .brand-section h1.wave-text {
+                font-size: clamp(1rem, 4vh, 2rem);
+            }
+
+            .subtitle {
+                font-size: 0.7rem;
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+
+            .lyrics-container {
+                bottom: 30px;
+                max-width: 42vw;
+            }
+
+            .member-carousel {
+                right: 12px;
+            }
+
+            .footer-right {
+                bottom: 4px;
+                font-size: 0.38rem;
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────
+           ULTRAWIDE (21:9 and wider — aspect ratio > ~2.1)
+        ───────────────────────────────────────────────────── */
+        @media (min-aspect-ratio: 21/9) {
+            /* Keep the globe anchored near the left edge of the content, not the raw viewport */
+            #globe-target {
+                left: -180px;
+                width: 420px;
+                height: 420px;
+                min-width: 0;
+                min-height: 0;
+            }
+
+            /* Reduce the extra left spacing on ultrawide screens. */
+            .content-wrapper {
+                --content-edge: clamp(24px, 2vw, 56px);
+                padding-left: var(--content-edge);
+            }
+        }
+
+        /* ── Reduced motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            .brand-section h1.wave-text {
+                animation: none;
+                -webkit-text-fill-color: var(--primary);
+                background: none;
+            }
+
+            .lyric-caret {
+                animation: none;
+                opacity: 0.75;
+            }
+
+            .disclaimer-hint {
+                animation: none;
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="constellation-container"></div>
+    <div id="bg-scrim"></div>
+
+    <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="disclaimer-heading"
+        aria-describedby="disclaimer-desc">
+        <div class="disclaimer-panel" id="disclaimer-desc">
+            <div class="disclaimer-main">
+                <h2 id="disclaimer-heading" class="disclaimer-title">Welcome to OutOfTune</h2>
+                <div class="disclaimer-body">
+                    <p>This is an open source project — made for creators, streamers, and friends.</p>
+                    <p>Share ideas, fork the code, and build together. Be respectful in community spaces.</p>
+                    <p>Background audio will start when you continue.</p>
+                </div>
+            </div>
+            <p class="disclaimer-hint">Click or tap anywhere to continue</p>
+        </div>
+    </div>
+
+    <main class="content-wrapper">
+        <section class="brand-section">
+            <div class="logo-container">
+                <div id="globe-target"></div>
+                <h1 class="wave-text">OutOfTune</h1>
+            </div>
+            <p class="subtitle">Open source — built for creators & friends.</p>
+        </section>
+    </main>
+
+    <div class="lyrics-container">
+        <div id="track-name" class="track-title">Loading track…</div>
+        <div class="lyric-line" id="lyric-line-box">
+            <span class="lyric-typed" id="lyric-output"></span><span class="lyric-caret" id="lyric-caret"
+                hidden>|</span>
+        </div>
+    </div>
+
+    <div class="member-carousel">
+        <div class="carousel-inner">
+            <div class="carousel-text" id="carousel-display">
+                <div class="member-category" id="member-category">FOUNDERS</div>
+                <div class="member-name" id="member-name">Bluerra</div>
+                <div class="member-hint">view profile ↗</div>
+            </div>
+            <div class="carousel-arrows">
+                <button class="carousel-nav carousel-up" aria-label="Previous member">
+                    <i data-lucide="chevron-up"></i>
+                </button>
+                <button class="carousel-nav carousel-down" aria-label="Next member">
+                    <i data-lucide="chevron-down"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mini-site-modal" class="mini-site-modal" aria-hidden="true">
+        <div class="mini-site-panel" role="dialog" aria-modal="true" aria-labelledby="mini-site-title">
+            <div class="mini-site-toolbar">
+                <div style="min-width:0;flex:1;">
+                    <div id="mini-site-title" class="mini-site-title">Preview</div>
+                    <div id="mini-site-url" class="mini-site-url"></div>
+                </div>
+                <div class="mini-site-actions">
+                    <button type="button" id="mini-site-open-full" class="mini-site-action-link open-full">open full
+                        page ↗</button>
+                    <button type="button" id="mini-site-close" class="mini-site-action-link close-btn">close ✕</button>
+                </div>
+            </div>
+            <div class="mini-site-frame-wrapper">
+                <iframe id="mini-site-iframe" class="mini-site-frame" src="about:blank"
+                    title="Profile preview"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-right">
+        <div class="footer-copy">© 2026 - OutOfTune</div>
+    </div>
+
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="pointer-sfx" preload="auto">
+        <source src="assets/audio/pointer.wav" type="audio/wav">
+    </audio>
+    <audio id="nameSwap-sfx" preload="auto">
+        <source src="assets/audio/nameSwap.wav" type="audio/wav">
+    </audio>
+    <audio id="confirm-sfx" preload="auto">
+        <source src="assets/audio/confirm.wav" type="audio/wav">
+    </audio>
+    <audio id="back-sfx" preload="auto">
+        <source src="assets/audio/back.wav" type="audio/wav">
+    </audio>
+
+    <script type="text/plain" id="lrc-embedded">
+        [00:11.39] 遠い日の思い出は
+        [00:17.45] どれも曖昧
+        [00:21.58] この身にほんとうに起きたことなのか
+        [00:31.89] 柔らかな頬に
+        [00:35.39] くちづけしたなら
+        [00:39.18] その温もりこそを信じたい
+        [00:42.67] How old?
+        [00:44.95] 曖昧だ
+        [00:46.94] 俺　今　いくつだっけ
+        [00:49.60] 俺　今　いくつだっけ
+        [00:52.96] How old?
+        [00:55.48] 曖昧だ
+        [00:57.37] 君　今　いくつなの
+        [00:59.99] 君　今　いくつなの
+        [01:03.49] How old?
+        [01:05.79] 曖昧だ
+        [01:08.30] 曖昧me
+        [01:11.05] I love you
+        [01:13.88] NOT TO DO LIST
+        [01:17.40] しなくていいことをあげてみる
+        [01:23.98] 反省は身体に毒だね　ほどほどに
+        [01:34.55] 未来も過去も
+        [01:38.58] ペンダントライトの光が照らす
+        [01:43.15] 淵までしかない
+        [01:45.26] How old?
+        [01:47.47] 曖昧だ
+        [01:49.46] 俺　今　いくつだっけ
+        [01:52.32] 俺　今　いくつだっけ
+        [01:55.56] How old?
+        [01:57.94] 曖昧だ
+        [01:59.86] 君　今　いくつなの
+        [02:02.70] 君　今　いくつなの
+        [02:05.97] How old?
+        [02:08.36] 曖昧だ
+        [02:10.98] 曖昧me
+        [02:13.56] I love you
+        [02:36.95] 柔らかな頬に
+        [02:40.60] くちづけしたなら
+        [02:44.25] その温もりこそを信じたい
+        [02:47.91] How old?
+        [02:50.08] 曖昧だ
+        [02:52.05] 俺　今　いくつだっけ
+        [02:54.88] 俺　今　いくつだっけ
+        [02:58.29] How old?
+        [03:00.63] 曖昧だ
+        [03:02.57] 君　今　いくつなの
+        [03:05.08] 君　今　いくつなの
+        [03:08.65] How old?
+        [03:11.05] 曖昧だ
+        [03:12.99] 俺　今　いくつだっけ
+        [03:15.73] 俺　今　いくつだっけ
+        [03:19.06] How old?
+        [03:21.52] 曖昧だ
+        [03:23.97] 曖昧me
+        [03:26.52] I love you
+        [03:39.80] 色褪せたの写真の中の新生児
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // tiny human touch: a handwritten console signature
+            console.log('%cOutOfTune', 'color: #ff9ec4; font-weight: 700');
+            // Easter egg: secret shortcut (Ctrl+Shift+E) to reveal a playful dev message
+            function revealEasterEgg() {
+                console.log('%cHey there, been lurkin here?', 'color:#ffb0d0; font-size:14px; font-weight:700');
+                console.log('Thank fuck Claude is a thing');
+                const sub = document.querySelector('.subtitle');
+                if (sub) {
+                    const orig = sub.textContent;
+                    try {
+                        sub.textContent = 'Had to use Claude for the sphere, kms';
+                        setTimeout(() => { sub.textContent = orig; }, 4200);
+                    } catch (e) {}
+                }
+            }
+            window.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e')) revealEasterEgg();
+            });
+            // expose to the console for curious humans
+            window.outoftuneEaster = revealEasterEgg;
+
+            // Globe horizontal positioning is handled by CSS so it remains
+            // stable across resizes and does not use inline style overrides.
+
+            // Member Carousel
+            const allMembers = [
+                // Founders (Mom I'm here :3)
+                {
+                    display: 'MiloHakai',
+                    path: 'milohakai',
+                    category: 'FOUNDERS'
+                },
+                {
+                    display: 'SaiaMantaRay',
+                    path: 'bluerra',
+                    category: 'FOUNDERS'
+                },
+                // Collaborators (alphabetical)
+                {
+                    display: 'Buniisu',
+                    path: 'buniisu',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Indura',
+                    path: 'indura',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Karakule',
+                    path: 'karakule',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Lavender',
+                    path: 'lavender',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Ren Yi',
+                    path: 'renyi',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Reyvonlune',
+                    path: 'reyvonlune',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Shotokiii',
+                    path: 'shotokiii',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Umiseii',
+                    path: 'umiseii',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Umilushi',
+                    path: 'umilushi',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Visceral',
+                    path: 'visceral',
+                    category: 'COLLABORATORS'
+                },
+                {
+                    display: 'Wicadev',
+                    path: 'wicadev',
+                    category: 'COLLABORATORS'
+                },
+            ];
+
+            let currentMemberIndex = 0;
+            const memberNameEl = document.getElementById('member-name');
+            const memberCategoryEl = document.getElementById('member-category');
+            const carouselDisplay = document.getElementById('carousel-display');
+            const carouselUp = document.querySelector('.carousel-up');
+            const carouselDown = document.querySelector('.carousel-down');
+
+            function updateMemberDisplay(index) {
+                currentMemberIndex = (index + allMembers.length) % allMembers.length;
+                const member = allMembers[currentMemberIndex];
+                memberNameEl.classList.remove('animate');
+                void memberNameEl.offsetWidth;
+                memberNameEl.classList.add('animate');
+                memberNameEl.textContent = member.display;
+                memberCategoryEl.textContent = member.category;
+            }
+
+            function emitMemberAction(actionType, member) {
+                window.dispatchEvent(new CustomEvent(actionType, {
+                    detail: {
+                        member
+                    }
+                }));
+            }
+
+            carouselUp.addEventListener('click', () => {
+                updateMemberDisplay(currentMemberIndex - 1);
+                emitMemberAction('nameSwap', allMembers[currentMemberIndex]);
+                playNameSwap();
+            });
+            carouselDown.addEventListener('click', () => {
+                updateMemberDisplay(currentMemberIndex + 1);
+                emitMemberAction('nameSwap', allMembers[currentMemberIndex]);
+                playNameSwap();
+            });
+
+            carouselDisplay.addEventListener('click', () => {
+                const member = allMembers[currentMemberIndex];
+                emitMemberAction('confirm', member);
+                playSound(confirmSfx, () => {});
+                openMiniSitePreview(member);
+            });
+
+            const carouselArrows = document.querySelectorAll('.carousel-nav');
+            carouselArrows.forEach((arrow) => {
+                arrow.addEventListener('mouseenter', () => playSound(pointerSfx));
+            });
+            carouselDisplay.addEventListener('mouseenter', () => playSound(pointerSfx));
+
+            const carouselRoot = document.querySelector('.member-carousel');
+            const hint = document.querySelector('.member-hint');
+            if (hint) {
+                carouselRoot.addEventListener('mouseenter', () => hint.style.opacity = '1');
+                carouselRoot.addEventListener('mouseleave', () => hint.style.opacity = '0');
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp') {
+                    updateMemberDisplay(currentMemberIndex - 1);
+                    playNameSwap();
+                }
+                if (e.key === 'ArrowDown') {
+                    updateMemberDisplay(currentMemberIndex + 1);
+                    playNameSwap();
+                }
+                if (e.key === 'Enter') {
+                    const member = allMembers[currentMemberIndex];
+                    emitMemberAction('confirm', member);
+                    playSound(confirmSfx, () => {});
+                    openMiniSitePreview(member);
+                }
+            });
+
+            updateMemberDisplay(0);
+
+            // Mini-site modal
+            const miniSiteModal = document.getElementById('mini-site-modal');
+            const miniSiteIframe = document.getElementById('mini-site-iframe');
+            const miniSiteTitle = document.getElementById('mini-site-title');
+            const miniSiteUrlEl = document.getElementById('mini-site-url');
+            const miniSiteOpenFull = document.getElementById('mini-site-open-full');
+            const miniSiteClose = document.getElementById('mini-site-close');
+
+            let baseAudioWasPlaying = false;
+            let currentMemberUrl = '';
+
+            function openMiniSitePreview(member) {
+                const url = `./${member.path}/index.html`;
+                currentMemberUrl = url;
+                baseAudioWasPlaying = !audio.paused;
+                if (baseAudioWasPlaying) audio.pause();
+                miniSiteTitle.textContent = member.display;
+                miniSiteUrlEl.textContent = `https://outoftune.dev/${member.path}`;
+                miniSiteIframe.src = url;
+                miniSiteOpenFull.onclick = () => {
+                    window.location.href = url;
+                };
+                miniSiteModal.classList.add('open');
+                miniSiteModal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeMiniSitePreview() {
+                miniSiteModal.classList.remove('open');
+                miniSiteModal.setAttribute('aria-hidden', 'true');
+                miniSiteIframe.src = 'about:blank';
+                if (baseAudioWasPlaying) audio.play().catch(() => {});
+                baseAudioWasPlaying = false;
+                currentMemberUrl = '';
+            }
+
+            miniSiteClose.addEventListener('click', () => {
+                playSound(document.getElementById('back-sfx'));
+                closeMiniSitePreview();
+            });
+            miniSiteModal.addEventListener('click', (event) => {
+                if (event.target === miniSiteModal) {
+                    playSound(document.getElementById('back-sfx'));
+                    closeMiniSitePreview();
+                }
+            });
+
+            // Audio & Lyrics
+            const overlay = document.getElementById('overlay');
+            const audio = document.getElementById('bgm');
+            const pointerSfx = document.getElementById('pointer-sfx');
+            const nameSwapSfx = document.getElementById('nameSwap-sfx');
+            const confirmSfx = document.getElementById('confirm-sfx');
+            const backSfx = document.getElementById('back-sfx');
+
+            if (pointerSfx) pointerSfx.volume = 0.3;
+            if (nameSwapSfx) nameSwapSfx.volume = 0.3;
+            if (confirmSfx) confirmSfx.volume = 0.3;
+            if (backSfx) backSfx.volume = 0.3;
+
+            const lyricOutput = document.getElementById('lyric-output');
+            const lyricCaret = document.getElementById('lyric-caret');
+            const trackName = document.getElementById('track-name');
+
+            function playSound(sound, onComplete) {
+                if (!sound) {
+                    if (typeof onComplete === 'function') onComplete();
+                    return;
+                }
+                try {
+                    sound.currentTime = 0;
+                    const playPromise = sound.play();
+                    if (onComplete && playPromise && typeof playPromise.then === 'function') {
+                        playPromise.then(() => {
+                                sound.addEventListener('ended', onComplete, {
+                                    once: true
+                                });
+                            })
+                            .catch(() => {
+                                if (typeof onComplete === 'function') onComplete();
+                            });
+                    } else if (onComplete) {
+                        sound.addEventListener('ended', onComplete, {
+                            once: true
+                        });
+                    }
+                } catch (err) {
+                    if (typeof onComplete === 'function') onComplete();
+                }
+            }
+
+            function playNameSwap() {
+                playSound(nameSwapSfx);
+            }
+
+            let lyricsPromise = Promise.resolve();
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+            const fallbackLyrics = [{
+                    time: 0,
+                    text: "System initialized"
+                },
+                {
+                    time: 4,
+                    text: "Connecting to the void…"
+                },
+                {
+                    time: 8,
+                    text: "Iceberg drifts in digital blue"
+                },
+                {
+                    time: 13,
+                    text: "Cold light reflections"
+                },
+                {
+                    time: 18,
+                    text: "Synchronizing the deep"
+                }
+            ];
+            let lyrics = fallbackLyrics.slice();
+            let committedLyricLine = '';
+            let trackTitle = '曖昧me - Kirinji';
+
+            trackName.textContent = trackTitle;
+            lyricOutput.textContent = 'Continue from the welcome screen to play · lyrics sync to audio';
+
+            let cancelTyping = null;
+
+            function displayArtistName(raw) {
+                const a = (raw || '').trim();
+                if (!a) return a;
+                if (a === a.toLowerCase()) return a.charAt(0).toUpperCase() + a.slice(1);
+                return a;
+            }
+
+            function formatTrackDisplay(title, artist) {
+                if (!title && !artist) return '';
+                const t = (title || '').trim();
+                const a = displayArtistName(artist);
+                if (t && a) return `${t} by ${a}`;
+                return t || a;
+            }
+
+            function setLyricTyped(full) {
+                if (cancelTyping) {
+                    cancelTyping();
+                    cancelTyping = null;
+                }
+                if (reducedMotion.matches) {
+                    lyricOutput.textContent = full;
+                    if (lyricCaret) lyricCaret.hidden = true;
+                    return;
+                }
+                let i = 0;
+                lyricOutput.textContent = '';
+                if (lyricCaret) lyricCaret.hidden = false;
+                const tid = window.setInterval(() => {
+                    if (i >= full.length) {
+                        window.clearInterval(tid);
+                        if (lyricCaret) lyricCaret.hidden = true;
+                        cancelTyping = null;
+                        return;
+                    }
+                    lyricOutput.textContent += full[i++];
+                }, 28);
+                cancelTyping = () => {
+                    window.clearInterval(tid);
+                    lyricOutput.textContent = full;
+                    if (lyricCaret) lyricCaret.hidden = true;
+                };
+            }
+
+            audio.addEventListener('timeupdate', () => {
+                const time = audio.currentTime;
+                let activeIndex = -1;
+                for (let i = 0; i < lyrics.length; i++) {
+                    if (lyrics[i].time <= time) activeIndex = i;
+                    else break;
+                }
+                const raw = activeIndex >= 0 ? lyrics[activeIndex].text : '';
+                const next = raw.trim() || '♪';
+                if (next !== committedLyricLine) {
+                    committedLyricLine = next;
+                    setLyricTyped(committedLyricLine);
+                }
+            });
+
+            async function dismissSplash() {
+                if (!overlay || overlay.classList.contains('hidden')) return;
+                overlay.classList.add('hidden');
+                overlay.setAttribute('aria-hidden', 'true');
+                audio.volume = 0.35;
+                audio.play().catch((err) => console.warn('Audio play:', err));
+                try {
+                    await lyricsPromise;
+                } catch (_) {}
+            }
+
+            overlay.addEventListener('pointerup', () => dismissSplash(), {
+                passive: true
+            });
+            overlay.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                dismissSplash();
+            }, {
+                passive: false
+            });
+            document.addEventListener('keydown', (e) => {
+                if (overlay.classList.contains('hidden')) return;
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                    e.preventDefault();
+                    dismissSplash();
+                }
+            });
+
+            function directoryBaseHref() {
+                const href = window.location.href.split('#')[0];
+                const u = new URL(href);
+                if (u.protocol === 'file:') {
+                    const clean = href.split('?')[0];
+                    const lastSlash = clean.lastIndexOf('/');
+                    const tail = clean.slice(lastSlash + 1);
+                    if (tail.includes('.')) return clean.slice(0, lastSlash + 1);
+                    return clean.endsWith('/') ? clean : `${clean}/`;
+                }
+                let path = u.pathname;
+                if (!path.endsWith('/')) {
+                    const slash = path.lastIndexOf('/');
+                    const last = path.slice(slash + 1);
+                    if (last.includes('.')) path = path.slice(0, slash + 1);
+                    else path += '/';
+                }
+                return `${u.origin}${path}`;
+            }
+
+            async function loadLyrics() {
+                let text = '';
+                
+                // Directly use the embedded lyrics, completely ignoring any external song.lrc
+                const embedded = document.getElementById('lrc-embedded');
+                if (embedded) text = embedded.textContent.trim();
+
+                if (!text.trim()) {
+                    console.warn('No embedded lyrics found.');
+                    return;
+                }
+
+                try {
+                    const parsed = parseLRC(text);
+                    if (parsed.lines.length) {
+                        lyrics = parsed.lines;
+                        committedLyricLine = '';
+                        const disp = formatTrackDisplay(parsed.title, parsed.artist);
+                        if (disp) {
+                            trackTitle = disp;
+                            trackName.textContent = trackTitle;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Failed to parse LRC:', error);
+                }
+            }
+
+            /**
+             * Parses a given LRC text content into an array of line objects.
+             *
+             * @param {string} content - The LRC text content to parse.
+             * @returns {{ lines: Array<{ time: number, text: string }>, title: string, artist: string }} Parsed LRC data with lines and song metadata.
+             */
+            function parseLRC(content) {
+                const lines = []; // Array to hold parsed LRC lines
+                let title = '',
+                    artist = ''; // Variables to store song title and artist
+
+                content.split(/\r?\n/).forEach((rawLine,
+                index) => { // Split content into lines and iterate over them
+                    const line = rawLine.trim(); // Trim whitespace from the current line
+
+                    if (!line) return; // Skip empty lines
+
+                    const tiMatch = line.match(/^\[ti:\s*(.+?)\]\s*$/i); // Match title line
+                    if (tiMatch) {
+                        title = tiMatch[1].trim(); // Assign matched title to the `title` variable
+                        return;
+                    }
+
+                    const arMatch = line.match(/^\[ar:\s*(.+?)\]\s*$/i); // Match artist line
+                    if (arMatch) {
+                        artist = arMatch[1].trim(); // Assign matched artist to the `artist` variable
+                        return;
+                    }
+
+                    if (/^\[(?:id|al|length|offset|by|re|ver):/i.test(line))
+                return; // Skip metadata lines
+
+                    // This timestamp regex was fiddly to get right —
+                    // "Thank fuck Claude saved my ass" (true story)
+                    const timeRe = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+                    const stampMatches = [...line.matchAll(
+                    timeRe)]; // Find all timestamp matches in the line
+
+                    if (!stampMatches.length) return; // Skip lines without timestamps
+
+                    const text = line.replace(/\[\d{1,2}:\d{2}(?:\.\d{1,3})?\]/g, '')
+                .trim(); // Extract text content from the line, removing timestamps
+                    stampMatches.forEach((match, matchIndex) => { // Iterate over each timestamp match
+                        const minutes = parseInt(match[1],
+                        10); // Convert first group (minutes) to integer
+                        const seconds = parseInt(match[2],
+                        10); // Convert second group (seconds) to integer
+                        let frac = 0;
+                        if (match[3] !== undefined) { // Handle fractional seconds
+                            const f = match[3],
+                                n = parseInt(f, 10);
+                            if (f.length === 3) frac = n /
+                            1000; // Convert three-digit fractional second to decimal
+                            else if (f.length === 2) frac = n /
+                            100; // Convert two-digit fractional second to decimal
+                            else frac = n /
+                            10; // Convert one-digit fractional second to decimal
+                        }
+                        lines.push({
+                            time: minutes * 60 + seconds + frac,
+                            text
+                        }); // Store the line with timestamp in the `lines` array
+                    });
+                });
+
+                lines.sort((a, b) => a.time - b.time); // Sort parsed lines by their timestamps
+
+                return {
+                    lines,
+                    title,
+                    artist
+                }; // Return an object containing the parsed LRC data, including lines, title, and artist
+            }
+
+            lyricsPromise = loadLyrics();
+            // Full ocean/particle background disabled — replaced by a chill
+            // low-poly sea/sky scene (desktop only; mobile just gets the
+            // CSS gradient already set on #constellation-container).
+            try {
+                initGlobe(); // old name was initGlobeOnly — renamed for personality
+            } catch (err) {
+                console.warn('WebGL globe failed:', err);
+            }
+            try {
+                initChillSea(); // renamed: sounds friendlier
+            } catch (err) {
+                console.warn('WebGL background failed:', err);
+            }
+        });
+
+        function initGlobe() {
+            const globeBox = document.getElementById('globe-target');
+            if (!globeBox) return;
+
+            function safeSize(el, fallbackW, fallbackH) {
+                const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
+                const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
+                return { w, h, aspect: w / h };
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            const globeScene = new THREE.Scene();
+            const globeSize = safeSize(globeBox, 400, 400);
+            const globeCam = new THREE.PerspectiveCamera(75, globeSize.aspect, 0.1, 1000);
+            const globeRen = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            globeRen.setPixelRatio(dpr);
+            globeRen.setSize(globeSize.w, globeSize.h);
+            globeBox.appendChild(globeRen.domElement);
+
+            const globe = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(2.5, 3),
+                new THREE.MeshBasicMaterial({ color: 0xffd6e8, wireframe: true, transparent: true, opacity: 0.90 })
+            );
+            globeScene.add(globe);
+            globeCam.position.z = 4.2;
+
+            function animateGlobe() {
+                requestAnimationFrame(animateGlobe);
+                globe.rotation.y += 0.002;
+                globe.rotation.x += 0.001;
+                globeRen.render(globeScene, globeCam);
+            }
+
+            window.addEventListener('resize', () => {
+                const gs2 = safeSize(globeBox, 400, 400);
+                globeCam.aspect = gs2.aspect;
+                globeCam.updateProjectionMatrix();
+                globeRen.setSize(gs2.w, gs2.h);
+            });
+
+            animateGlobe();
+        }
+
+        // ok this bit is my favorite — messy little waves, handcrafted
+        function initChillSea() {
+            const cBox = document.getElementById('constellation-container');
+            if (!cBox || !window.THREE) return;
+
+            function safeSize(el, fallbackW, fallbackH) {
+                const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
+                const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
+                return { w, h, aspect: w / h };
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+            const scene = new THREE.Scene();
+            // Sky handled by the CSS gradient behind the transparent canvas —
+            // fog just softly blends the low-poly sea into it near the horizon.
+            scene.fog = new THREE.Fog(0x6cc9c8, 24, 78);
+
+            const s = safeSize(cBox, window.innerWidth, window.innerHeight);
+            const camera = new THREE.PerspectiveCamera(58, s.aspect, 0.1, 200);
+            // Low, close to the sand — like lying down looking across the beach
+            // toward the water and the bar off to the side.
+            camera.position.set(-3, 0.55, 15);
+            camera.lookAt(7, 0.55, -6);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setPixelRatio(dpr);
+            renderer.setSize(s.w, s.h);
+            cBox.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const sun = new THREE.DirectionalLight(0xffe3d6, 0.5);
+            sun.position.set(-10, 14, 8);
+            scene.add(sun);
+
+            // ── Sand (foreground, low poly, gentle warm tone variation) ──
+            let sandGeo = new THREE.PlaneGeometry(70, 34, 22, 12);
+            sandGeo = sandGeo.toNonIndexed();
+            sandGeo.rotateX(-Math.PI / 2);
+            sandGeo.translate(0, -1.56, 9);
+
+            const sandPos = sandGeo.attributes.position;
+            const sandColors = new Float32Array(sandPos.count * 3);
+            const sandLight = new THREE.Color(0xfbe6ea);
+            const sandShade = new THREE.Color(0xf0c9cf);
+            const sandWet = new THREE.Color(0xd9a3ad);
+            for (let i = 0; i < sandPos.count; i += 3) {
+                const z = sandPos.getZ(i);
+                // Darker, wetter sand near the shoreline (low/negative z), drying out
+                // toward the camera (higher z) — plus a bit of grain from randomness.
+                const wetness = Math.max(0, Math.min(1, 1 - (z + 8) / 20));
+                const grain = Math.random() * 0.5;
+                let c = sandLight.clone().lerp(sandShade, grain);
+                c = c.lerp(sandWet, wetness * 0.55);
+                for (let k = 0; k < 3; k++) {
+                    sandColors[(i + k) * 3] = c.r;
+                    sandColors[(i + k) * 3 + 1] = c.g;
+                    sandColors[(i + k) * 3 + 2] = c.b;
+                }
+            }
+            sandGeo.setAttribute('color', new THREE.BufferAttribute(sandColors, 3));
+            const sandMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, fog: true });
+            const sand = new THREE.Mesh(sandGeo, sandMat);
+            scene.add(sand);
+
+            // Low-poly faceted sea: flat shading gives the "chill low poly" look.
+            let seaGeo = new THREE.PlaneGeometry(100, 70, 34, 24);
+            seaGeo = seaGeo.toNonIndexed();
+            seaGeo.rotateX(-Math.PI / 2);
+            seaGeo.translate(0, 0, -38);
+
+            const seaPos = seaGeo.attributes.position;
+            const seaBase = new Float32Array(seaPos.count * 3);
+            for (let i = 0; i < seaPos.count; i++) {
+                seaBase[i * 3] = seaPos.getX(i);
+                seaBase[i * 3 + 1] = seaPos.getY(i);
+                seaBase[i * 3 + 2] = seaPos.getZ(i);
+            }
+
+            const seaColors = new Float32Array(seaPos.count * 3);
+            const shallow = new THREE.Color(0xaef0e0);
+            const deep = new THREE.Color(0x3f9fb8);
+            seaGeo.setAttribute('color', new THREE.BufferAttribute(seaColors, 3));
+
+            const seaMat = new THREE.MeshLambertMaterial({
+                vertexColors: true,
+                flatShading: true,
+                fog: true
+            });
+            const sea = new THREE.Mesh(seaGeo, seaMat);
+            sea.position.y = -1.5;
+            scene.add(sea);
+
+            // A couple of very simple low-poly "island" silhouettes on the horizon —
+            // static, just gives the scene some depth like the reference photo.
+            const islandMat = new THREE.MeshLambertMaterial({ color: 0x8a95ae, flatShading: true });
+            const island1 = new THREE.Mesh(new THREE.ConeGeometry(3.2, 2.2, 7), islandMat);
+            island1.position.set(-16, -0.6, -46);
+            scene.add(island1);
+            const island2 = new THREE.Mesh(new THREE.ConeGeometry(2, 1.4, 7), islandMat);
+            island2.position.set(-9, -0.9, -48);
+            scene.add(island2);
+
+            // Low-poly sun — echoes the warm accent color used across the site.
+            // fog: false keeps it reading as a bright peach dot instead of
+            // getting washed toward the fog/horizon color at that distance.
+            const sunMesh = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(3, 1),
+                new THREE.MeshBasicMaterial({ color: 0xffcdb0, fog: false })
+            );
+            sunMesh.position.set(45, 11, -50); // Pushed X all the way to 45 to keep it clear of the umbrella
+            scene.add(sunMesh);
+
+            // ── Beach hut / bar (very simple low-poly) — sits on the sand,
+            // off to the side, like the reference photo. ──
+            const hut = new THREE.Group();
+            const postMat = new THREE.MeshLambertMaterial({ color: 0x6b4245, flatShading: true });
+            const woodMat = new THREE.MeshLambertMaterial({ color: 0x9c6560, flatShading: true });
+            const roofMat = new THREE.MeshLambertMaterial({ color: 0xe8a4a8, flatShading: true });
+
+            const counter = new THREE.Mesh(new THREE.BoxGeometry(5, 1.1, 2.2), woodMat);
+            counter.position.y = 0.55;
+            hut.add(counter);
+
+            const postGeo = new THREE.CylinderGeometry(0.09, 0.09, 3.1, 5);
+            const postOffsets = [
+                [-2.3, -0.9], [2.3, -0.9], [-2.3, 0.9], [2.3, 0.9]
+            ];
+            postOffsets.forEach(([px, pz]) => {
+                const post = new THREE.Mesh(postGeo, postMat);
+                post.position.set(px, 1.65, pz);
+                hut.add(post);
+            });
+
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(4.3, 2.1, 8), roofMat);
+            roof.rotation.y = Math.PI / 4;
+            roof.position.y = 4.3;
+            hut.add(roof);
+
+            hut.position.set(11, -1.56, 1);
+            hut.rotation.y = -0.5;
+            scene.add(hut);
+
+            // ── Beach Chairs (Low-Poly Folding Loungers) ──
+            function createBeachChair() {
+                const chair = new THREE.Group();
+                const fabricMat = new THREE.MeshLambertMaterial({ color: 0x1a45b8, flatShading: true }); // Bright blue canvas
+                const frameMat = new THREE.MeshLambertMaterial({ color: 0x9ca3af, flatShading: true });  // Silver/grey frame
+
+                // Seat portion
+                const seat = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 1.8), fabricMat);
+                seat.position.set(0, 0.3, 0);
+                chair.add(seat);
+
+                // Backrest portion (tilted)
+                const back = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 1.3), fabricMat);
+                back.position.set(0, 0.65, -1.4);
+                back.rotation.x = -0.6;
+                chair.add(back);
+
+                // Function to build the U-shaped folding legs
+                function addULeg(zPos) {
+                    const legGrp = new THREE.Group();
+                    const hBar = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.06, 0.06), frameMat);
+                    hBar.position.set(0, 0.03, 0); // rests on the ground
+                    legGrp.add(hBar);
+                    
+                    const vBarL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.27, 0.06), frameMat);
+                    vBarL.position.set(-0.42, 0.165, 0);
+                    legGrp.add(vBarL);
+                    
+                    const vBarR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.27, 0.06), frameMat);
+                    vBarR.position.set(0.42, 0.165, 0);
+                    legGrp.add(vBarR);
+                    
+                    legGrp.position.z = zPos;
+                    chair.add(legGrp);
+                }
+
+                // Front, middle, and back legs
+                addULeg(0.7);
+                addULeg(-0.7);
+                addULeg(-1.7);
+
+                chair.scale.set(0.7, 0.7, 0.7);
+                return chair;
+            }
+
+            // Scatter a few chairs on the sand
+            const chair1 = createBeachChair();
+            chair1.position.set(4, -1.56, 3);
+            chair1.rotation.y = -0.3; // Angled slightly towards the water
+            scene.add(chair1);
+
+            const chair2 = createBeachChair();
+            chair2.position.set(0.5, -1.56, 5.5);
+            chair2.rotation.y = 0.2;
+            scene.add(chair2);
+
+            const chair3 = createBeachChair();
+            chair3.position.set(-2.8, -1.56, 5); // Shifted back and left to avoid wide-angle camera distortion
+            chair3.rotation.y = 0.45;
+            scene.add(chair3);
+
+            // ── Beach Umbrella ──
+            const umbrellaGrp = new THREE.Group();
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 3.5, 6), new THREE.MeshLambertMaterial({color: 0xd1d5db}));
+            pole.position.y = 1.75;
+            umbrellaGrp.add(pole);
+            const canopy = new THREE.Mesh(new THREE.ConeGeometry(2.2, 0.8, 9), new THREE.MeshLambertMaterial({color: 0xff9ec4, flatShading: true})); // Pastel pink canopy
+            canopy.position.y = 3.5;
+            umbrellaGrp.add(canopy);
+            
+            umbrellaGrp.position.set(-1.5, -1.56, 5.5); // Shifted deeper into the scene
+            umbrellaGrp.rotation.z = 0.18; 
+            umbrellaGrp.rotation.x = -0.1;
+            umbrellaGrp.rotation.y = -0.8;
+            scene.add(umbrellaGrp);
+
+            // ── Surfboards ──
+            // Board 1 (Teal)
+            const board1 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.5, 7), new THREE.MeshLambertMaterial({color: 0x8fd8d6, flatShading: true}));
+            board1.scale.z = 0.15; // Flatten the cylinder to make a board shape
+            board1.position.set(8.8, -0.4, 1.8);
+            board1.rotation.set(-0.2, -0.4, 0.1); // Leaning against the hut
+            scene.add(board1);
+
+            // Board 2 (Light Pink)
+            const board2 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.6, 7), new THREE.MeshLambertMaterial({color: 0xffb3cd, flatShading: true}));
+            board2.scale.z = 0.15;
+            board2.position.set(9.4, -0.35, 2.2);
+            board2.rotation.set(-0.25, -0.1, -0.15);
+            scene.add(board2);
+
+            // ── Palm Trees ──
+            function createPalmTree() {
+                const tree = new THREE.Group();
+                const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b, flatShading: true });
+                const leafMatDark = new THREE.MeshLambertMaterial({ color: 0x3f9fb8, flatShading: true }); 
+                const leafMatLight = new THREE.MeshLambertMaterial({ color: 0x6cc9c8, flatShading: true });
+                
+                // Thicker, sturdier trunk to support the voluminous canopy
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.45, 4.5, 6), trunkMat);
+                trunk.position.y = 2.25;
+                tree.add(trunk);
+                
+                // Central "crown" to fill in gaps and add solid core volume
+                const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(0.6, 0), leafMatDark);
+                crown.position.y = 4.3;
+                crown.scale.y = 0.8;
+                tree.add(crown);
+
+                // Function to build a segmented, naturally curving frond with adjustable angles
+                function createFrond(material, scale, outwardSpread, tipDroop) {
+                    const frond = new THREE.Group();
+                    
+                    // Base segment (made wider for more volume)
+                    const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.05, 2.2, 5), material);
+                    seg1.geometry.translate(0, 1.1, 0); 
+                    seg1.geometry.scale(1, 1, 0.35);    // Less intensely flattened
+                    seg1.rotation.x = outwardSpread;              
+                    
+                    // Tip segment
+                    const seg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.0, 0.28, 2.0, 5), material);
+                    seg2.geometry.translate(0, 1.0, 0); 
+                    seg2.geometry.scale(1, 1, 0.35);
+                    seg2.position.y = 2.2;              
+                    seg2.rotation.x = tipDroop;              
+                    
+                    seg1.add(seg2);
+                    frond.add(seg1);
+                    frond.scale.set(scale, scale, scale);
+                    return frond;
+                }
+                
+                // Bottom layer (8 fronds, Dark, sweeping wide and drooping heavy)
+                for(let i = 0; i < 8; i++) {
+                    const frond = createFrond(leafMatDark, 1.3, 1.2, 0.8);
+                    frond.position.y = 4.1;
+                    frond.rotation.y = (i / 8) * Math.PI * 2;
+                    tree.add(frond);
+                }
+
+                // Middle layer (7 fronds, Light, moderate spread)
+                for(let i = 0; i < 7; i++) {
+                    const frond = createFrond(leafMatLight, 1.1, 0.7, 0.5);
+                    frond.position.y = 4.3;
+                    frond.rotation.y = (i / 7) * Math.PI * 2 + 0.3; 
+                    tree.add(frond);
+                }
+                
+                // Top layer (5 fronds, Light, sprouting upwards)
+                for(let i = 0; i < 5; i++) {
+                    const frond = createFrond(leafMatLight, 0.8, 0.3, 0.3);
+                    frond.position.y = 4.6;
+                    frond.rotation.y = (i / 5) * Math.PI * 2 + 0.6; 
+                    tree.add(frond);
+                }
+                
+                // Coconuts (Increased to 4 for a bulkier base)
+                const cocoMat = new THREE.MeshLambertMaterial({ color: 0x5c3a21, flatShading: true });
+                for(let i = 0; i < 4; i++) {
+                    const coco = new THREE.Mesh(new THREE.DodecahedronGeometry(0.28, 0), cocoMat);
+                    coco.position.set(
+                        Math.cos(i * 1.6) * 0.4,
+                        4.1,
+                        Math.sin(i * 1.6) * 0.4
+                    );
+                    tree.add(coco);
+                }
+
+                return tree;
+            }
+
+            const palm1 = createPalmTree();
+            palm1.position.set(13, -1.56, -1);
+            palm1.rotation.z = -0.15; // Slight bend
+            scene.add(palm1);
+
+            const palm2 = createPalmTree();
+            palm2.position.set(-6, -1.56, 5);
+            palm2.rotation.z = 0.2; // Leaning out towards the water
+            palm2.rotation.x = 0.1;
+            scene.add(palm2);
+
+            // ── Ultrawide (21:9) Extra Elements ──
+            const ultrawideGroup = new THREE.Group();
+            ultrawideGroup.visible = false;
+            
+            // Distant Sailboat on the left
+            const boatGrp = new THREE.Group();
+            const hullMat = new THREE.MeshLambertMaterial({color: 0xffffff, flatShading: true});
+            const sailMat = new THREE.MeshLambertMaterial({color: 0xff9ec4, flatShading: true});
+            const hull = new THREE.Mesh(new THREE.BoxGeometry(2, 0.4, 0.8), hullMat);
+            hull.position.y = 0.2;
+            boatGrp.add(hull);
+            const sail = new THREE.Mesh(new THREE.ConeGeometry(0.1, 2.5, 3), sailMat);
+            sail.position.set(0, 1.6, 0);
+            sail.rotation.y = Math.PI / 2;
+            boatGrp.add(sail);
+            boatGrp.position.set(-25, -1.5, -20);
+            boatGrp.rotation.y = 0.5;
+            ultrawideGroup.add(boatGrp);
+
+            // Extra large island far right
+            const island3 = new THREE.Mesh(new THREE.ConeGeometry(5, 3.5, 7), islandMat);
+            island3.position.set(32, -1.0, -35);
+            ultrawideGroup.add(island3);
+
+            // Flock of low-poly birds hovering on the left
+            const birdMat = new THREE.MeshBasicMaterial({color: 0x3f9fb8});
+            for(let i = 0; i < 6; i++) {
+                const bird = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.4, 3), birdMat);
+                bird.rotation.x = Math.PI / 2;
+                bird.rotation.z = Math.PI / 2;
+                bird.position.set(-18 + Math.random() * 6, 9 + Math.random() * 3, -22 + Math.random() * 6);
+                bird.userData = { offset: Math.random() * Math.PI * 2, speed: 0.5 + Math.random() * 0.5 };
+                ultrawideGroup.add(bird);
+            }
+            scene.add(ultrawideGroup);
+
+            const animatedFlames = [];
+            let sceneFireLight = null;
+            let sceneStars = null;
+
+            // ── Campfire ──
+            const campfire = new THREE.Group();
+            
+            // Fire ring stones
+            const stoneMat = new THREE.MeshLambertMaterial({color: 0x8a95ae, flatShading: true});
+            for(let i = 0; i < 9; i++) {
+                const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.15, 0), stoneMat);
+                const angle = (i / 9) * Math.PI * 2;
+                stone.position.set(Math.cos(angle) * 0.5, 0.05, Math.sin(angle) * 0.5);
+                stone.rotation.set(Math.random(), Math.random(), Math.random());
+                campfire.add(stone);
+            }
+            
+            // Low-poly geometric flames
+            const flame1 = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.7, 4), new THREE.MeshLambertMaterial({color: 0xffaa00, flatShading: true}));
+            flame1.position.y = 0.35;
+            campfire.add(flame1);
+            animatedFlames.push({ mesh: flame1, baseScale: 1, speed: 20, offset: 0 });
+            
+            const flame2 = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, 4), new THREE.MeshLambertMaterial({color: 0xff3300, flatShading: true}));
+            flame2.position.set(0.1, 0.25, 0.1);
+            campfire.add(flame2);
+            animatedFlames.push({ mesh: flame2, baseScale: 1, speed: 25, offset: Math.PI });
+
+            // A warm point light to cast an orange glow on the surrounding sand
+            const fireLight = new THREE.PointLight(0xff7700, 0.8, 12);
+            fireLight.position.y = 0.6;
+            campfire.add(fireLight);
+            sceneFireLight = fireLight;
+
+            campfire.position.set(1.5, -1.56, 4.8);
+            scene.add(campfire);
+
+            // ── Right Side Area (Pier, Rocks, Starfish, Extra Palm) ──
+            
+            // Wooden Pier
+            const pier = new THREE.Group();
+            const woodMatDark = new THREE.MeshLambertMaterial({color: 0x5c3a21, flatShading: true});
+            const woodMatLight = new THREE.MeshLambertMaterial({color: 0x8b5a2b, flatShading: true});
+
+            // Replaced solid box with individual planks for a better aesthetic
+            for (let i = 0; i < 24; i++) {
+                const plank = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.1, 0.45), woodMatLight);
+                plank.position.set(0, 0, 2 - i * 0.5);
+                plank.rotation.y = (Math.random() - 0.5) * 0.06;
+                plank.rotation.z = (Math.random() - 0.5) * 0.03;
+                pier.add(plank);
+            }
+
+            // Support beams underneath
+            const beam1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 12), woodMatDark);
+            beam1.position.set(-1.2, -0.15, -3.75);
+            pier.add(beam1);
+            const beam2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 12), woodMatDark);
+            beam2.position.set(1.2, -0.15, -3.75);
+            pier.add(beam2);
+
+            // Pilings for Pier
+            const pileGeo = new THREE.CylinderGeometry(0.12, 0.15, 3, 5);
+            const pilePositions = [
+                [-1.4, -9], [1.4, -9],
+                [-1.4, -5], [1.4, -5],
+                [-1.4, -1], [1.4, -1],
+                [-1.4, 2.5],  [1.4, 2.5]
+            ];
+            pilePositions.forEach(([px, pz]) => {
+                const pile = new THREE.Mesh(pileGeo, woodMatDark);
+                pile.position.set(px, -1.2, pz);
+                pile.rotation.set( (Math.random()-0.5)*0.1, Math.random(), (Math.random()-0.5)*0.1 );
+                pier.add(pile);
+            });
+
+            pier.position.set(22, -1.0, 3);
+            pier.rotation.y = -0.15;
+            scene.add(pier);
+
+            // Scattered Rocks
+            const sceneRockMat = new THREE.MeshLambertMaterial({color: 0x8a95ae, flatShading: true});
+            function addRock(x, z, s) {
+                const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(s, 0), sceneRockMat);
+                rock.position.set(x, -1.56 + s * 0.4, z);
+                rock.rotation.set(Math.random(), Math.random(), Math.random());
+                scene.add(rock);
+            }
+            addRock(16, 5, 0.4);
+            addRock(17, 4.5, 0.25);
+            addRock(23, 7, 0.5);
+            addRock(24.5, 6, 0.3);
+            addRock(28, 4, 0.8);
+
+            // Starfish
+            const starfMat = new THREE.MeshLambertMaterial({color: 0xff9ec4, flatShading: true}); 
+            function addStarfish(x, z, rot) {
+                const star = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.05, 0.06, 5), starfMat);
+                star.position.set(x, -1.53, z);
+                star.rotation.set(0, rot, 0);
+                scene.add(star);
+            }
+            addStarfish(15, 7, 0.4);
+            addStarfish(21.5, 8.5, 1.2);
+            addStarfish(26, 5, 2.0);
+
+            // Extra Palm on the far right
+            const palm3 = createPalmTree();
+            palm3.position.set(24.5, -1.56, 3.5); // Moved further back and right to clear the UI text
+            palm3.rotation.z = -0.15;
+            palm3.rotation.x = 0.1;
+            scene.add(palm3);
+
+            // ── Sky Stars (Points) ──
+            const starsGeo = new THREE.BufferGeometry();
+            const starsCount = 150;
+            const starsPos = new Float32Array(starsCount * 3);
+            for(let i=0; i<starsCount; i++) {
+                starsPos[i*3] = (Math.random() - 0.5) * 120; // x
+                starsPos[i*3+1] = 15 + Math.random() * 40;   // y
+                starsPos[i*3+2] = -40 - Math.random() * 60;  // z
+            }
+            starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+            const skyStarsMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.15, transparent: true, opacity: 0.8, fog: false});
+            const skyStars = new THREE.Points(starsGeo, skyStarsMat);
+            scene.add(skyStars);
+            sceneStars = skyStars;
+
+            function paintSea(t) {
+                const arr = seaPos.array;
+                for (let i = 0; i < seaPos.count; i++) {
+                    const bx = seaBase[i * 3], bz = seaBase[i * 3 + 2];
+                    // Big, slow, non-interactive swells for the chill feel...
+                    const swell = Math.sin(bx * 0.08 + t) * 0.28 + Math.sin(bz * 0.06 - t * 0.45) * 0.20;
+                    // ...plus a much finer, low-amplitude ripple layer just for surface texture.
+                    const ripple = Math.sin(bx * 0.55 + bz * 0.4 + t * 1.6) * 0.035 +
+                        Math.sin(bx * 0.9 - bz * 0.7 + t * 2.1) * 0.02;
+                    arr[i * 3 + 1] = swell + ripple;
+                }
+                seaPos.needsUpdate = true;
+                seaGeo.computeVertexNormals();
+
+                const triCount = seaPos.count / 3;
+                for (let tri = 0; tri < triCount; tri++) {
+                    const i0 = tri * 3, i1 = i0 + 1, i2 = i0 + 2;
+                    const avgY = (arr[i0 * 3 + 1] + arr[i1 * 3 + 1] + arr[i2 * 3 + 1]) / 3;
+                    const h = Math.max(0, Math.min(1, (avgY + 0.4) / 0.8));
+                    // Deterministic per-facet noise (based on base position, not time)
+                    // adds a subtle mottled/glinting texture instead of a flat gradient.
+                    const speck = (Math.sin(seaBase[i0 * 3] * 3.1 + seaBase[i0 * 3 + 2] * 2.3) * 0.5 + 0.5) * 0.12;
+                    const c = shallow.clone().lerp(deep, 1 - h);
+                    c.r = Math.min(1, c.r + speck);
+                    c.g = Math.min(1, c.g + speck * 0.6);
+                    c.b = Math.min(1, c.b + speck * 0.75);
+                    [i0, i1, i2].forEach((idx) => {
+                        seaColors[idx * 3] = c.r;
+                        seaColors[idx * 3 + 1] = c.g;
+                        seaColors[idx * 3 + 2] = c.b;
+                    });
+                }
+                seaGeo.attributes.color.needsUpdate = true;
+            }
+
+            let t = 0;
+            let running = true;
+            function animate() {
+                if (!running) return;
+                requestAnimationFrame(animate);
+                t += 0.0028;
+                paintSea(t);
+                sunMesh.rotation.y += 0.001;
+
+                // Animate Campfire Flames
+                animatedFlames.forEach(f => {
+                    const flicker = Math.sin(t * f.speed + f.offset);
+                    const scaleY = f.baseScale + Math.max(0, flicker * 0.4);
+                    const scaleXZ = f.baseScale + flicker * 0.1;
+                    f.mesh.scale.set(scaleXZ, scaleY, scaleXZ);
+                    f.mesh.rotation.y = t * 6;
+                });
+                
+                // Flicker Campfire Light
+                if (sceneFireLight) {
+                    sceneFireLight.intensity = 0.8 + Math.sin(t * 50) * 0.1 + Math.random() * 0.05;
+                }
+
+                // Slow rotation for the stars in the sky
+                if (sceneStars) {
+                    sceneStars.rotation.y = t * 0.03;
+                }
+
+                // Animate ultrawide elements if visible
+                if (ultrawideGroup.visible) {
+                    boatGrp.position.y = -1.5 + Math.sin(t * 1.5) * 0.15;
+                    boatGrp.rotation.z = Math.sin(t * 1.2) * 0.05;
+                    boatGrp.position.x = -25 + Math.sin(t * 0.2) * 2; // slow drift
+                    
+                    ultrawideGroup.children.forEach(child => {
+                        if (child.userData.speed) { // Birds flapping effect
+                            child.position.y += Math.sin(t * child.userData.speed * 5 + child.userData.offset) * 0.01;
+                        }
+                    });
+                }
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            function layout() {
+                const s2 = safeSize(cBox, window.innerWidth, window.innerHeight);
+                camera.aspect = s2.aspect;
+                
+                // Fixed FOV to avoid distorted "zoom" effect
+                camera.fov = 60;
+                
+                // Adaptive framing for Mobile, Desktop, and 21:9 Ultrawide
+                if (s2.aspect < 1.0) { 
+                    // Mobile portrait / tall screens: move camera back and up
+                    camera.position.set(-0.5, 1.8, 22); 
+                    ultrawideGroup.visible = false;
+                } else if (s2.aspect > 2.2) { 
+                    // Ultrawide: shift left and slightly forward
+                    camera.position.set(-5.5, 0.55, 13);
+                    ultrawideGroup.visible = true; // Reveal sailboat and extra elements!
+                } else { 
+                    // Standard desktop / Tablet landscape
+                    camera.position.set(-3, 0.55, 15);
+                    ultrawideGroup.visible = false;
+                }
+                
+                camera.updateProjectionMatrix();
+                renderer.setSize(s2.w, s2.h);
+            }
+            window.addEventListener('resize', layout);
+            layout(); // Trigger instantly to set correct initial framing
+        }
+
+        function initBackgrounds() {
+            function safeSize(el, fallbackW, fallbackH) {
+                const w = Math.max(1, el.offsetWidth || el.clientWidth || fallbackW || 1);
+                const h = Math.max(1, el.offsetHeight || el.clientHeight || fallbackH || 1);
+                return {
+                    w,
+                    h,
+                    aspect: w / h
+                };
+            }
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            // Globe
+            const globeBox = document.getElementById('globe-target');
+            const gScene = new THREE.Scene();
+            const gs = safeSize(globeBox, 400, 400);
+            const gCam = new THREE.PerspectiveCamera(75, gs.aspect, 0.1, 1000);
+            const gRen = new THREE.WebGLRenderer({
+                alpha: true,
+                antialias: true
+            });
+            gRen.setPixelRatio(dpr);
+            gRen.setSize(gs.w, gs.h);
+            globeBox.appendChild(gRen.domElement);
+
+            const globe = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(2.5, 3),
+                new THREE.MeshBasicMaterial({
+                    color: 0xffd6e8,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.90
+                })
+            );
+            gScene.add(globe);
+            gCam.position.z = 4.2;
+
+            // Background terrain
+            const cBox = document.getElementById('constellation-container');
+            const cScene = new THREE.Scene();
+            cScene.fog = new THREE.Fog(0x170d06, 30, 110);
+
+            const dirLight1 = new THREE.DirectionalLight(0xff9a4d, 1.2);
+            dirLight1.position.set(20, 30, 10);
+            cScene.add(dirLight1);
+            const dirLight2 = new THREE.DirectionalLight(0x8a4a1a, 0.7);
+            dirLight2.position.set(-15, 20, -8);
+            cScene.add(dirLight2);
+            const dirLight3 = new THREE.DirectionalLight(0x2a1608, 0.4);
+            dirLight3.position.set(0, -10, 5);
+            cScene.add(dirLight3);
+            cScene.add(new THREE.AmbientLight(0x1f1006, 0.6));
+
+            const cs = safeSize(cBox, window.innerWidth, window.innerHeight);
+            const cCam = new THREE.PerspectiveCamera(60, cs.aspect, 0.1, 400);
+            cCam.position.set(20, 24, 28);
+            cCam.lookAt(0, 6, 0);
+
+            const cRen = new THREE.WebGLRenderer({
+                alpha: false,
+                antialias: true,
+                powerPreference: 'high-performance'
+            });
+            cRen.setPixelRatio(dpr);
+            cRen.setSize(cs.w, cs.h);
+            cRen.setClearColor(0x170d06, 1);
+            cRen.shadowMap.enabled = true;
+            cRen.shadowMap.type = THREE.PCFSoftShadowMap;
+            cBox.appendChild(cRen.domElement);
+
+            let planeGeo = new THREE.PlaneGeometry(250, 250, 120, 120);
+            planeGeo = planeGeo.toNonIndexed();
+            planeGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+
+            const posAttr = planeGeo.attributes.position;
+            const vCount = posAttr.count;
+            const base = new Float32Array(vCount * 3);
+            for (let i = 0; i < vCount; i++) {
+                base[i * 3] = posAttr.getX(i);
+                base[i * 3 + 1] = posAttr.getY(i);
+                base[i * 3 + 2] = posAttr.getZ(i);
+            }
+
+            const colorArr = new Float32Array(vCount * 3);
+            const colorAttr = new THREE.BufferAttribute(colorArr, 3);
+            planeGeo.setAttribute('color', colorAttr);
+
+            const planeMat = new THREE.MeshLambertMaterial({
+                vertexColors: true,
+                fog: true,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.97
+            });
+            const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+            planeMesh.castShadow = planeMesh.receiveShadow = true;
+            cScene.add(planeMesh);
+
+            const wireMat = new THREE.MeshBasicMaterial({
+                color: 0x4a2a12,
+                wireframe: true,
+                fog: true,
+                transparent: true,
+                opacity: 0.06
+            });
+            const wireMesh = new THREE.Mesh(planeGeo, wireMat);
+            wireMesh.position.y = 0.1;
+            cScene.add(wireMesh);
+
+            const floatingElements = [];
+            const orbitalRings = [{
+                    radius: 22,
+                    speed: 0.00045,
+                    height: 2.4,
+                    elementCount: 6
+                },
+                {
+                    radius: 35,
+                    speed: 0.00032,
+                    height: 3.2,
+                    elementCount: 8
+                },
+                {
+                    radius: 50,
+                    speed: 0.00021,
+                    height: 2.0,
+                    elementCount: 6
+                },
+            ];
+
+            const d20Material = new THREE.MeshStandardMaterial({
+                color: 0xffb066,
+                emissive: 0x7a3d10,
+                roughness: 0.22,
+                metalness: 0.28,
+                flatShading: true,
+                transparent: true,
+                opacity: 0.88,
+            });
+            const d20EdgeMaterial = new THREE.LineBasicMaterial({
+                color: 0xffe0b3,
+                transparent: true,
+                opacity: 0.45
+            });
+
+            orbitalRings.forEach((ring) => {
+                for (let i = 0; i < ring.elementCount; i++) {
+                    const size = 0.28 + Math.random() * 0.10;
+                    const geometry = new THREE.IcosahedronGeometry(size, 1);
+                    const mesh = new THREE.Mesh(geometry, d20Material);
+                    const edgeLines = new THREE.LineSegments(new THREE.EdgesGeometry(geometry),
+                    d20EdgeMaterial);
+                    mesh.add(edgeLines);
+                    const angleOffset = (i / ring.elementCount) * Math.PI * 2;
+                    mesh.position.set(Math.cos(angleOffset) * ring.radius, ring.height, Math.sin(angleOffset) *
+                        ring.radius);
+                    mesh.userData = {
+                        ringRadius: ring.radius,
+                        ringSpeed: ring.speed,
+                        baseAngle: angleOffset,
+                        baseY: ring.height,
+                        seaFloat: true,
+                        seaOffset: 1.6 + Math.random() * 0.5,
+                        bobSpeed: 0.004 + Math.random() * 0.004,
+                        bobOffset: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.007,
+                        swayPhase: Math.random() * Math.PI * 2,
+                    };
+                    floatingElements.push(mesh);
+                    cScene.add(mesh);
+                }
+            });
+
+            const innerClusterCount = 4;
+            for (let i = 0; i < innerClusterCount; i++) {
+                const size = 0.24 + Math.random() * 0.08;
+                const geo = new THREE.IcosahedronGeometry(size, 1);
+                const mesh = new THREE.Mesh(geo, d20Material);
+                const angle = (i / innerClusterCount) * Math.PI * 2;
+                const radius = 12 + Math.sin(i * 0.9) * 1.8;
+                mesh.position.set(Math.cos(angle) * radius, 5.2 + Math.sin(angle * 1.3) * 0.7, Math.sin(angle) *
+                radius);
+                mesh.rotation.set(Math.random() * 0.5, Math.random() * Math.PI, Math.random() * 0.5);
+                mesh.userData = {
+                    ringRadius: radius,
+                    ringSpeed: 0.00028 + Math.random() * 0.00016,
+                    baseAngle: angle + Math.random() * 0.12,
+                    baseY: mesh.position.y,
+                    seaFloat: true,
+                    seaOffset: 1.3 + Math.random() * 0.5,
+                    bobSpeed: 0.004 + Math.random() * 0.003,
+                    bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.008,
+                    swayPhase: Math.random() * Math.PI * 2,
+                    menuOrbit: false,
+                };
+                floatingElements.push(mesh);
+                cScene.add(mesh);
+            }
+
+            const outerClusterCount = 6;
+            for (let i = 0; i < outerClusterCount; i++) {
+                const size = 0.18 + Math.random() * 0.06;
+                const geo = new THREE.BoxGeometry(size, size, size);
+                const mesh = new THREE.Mesh(geo, d20Material);
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 62 + Math.random() * 18;
+                mesh.position.set(Math.cos(angle) * radius, 4.2 + Math.random() * 2.0, Math.sin(angle) * radius);
+                mesh.rotation.set(Math.random() * 0.6, Math.random() * Math.PI, Math.random() * 0.6);
+                mesh.userData = {
+                    scattered: true,
+                    radius,
+                    baseAngle: angle,
+                    baseY: mesh.position.y,
+                    seaFloat: true,
+                    seaOffset: 1.4 + Math.random() * 0.5,
+                    speed: 0.00012 + Math.random() * 0.0001,
+                    bobSpeed: 0.003 + Math.random() * 0.003,
+                    bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.006,
+                };
+                floatingElements.push(mesh);
+                cScene.add(mesh);
+            }
+
+            const roundParticles = [];
+            const roundMat = new THREE.MeshBasicMaterial({
+                color: 0xfff0dd,
+                transparent: true,
+                opacity: 0.82
+            });
+            for (let i = 0; i < 16; i++) {
+                const mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.06 + Math.random() * 0.06, 10, 10),
+                    roundMat
+                );
+                mesh.position.set(
+                    (Math.random() - 0.5) * 90,
+                    3.2 + Math.random() * 6.4,
+                    (Math.random() - 0.5) * 90
+                );
+                mesh.userData = {
+                    driftX: Math.random() * 0.002 - 0.001,
+                    driftZ: Math.random() * 0.002 - 0.001,
+                    bobSpeed: 0.003 + Math.random() * 0.003,
+                    bobOffset: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.006,
+                    baseY: mesh.position.y,
+                    seaFloat: true,
+                    seaOffset: 1.2 + Math.random() * 0.6,
+                };
+                roundParticles.push(mesh);
+                floatingElements.push(mesh);
+                cScene.add(mesh);
+            }
+
+            const particleCount = 300;
+            const particleGeo = new THREE.BufferGeometry();
+            const pPos = new Float32Array(particleCount * 3);
+            const pCol = new Float32Array(particleCount * 3);
+            const pColor = new THREE.Color(0xff8c3a);
+            for (let i = 0; i < particleCount; i++) {
+                pPos[i * 3] = (Math.random() - 0.5) * 250;
+                pPos[i * 3 + 1] = Math.random() * 50;
+                pPos[i * 3 + 2] = (Math.random() - 0.5) * 250;
+                pCol[i * 3] = pColor.r;
+                pCol[i * 3 + 1] = pColor.g;
+                pCol[i * 3 + 2] = pColor.b;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+            particleGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
+            const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({
+                size: 0.5,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                fog: true
+            }));
+            cScene.add(particles);
+
+            let mouseX = 0,
+                mouseY = 0,
+                smoothMX = 0,
+                smoothMY = 0,
+                mouseInfluence = 0;
+
+            function handleMouseMove(clientX, clientY) {
+                mouseX = (clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(clientY / window.innerHeight) * 2 + 1;
+                mouseInfluence = 1;
+            }
+            cBox.addEventListener('mousemove', (e) => handleMouseMove(e.clientX, e.clientY));
+            cBox.addEventListener('touchmove', (e) => {
+                if (e.touches[0]) handleMouseMove(e.touches[0].clientX, e.touches[0].clientY);
+            }, {
+                passive: true
+            });
+            cBox.addEventListener('mouseleave', () => {
+                mouseInfluence = 0;
+            });
+
+            function sampleSurf(x, z, t) {
+                let y = 0;
+                y += Math.sin(x * 0.10 - t * 0.30) * 1.5;
+                y += Math.sin(x * 0.07 - t * 0.22 + z * 0.02) * 0.8;
+                y += Math.sin(x * 0.18 - z * 0.06 - t * 0.40) * 0.35;
+                y += Math.sin(x * 0.04 - t * 0.12) * 0.5;
+                y += Math.sin(z * 0.09 + t * 0.08) * 0.2;
+                const dx = x - smoothMX * 20,
+                    dz = z - smoothMY * 20;
+                y += Math.exp(-Math.sqrt(dx * dx + dz * dz) * 0.015) * mouseInfluence * 1.5;
+                return y * 2.2;
+            }
+
+            let tField = 0;
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                globe.rotation.y += 0.002;
+                globe.rotation.x += 0.001;
+                gRen.render(gScene, gCam);
+
+                tField += 0.004;
+                smoothMX += (mouseX - smoothMX) * 0.05;
+                smoothMY += (mouseY - smoothMY) * 0.05;
+                mouseInfluence *= 0.98;
+
+                const arr = posAttr.array;
+                for (let i = 0; i < vCount; i++) {
+                    arr[i * 3 + 1] = sampleSurf(base[i * 3], base[i * 3 + 2], tField);
+                }
+                posAttr.needsUpdate = true;
+
+                const triCount = vCount / 3;
+                for (let t = 0; t < triCount; t++) {
+                    const i0 = t * 3,
+                        i1 = i0 + 1,
+                        i2 = i0 + 2;
+                    const y0 = arr[i0 * 3 + 1],
+                        y1 = arr[i1 * 3 + 1],
+                        y2 = arr[i2 * 3 + 1];
+                    const fy = (y0 + y1 + y2) / 3;
+                    const h = Math.max(0, Math.min(1, (fy + 4.0) / 8.0));
+                    const slope = Math.min(1, Math.max(Math.abs(y0 - y1), Math.abs(y1 - y2), Math.abs(y0 - y2)) / 2.5);
+                    const highlight = (fy > 1.8 && slope > 1.2) ? 0.12 : 0.0;
+                    const r = 0.010 + h * 0.035 + slope * 0.045 + highlight * 0.6;
+                    const g = 0.015 + h * 0.045 + slope * 0.060 + highlight * 0.7;
+                    const b = 0.090 + h * 0.150 + slope * 0.250 + highlight * 1.0;
+                    colorArr[i0 * 3] = r;
+                    colorArr[i0 * 3 + 1] = g;
+                    colorArr[i0 * 3 + 2] = b;
+                    colorArr[i1 * 3] = r;
+                    colorArr[i1 * 3 + 1] = g;
+                    colorArr[i1 * 3 + 2] = b;
+                    colorArr[i2 * 3] = r;
+                    colorArr[i2 * 3 + 1] = g;
+                    colorArr[i2 * 3 + 2] = b;
+                }
+                colorAttr.needsUpdate = true;
+
+                floatingElements.forEach((el) => {
+                    const d = el.userData;
+                    if (d.scattered) {
+                        const angle = d.baseAngle + tField * d.speed;
+                        el.position.x = Math.cos(angle) * d.radius + Math.sin(tField * 0.12 + d.bobOffset) *
+                        0.8;
+                        el.position.z = Math.sin(angle) * d.radius + Math.cos(tField * 0.11 + d.bobOffset) *
+                        0.8;
+                        el.position.y = d.seaFloat ?
+                            sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d
+                                .bobSpeed + d.bobOffset) * 0.3 :
+                            d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9;
+                    } else if (d.ringRadius !== undefined) {
+                        const baseSpeed = d.menuOrbit ? d.ringSpeed * 0.8 : d.ringSpeed;
+                        const angle = d.baseAngle + tField * baseSpeed;
+                        el.position.x = Math.cos(angle) * d.ringRadius;
+                        el.position.z = Math.sin(angle) * d.ringRadius;
+                        if (d.menuOrbit) {
+                            el.position.x += Math.sin(tField * 0.18 + d.swayPhase) * 1.3;
+                            el.position.z += Math.cos(tField * 0.14 + d.swayPhase) * 1.3;
+                        }
+                        el.position.y = d.seaFloat ?
+                            sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d
+                                .bobSpeed + d.bobOffset) * 0.28 :
+                            d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.9 + (d.menuOrbit ? Math
+                                .cos(tField * 0.16 + d.swayPhase) * 0.45 : 0);
+                    } else {
+                        el.position.x += d.driftX;
+                        el.position.z += d.driftZ;
+                        el.position.y = d.seaFloat ?
+                            sampleSurf(el.position.x, el.position.z, tField) + d.seaOffset + Math.sin(tField * d
+                                .bobSpeed + d.bobOffset) * 0.3 :
+                            d.baseY + Math.sin(tField * d.bobSpeed + d.bobOffset) * 0.8;
+                    }
+                    el.rotation.x += d.rotSpeed;
+                    el.rotation.y += d.rotSpeed * 0.7;
+                    el.rotation.z += d.rotSpeed * 0.5;
+                });
+
+                const particlePos = particles.geometry.attributes.position.array;
+                for (let i = 0; i < particleCount; i++) {
+                    particlePos[i * 3 + 1] += Math.sin(tField * 0.5 + i * 0.1) * 0.01;
+                    if (particlePos[i * 3 + 1] > 60) particlePos[i * 3 + 1] = 0;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+
+                cCam.position.x = smoothMX * 4;
+                cCam.position.z = smoothMY * 4;
+                cCam.position.y = 24 + Math.sin(tField * 0.18) * 1.5;
+                cCam.lookAt(smoothMX * 2, 6, smoothMY * 2);
+
+                wireMat.opacity = 0.04 + Math.sin(tField * 0.5) * 0.02;
+                dirLight1.intensity = 1.2 + Math.sin(tField * 0.4) * 0.25;
+                dirLight2.intensity = 0.7 + Math.cos(tField * 0.6) * 0.15;
+                dirLight3.intensity = 0.4 + Math.sin(tField * 0.3 + 1.2) * 0.10;
+
+                cRen.render(cScene, cCam);
+            }
+
+            function layoutBgCanvas() {
+                const s = safeSize(cBox, window.innerWidth, window.innerHeight);
+                cCam.aspect = s.aspect;
+                // On ultrawide the default 60° FOV exposes too much empty terrain.
+                // Increase FOV as the screen gets wider so the wave surface stays filled.
+                // 16:9 ≈ 1.78 → 60°  |  21:9 ≈ 2.33 → ~68°  |  capped at 75°
+                const baseAspect = 16 / 9;
+                cCam.fov = s.aspect > baseAspect
+                    ? Math.min(75, 60 + (s.aspect - baseAspect) * 14)
+                    : 60;
+                cCam.updateProjectionMatrix();
+                cRen.setSize(s.w, s.h);
+            }
+
+            window.addEventListener('resize', () => {
+                layoutBgCanvas();
+                const gs2 = safeSize(globeBox, 400, 400);
+                gCam.aspect = gs2.aspect;
+                gCam.updateProjectionMatrix();
+                gRen.setSize(gs2.w, gs2.h);
+            });
+
+            if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(() => layoutBgCanvas()).observe(cBox);
+            }
+            requestAnimationFrame(() => layoutBgCanvas());
+
+            animate();
+        }
+    </script>
+</body>
+
+</html>
