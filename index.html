@@ -33,6 +33,12 @@
       --fs-lyric: clamp(0.42rem, 0.8vw, 0.5rem);
       --lyrics-line-h: 19px;
 
+      /* entry gate is the one exception to the small ambient type elsewhere —
+         it's a one-time readable moment, and the only place the 12px
+         accessibility floor is enforced */
+      --fs-entry-title: clamp(0.9rem, 1.7vw, 1.05rem);
+      --fs-entry-body: clamp(0.78rem, 1.05vw, 0.88rem);
+
       /* motion — fast typewriter reveal, Ultrakill-style punch */
       --type-erase-ms: 10ms;
       --type-write-ms: 22ms;
@@ -157,6 +163,25 @@
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
     }
 
+    /* Each typed/erased character fades rather than snapping in at full
+       opacity — softer to the eye while keeping the fast cadence. The
+       steps() timing (not a continuous ease) gives it a slightly
+       granular, dithered quality instead of a fully smooth fade. */
+    .name-char {
+      display: inline-block;
+      opacity: 0;
+    }
+
+    .name-char.in {
+      opacity: 1;
+      transition: opacity 90ms steps(3, jump-none);
+    }
+
+    .name-char.out {
+      opacity: 0;
+      transition: opacity 70ms steps(3, jump-none);
+    }
+
     .type-caret {
       display: inline-block;
       width: 2px;
@@ -176,8 +201,9 @@
       50%, 100% { opacity: 0; }
     }
 
-    /* category flips instantly once the name finishes typing, with a quick
-       punchy flicker rather than a smooth fade — matches the fast/blunt feel */
+    /* category flips once the name finishes typing — softened from a hard
+       binary blink to a single gentle dip, still lightly stepped rather
+       than a fully continuous fade */
     .member-category {
       margin-bottom: 5px;
       font-family: var(--font-mono);
@@ -190,14 +216,13 @@
     }
 
     .member-category.flicker {
-      animation: category-flicker 160ms steps(2, jump-none);
+      animation: category-flicker 240ms steps(4, jump-none);
     }
 
     @keyframes category-flicker {
       0%   { opacity: 1; }
-      25%  { opacity: 0.15; }
-      50%  { opacity: 1; }
-      75%  { opacity: 0.15; }
+      30%  { opacity: 0.4; }
+      60%  { opacity: 1; }
       100% { opacity: 1; }
     }
 
@@ -284,6 +309,10 @@
       }
       .member-category.flicker {
         animation: none;
+      }
+      .name-char {
+        transition: none;
+        opacity: 1;
       }
       .member-hint,
       .carousel-button {
@@ -420,19 +449,19 @@
     }
 
     .entry-panel {
-      max-width: 22rem;
+      max-width: 27rem;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 14px;
+      gap: 18px;
     }
 
     .entry-title {
       font-family: var(--font-display);
-      font-size: clamp(0.72rem, 1.8vw, 0.92rem);
-      letter-spacing: 0.04em;
+      font-size: var(--fs-entry-title);
+      letter-spacing: 0.03em;
       user-select: none;
       opacity: 0;
       transform: translateY(16px);
@@ -448,8 +477,8 @@
 
     .entry-body {
       font-family: var(--font-mono);
-      font-size: var(--fs-subtitle);
-      line-height: 1.7;
+      font-size: var(--fs-entry-body);
+      line-height: 1.8;
       color: var(--muted);
       opacity: 0;
       animation: entry-body-in 560ms var(--ease-smooth) forwards;
@@ -461,7 +490,7 @@
     }
 
     .entry-body p + p {
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     .entry-hint {
@@ -544,6 +573,19 @@
     <source src="bg.mp3" type="audio/mpeg">
   </audio>
 
+  <audio id="pointer-sfx" preload="auto">
+    <source src="assets/audio/pointer.wav" type="audio/wav">
+  </audio>
+  <audio id="nameSwap-sfx" preload="auto">
+    <source src="assets/audio/nameSwap.wav" type="audio/wav">
+  </audio>
+  <audio id="confirm-sfx" preload="auto">
+    <source src="assets/audio/confirm.wav" type="audio/wav">
+  </audio>
+  <audio id="back-sfx" preload="auto">
+    <source src="assets/audio/back.wav" type="audio/wav">
+  </audio>
+
   <div class="lyrics-widget" id="lyrics-widget" aria-hidden="true">
     <div class="lyrics-credit">THE DRAIN — HEALTH</div>
     <div class="lyrics-viewport">
@@ -581,24 +623,62 @@
     const eraseMs = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--type-erase-ms')) || 10;
     const writeMs = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--type-write-ms')) || 22;
 
-    // Erases the current name one character at a time, fastest part of the
-    // sequence — this is the "backspace" half of the Ultrakill-style punch.
+    // SFX — same assets/audio/*.wav files and 0.3 volume as the old site.
+    const pointerSfx = document.getElementById('pointer-sfx');
+    const nameSwapSfx = document.getElementById('nameSwap-sfx');
+    const confirmSfx = document.getElementById('confirm-sfx');
+    [pointerSfx, nameSwapSfx, confirmSfx].forEach((s) => { if (s) s.volume = 0.3; });
+
+    function playSfx(sound) {
+      if (!sound) return;
+      try {
+        sound.currentTime = 0;
+        sound.play().catch(() => {}); // ignore — e.g. file missing, or gate not dismissed yet
+      } catch (err) { /* no-op */ }
+    }
+
+    // Renders a name instantly as fully-visible character spans, no
+    // animation — used for the very first paint and for reduced-motion.
+    function setNameInstant(el, text) {
+      el.innerHTML = '';
+      for (const ch of text) {
+        const span = document.createElement('span');
+        span.className = 'name-char in';
+        span.textContent = ch;
+        el.appendChild(span);
+      }
+    }
+    setNameInstant(nameTextEl, nameTextEl.textContent);
+
+    // Erases the current name one character at a time. Snapshotting the
+    // character list up front (rather than re-querying the DOM each step)
+    // matters: a character marked .out doesn't actually leave the DOM
+    // until its fade finishes, so re-querying would keep re-selecting the
+    // same still-fading character and stall the whole erase at the fade
+    // duration instead of the intended fast interval. Each character
+    // fades out on its own clock, independent of the loop's cadence.
     function eraseText(el, speed) {
       return new Promise((resolve) => {
+        const chars = Array.from(el.querySelectorAll('.name-char'));
+        let i = chars.length - 1;
         function step() {
-          const current = el.textContent;
-          if (current.length === 0) {
+          if (i < 0) {
             resolve();
             return;
           }
-          el.textContent = current.slice(0, -1);
+          const charEl = chars[i];
+          charEl.classList.remove('in');
+          charEl.classList.add('out');
+          setTimeout(() => charEl.remove(), 90);
+          i -= 1;
           setTimeout(step, speed);
         }
         step();
       });
     }
 
-    // Types the new name in one character at a time.
+    // Types the new name in one character at a time, each fading in
+    // rather than snapping to full opacity.
     function typeText(el, text, speed) {
       return new Promise((resolve) => {
         let i = 0;
@@ -607,7 +687,12 @@
             resolve();
             return;
           }
-          el.textContent += text[i];
+          const span = document.createElement('span');
+          span.className = 'name-char';
+          span.textContent = text[i];
+          el.appendChild(span);
+          void span.offsetWidth; // force reflow so the fade-in transition actually runs
+          span.classList.add('in');
           i += 1;
           setTimeout(step, speed);
         }
@@ -623,13 +708,14 @@
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduceMotion) {
-        nameTextEl.textContent = member.display;
+        setNameInstant(nameTextEl, member.display);
         categoryEl.textContent = member.category;
         return;
       }
 
       isAnimating = true;
       caretEl.classList.add('active');
+      playSfx(nameSwapSfx);
 
       await eraseText(nameTextEl, eraseMs);
       await typeText(nameTextEl, member.display, writeMs);
@@ -647,11 +733,20 @@
 
     function goToProfile() {
       const member = members[currentIndex];
+      playSfx(confirmSfx);
       window.location.href = `./${member.path}/index.html`;
     }
 
-    document.getElementById('member-prev').addEventListener('click', () => updateMember(currentIndex - 1));
-    document.getElementById('member-next').addEventListener('click', () => updateMember(currentIndex + 1));
+    const prevBtn = document.getElementById('member-prev');
+    const nextBtn = document.getElementById('member-next');
+
+    prevBtn.addEventListener('click', () => updateMember(currentIndex - 1));
+    nextBtn.addEventListener('click', () => updateMember(currentIndex + 1));
+
+    // Hover cue — matches the old site's pointer.wav-on-mouseenter behavior.
+    [prevBtn, nextBtn, displayEl].forEach((el) => {
+      el.addEventListener('mouseenter', () => playSfx(pointerSfx));
+    });
 
     displayEl.addEventListener('click', goToProfile);
 
@@ -683,7 +778,7 @@
       entryOverlay.classList.add('hidden');
       entryOverlay.setAttribute('aria-hidden', 'true');
       
-      bgm.volume = 0.65;
+      bgm.volume = 0.35;
       bgm.play().catch((err) => {
         console.warn('Background audio did not start:', err.message);
       });
@@ -702,6 +797,21 @@
     });
 
     entryOverlay.focus();
+
+    // Fired on every load, but critically also when the page is restored
+    // from the browser's back/forward cache (event.persisted === true) —
+    // e.g. clicking a member link, then hitting the browser's back button.
+    // The rest of the page (including the already-dismissed entry gate)
+    // comes back exactly as it was, but the video/audio elements are
+    // commonly left paused by the browser on that restore. Without this,
+    // returning via back leaves the background frozen and silent even
+    // though everything visually looks "resumed."
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted && !isEntryActive()) {
+        bgVideo.play().catch(() => {});
+        bgm.play().catch(() => {});
+      }
+    });
 
     // ---- Synced lyrics: THE DRAIN — HEALTH -----------------------------
     // Parsed from an enhanced .lrc with per-word timestamps. Driven by
