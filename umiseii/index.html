@@ -25,6 +25,7 @@
       --muted: rgba(255, 255, 255, 0.8);
       --pop: #f3c2ff;
       --pop2: #b5e2ff;
+      --background-image: url('./assets/images/background.png');
     }
 
     html,
@@ -39,7 +40,7 @@
       color: var(--fg);
       background:
         linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
-        url('./assets/images/background.png') no-repeat center center / cover fixed;
+        var(--background-image) no-repeat center center / cover fixed;
     }
 
     body {
@@ -428,7 +429,7 @@
       padding: 2rem 1.25rem 4rem;
       background:
         linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
-        url('./assets/images/background.png') no-repeat center center / cover fixed;
+        var(--background-image) no-repeat center center / cover fixed;
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -873,6 +874,13 @@
     const musicResume = document.getElementById('music-resume');
     const MUSIC_TIME_KEY = 'umiseii-music-time';
     const MUSIC_PLAYING_KEY = 'umiseii-music-playing';
+
+    if (new Date().getHours() >= 18) {
+      document.documentElement.style.setProperty(
+        '--background-image',
+        "url('./assets/images/background-night.png')"
+      );
+    }
 
     if (bgm) {
       bgm.volume = 0.18;
