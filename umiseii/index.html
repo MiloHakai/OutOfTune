@@ -25,7 +25,10 @@
       --muted: rgba(255, 255, 255, 0.8);
       --pop: #f3c2ff;
       --pop2: #b5e2ff;
-      --background-image: url('./assets/images/background.png');
+      --toggle-color: #1a3a52;
+      --toggle-background: rgba(232, 244, 248, 0.24);
+      --toggle-border: rgba(26, 58, 82, 0.35);
+      --toggle-glow: rgba(74, 123, 167, 0.22);
     }
 
     html,
@@ -37,10 +40,56 @@
     }
 
     body {
+      position: relative;
       color: var(--fg);
+      background: #758ba5;
+    }
+
+    body::before,
+    body::after,
+    .gallery-view::before,
+    .gallery-view::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+
+    body::before,
+    .gallery-view::before {
       background:
         linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
-        var(--background-image) no-repeat center center / cover fixed;
+        url('./assets/images/background-night.png') no-repeat center center / cover fixed;
+      opacity: 0;
+    }
+
+    body::after,
+    .gallery-view::after {
+      background:
+        linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
+        url('./assets/images/background.png') no-repeat center center / cover fixed;
+      opacity: 1;
+    }
+
+    body::before,
+    body::after {
+      z-index: 0;
+    }
+
+    body.night-theme::before,
+    body.night-theme .gallery-view::before {
+      opacity: 1;
+    }
+
+    body.night-theme::after,
+    body.night-theme .gallery-view::after {
+      opacity: 0;
+    }
+
+    body > * {
+      position: relative;
+      z-index: 1;
     }
 
     body {
@@ -52,21 +101,93 @@
       opacity: 1;
     }
 
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 55px;
+      height: 55px;
+      padding: 14px;
+      color: var(--toggle-color);
+      background: var(--toggle-background);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid var(--toggle-border);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 32px var(--toggle-glow);
+    }
+
+    .theme-toggle:hover {
+      color: var(--toggle-color);
+      background: var(--toggle-background);
+      border-color: var(--toggle-color);
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 12px 40px var(--toggle-glow),
+        0 0 30px var(--toggle-glow);
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--pop2);
+      outline-offset: 3px;
+    }
+
+    .theme-icon {
+      font-size: 1.3rem;
+      transition: all 0.3s ease;
+    }
+
+    .sun-icon {
+      display: none;
+    }
+
+    .moon-icon {
+      display: block;
+      filter: drop-shadow(0 0 8px var(--toggle-glow));
+    }
+
+    body.night-theme .sun-icon {
+      display: block;
+    }
+
+    body.night-theme .moon-icon {
+      display: none;
+    }
+
+    body.night-theme {
+      --toggle-color: #b8d4e8;
+      --toggle-background: rgba(26, 58, 82, 0.22);
+      --toggle-border: rgba(184, 212, 232, 0.38);
+      --toggle-glow: rgba(74, 123, 167, 0.3);
+    }
+
 
     .splash {
       position: fixed;
       inset: 0;
-      z-index: 50;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(180deg, #9b90bd 0%, #c4bcdc 55%, #eae6f5 100%);
+      background: linear-gradient(135deg, #0a1628 0%, #1a3a52 52%, #1e4a66 100%);
       cursor: pointer;
-      transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transition:
+        opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+        visibility 0s linear 0.6s;
+    }
+
+    body:not(.night-theme) .splash {
+      background: linear-gradient(135deg, #e8f4f8 0%, #b8d4e8 52%, #6b8caf 100%);
     }
 
     .splash.gone {
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
     }
 
@@ -81,7 +202,8 @@
 
     .splash-name {
       font-size: clamp(1.1rem, 2.8vw, 1.6rem);
-      color: #2c2243;
+      color: var(--fg);
+      text-shadow: 0 2px 8px rgba(20, 14, 35, 0.95);
       opacity: 0;
       transform: translateY(25px);
       animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
@@ -89,10 +211,21 @@
 
     .splash-hint {
       font-size: clamp(0.45rem, 1.2vw, 0.52rem);
-      color: rgba(44, 34, 67, 0.75);
+      color: var(--pop2);
+      text-shadow: 0 1px 5px rgba(20, 14, 35, 0.95);
       opacity: 0;
       letter-spacing: 1px;
       animation: fadeIn 0.8s ease forwards 0.9s;
+    }
+
+    body:not(.night-theme) .splash-name {
+      color: #1a3a52;
+      text-shadow: 0 2px 8px rgba(232, 244, 248, 0.8);
+    }
+
+    body:not(.night-theme) .splash-hint {
+      color: #1a3a52;
+      text-shadow: 0 1px 5px rgba(232, 244, 248, 0.8);
     }
 
     @keyframes slideUp {
@@ -427,9 +560,7 @@
       z-index: 20;
       overflow-y: auto;
       padding: 2rem 1.25rem 4rem;
-      background:
-        linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
-        var(--background-image) no-repeat center center / cover fixed;
+      background: transparent;
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -438,6 +569,14 @@
         opacity 0.32s ease,
         transform 0.32s ease,
         visibility 0s linear 0.32s;
+    }
+
+    .gallery-view::before {
+      z-index: 0;
+    }
+
+    .gallery-view::after {
+      z-index: 0;
     }
 
     .gallery-view.open {
@@ -451,6 +590,8 @@
     }
 
     .gallery-shell {
+      position: relative;
+      z-index: 1;
       width: min(1100px, 100%);
       margin: 0 auto;
     }
@@ -683,6 +824,14 @@
 
 
     @media (max-width: 650px) {
+      body::before,
+      body::after,
+      .gallery-view::before,
+      .gallery-view::after {
+        background-position: 68% center;
+        filter: brightness(0.9);
+      }
+
       .gallery-view {
         padding: 1.5rem 0.8rem 3rem;
       }
@@ -725,6 +874,10 @@
 </head>
 
 <body>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to daytime background" title="Switch to daytime background">
+    <i class="fas fa-sun theme-icon sun-icon" aria-hidden="true"></i>
+    <i class="fas fa-moon theme-icon moon-icon" aria-hidden="true"></i>
+  </button>
   <div id="splash" class="splash">
     <div class="splash-inner">
       <div class="splash-name">Umiseii</div>
@@ -874,13 +1027,20 @@
     const musicResume = document.getElementById('music-resume');
     const MUSIC_TIME_KEY = 'umiseii-music-time';
     const MUSIC_PLAYING_KEY = 'umiseii-music-playing';
+    const themeToggle = document.getElementById('theme-toggle');
+    let isNight = new Date().getHours() >= 18;
 
-    if (new Date().getHours() >= 18) {
-      document.documentElement.style.setProperty(
-        '--background-image',
-        "url('./assets/images/background-night.png')"
-      );
+    function setNightTheme(night) {
+      document.body.classList.toggle('night-theme', night);
+      themeToggle?.setAttribute('aria-label', night ? 'Switch to daytime background' : 'Switch to nighttime background');
+      themeToggle?.setAttribute('title', night ? 'Switch to daytime background' : 'Switch to nighttime background');
     }
+
+    setNightTheme(isNight);
+    themeToggle?.addEventListener('click', () => {
+      isNight = !isNight;
+      setNightTheme(isNight);
+    });
 
     if (bgm) {
       bgm.volume = 0.18;
@@ -1028,7 +1188,8 @@
                 const parts = url.pathname.split('/').filter(Boolean);
                 return decodeURIComponent(parts[parts.length - 1] || '');
               })
-              .filter((name) => extensions.test(name));
+              .filter((name) => extensions.test(name))
+              .filter((name) => !['background.png', 'background-night.png'].includes(name.toLowerCase()));
 
             if (localFiles.length) return localFiles;
           }
@@ -1044,7 +1205,9 @@
           throw new Error('Gallery manifest is not an array');
         }
 
-        return data.filter((name) => extensions.test(name));
+        return data
+          .filter((name) => extensions.test(name))
+          .filter((name) => !['background.png', 'background-night.png'].includes(name.toLowerCase()));
       }
 
       async function loadGallery() {
