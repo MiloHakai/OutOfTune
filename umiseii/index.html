@@ -338,7 +338,7 @@
 
     main {
       position: relative;
-      z-index: 3;
+      z-index: 2;
       min-height: 100%;
       display: flex;
       flex-direction: column;
@@ -417,12 +417,33 @@
       position: fixed;
       bottom: 20px;
       right: 25px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.2rem;
       font-size: 0.5rem;
       color: var(--muted);
       line-height: 1.45;
       letter-spacing: 0.06em;
       text-align: right;
       text-shadow: 0 1px 4px rgba(20, 14, 35, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
+      pointer-events: auto;
+    }
+
+    footer span {
+      display: block;
+    }
+
+    footer a {
+      color: var(--pop2);
+      text-decoration: none;
+      transition: color 0.18s ease;
+    }
+
+    footer a:hover,
+    footer a:focus-visible {
+      color: var(--pop);
     }
 
     .track {
@@ -805,7 +826,7 @@
       p { font-size: 0.68rem; }
 
       .track {
-        bottom: 48px;
+        bottom: 82px;
         left: 50%;
         transform: translateX(-50%);
         align-items: center;
@@ -817,8 +838,11 @@
         left: 50%;
         right: auto;
         transform: translateX(-50%);
+        align-items: center;
         text-align: center;
         font-size: 0.45rem;
+        gap: 0.12rem;
+        line-height: 1.6;
       }
     }
 
@@ -939,8 +963,9 @@
 </section>
 
   <footer>
-    OutOfTune - 2026<br>
-    Umiseii
+    <span>OutOfTune - 2026</span>
+    <span>Umiseii</span>
+    <span>Background art: <a href="https://x.com/Mo_shuka_10" target="_blank" rel="noopener noreferrer">@Mo_Shuka_10</a></span>
   </footer>
 
   <div class="track">
