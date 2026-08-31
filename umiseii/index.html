@@ -46,9 +46,7 @@
     }
 
     body::before,
-    body::after,
-    .gallery-view::before,
-    .gallery-view::after {
+    body::after {
       content: '';
       position: fixed;
       inset: 0;
@@ -56,16 +54,14 @@
       transition: opacity 0.8s ease;
     }
 
-    body::before,
-    .gallery-view::before {
+    body::before {
       background:
         linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
         url('./assets/images/background-night.png') no-repeat center center / cover fixed;
       opacity: 0;
     }
 
-    body::after,
-    .gallery-view::after {
+    body::after {
       background:
         linear-gradient(rgba(20, 14, 35, 0.35), rgba(20, 14, 35, 0.35)),
         url('./assets/images/background.png') no-repeat center center / cover fixed;
@@ -77,13 +73,11 @@
       z-index: 0;
     }
 
-    body.night-theme::before,
-    body.night-theme .gallery-view::before {
+    body.night-theme::before {
       opacity: 1;
     }
 
-    body.night-theme::after,
-    body.night-theme .gallery-view::after {
+    body.night-theme::after {
       opacity: 0;
     }
 
@@ -121,6 +115,13 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 8px 32px var(--toggle-glow);
+    }
+
+    body.gallery-open .theme-toggle {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(0.9);
     }
 
     .theme-toggle:hover {
@@ -580,8 +581,8 @@
       inset: 0;
       z-index: 20;
       overflow-y: auto;
-      padding: 2rem 1.25rem 4rem;
-      background: transparent;
+      padding: 0 1.25rem 4rem;
+      background: rgba(12, 10, 18, 0.92);
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -613,76 +614,170 @@
     .gallery-shell {
       position: relative;
       z-index: 1;
-      width: min(1100px, 100%);
+      width: min(1400px, 100%);
       margin: 0 auto;
     }
 
     .gallery-top {
-      position: relative;
+      position: sticky;
+      top: 0;
+      z-index: 8;
       display: flex;
       align-items: center;
-      justify-content: center;
-      min-height: 2.5rem;
-      margin-bottom: 1.75rem;
+      justify-content: flex-start;
+      padding: 0.85rem 1rem;
+      margin: 0 -1.25rem;
+      background: transparent;
+      pointer-events: none;
     }
 
     .gallery-back {
-      position: absolute;
-      left: 0;
+      pointer-events: auto;
+    }
+
+    .gallery-back {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 1.5rem;
-      height: 1.5rem;
+      gap: 0.45rem;
+      padding: 0.42rem 0.85rem 0.42rem 0.65rem;
       color: var(--pop2);
+      font-size: 0.52rem;
+      letter-spacing: 0.06em;
       text-decoration: none;
-      font-size: 0.85rem;
-      transition: transform 0.18s ease, color 0.18s ease;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 4px 14px rgba(10, 8, 20, 0.3);
+      cursor: pointer;
+      transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+      user-select: none;
     }
 
     .gallery-back:hover {
       color: var(--pop);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.24);
       transform: translateX(-2px);
     }
 
+    .gallery-back:active {
+      transform: translateX(-3px) scale(0.97);
+    }
+
+    .gallery-back .back-arrow {
+      font-size: 0.7rem;
+      line-height: 1;
+    }
+
     .gallery-title {
+      display: none;
       margin: 0;
-      font-size: clamp(1.1rem, 3.5vw, 1.7rem);
-      color: var(--fg);
-      text-shadow: 0 2px 6px rgba(20, 14, 35, 0.95);
+      user-select: none;
+      pointer-events: none;
     }
 
     .gallery-grid {
-      column-count: 2;
-      column-gap: 1.25rem;
+      column-count: 5;
+      column-gap: 1rem;
+      padding-bottom: 2rem;
+    }
+
+    @media (max-width: 1200px) {
+      .gallery-grid { column-count: 4; }
+    }
+
+    @media (max-width: 920px) {
+      .gallery-grid { column-count: 3; }
+    }
+
+    @media (max-width: 700px) {
+      .gallery-grid { column-count: 2; }
+      .gallery-shell { width: min(100%, calc(100vw - 1rem)); }
+    }
+
+    @media (max-width: 480px) {
+      .gallery-grid { column-count: 1; }
+      .gallery-view { padding-left: 0.65rem; padding-right: 0.65rem; }
+      .gallery-top { margin: 0 -0.65rem; }
     }
 
     .gallery-piece {
-      break-inside: avoid;
-      margin: 0 0 1.25rem;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      margin: 0 0 1rem;
       cursor: pointer;
-      opacity: 0.94;
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      border-radius: 14px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s ease;
+      box-shadow: 0 10px 28px rgba(10, 8, 20, 0.28);
+      background: linear-gradient(110deg, rgba(255, 255, 255, 0.035) 8%, rgba(255, 255, 255, 0.09) 18%, rgba(255, 255, 255, 0.035) 33%);
+      background-size: 200% 100%;
+      animation: gallery-shimmer 1.6s linear infinite;
+      break-inside: avoid;
+      -webkit-column-break-inside: avoid;
     }
 
-    .gallery-piece:hover {
+    .gallery-piece.loaded {
+      animation: none;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .gallery-piece.in-view {
       opacity: 1;
-      transform: translateY(-2px);
+      transform: translateY(0);
+    }
+
+    .gallery-piece:hover,
+    .gallery-piece:focus-within {
+      box-shadow: 0 16px 34px rgba(10, 8, 20, 0.48);
+    }
+
+    @keyframes gallery-shimmer {
+      to { background-position-x: -200%; }
     }
 
     .gallery-piece img {
       display: block;
       width: 100%;
       height: auto;
-      border-radius: 2px;
+      object-fit: cover;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+      filter: saturate(0.96);
+    }
+
+    .gallery-piece img.loaded {
+      opacity: 1;
+    }
+
+    .gallery-piece:hover img,
+    .gallery-piece:focus-within img {
+      transform: scale(1.06);
+      filter: saturate(1.05);
     }
 
     .gallery-piece figcaption {
-      margin-top: 0.55rem;
-      color: var(--muted);
-      font-size: 0.48rem;
+      position: absolute;
+      inset: auto 0 0 0;
+      margin: 0;
+      padding: 1.8rem 0.7rem 0.6rem;
+      color: var(--fg);
+      font-size: 0.44rem;
       line-height: 1.6;
-      text-shadow: 0 1px 4px rgba(20, 14, 35, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
+      background: linear-gradient(to top, rgba(10, 8, 20, 0.85), rgba(10, 8, 20, 0));
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .gallery-piece:hover figcaption,
+    .gallery-piece:focus-within figcaption {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .gallery-empty {
@@ -695,6 +790,16 @@
 
     body.viewer-open {
       overflow: hidden;
+    }
+
+    body.gallery-open #home-view,
+    body.gallery-open footer,
+    body.gallery-open .track,
+    body.gallery-open .music-resume,
+    body.gallery-open .edges {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     .gallery-view.viewer-open {
@@ -748,8 +853,8 @@
 
       transform: scale(1);
       transform-origin: center center;
-      transition: transform 0.12s ease-out;
-      will-change: transform;
+      transition: transform 0.12s ease-out, opacity 0.18s ease;
+      will-change: transform, opacity;
 
       box-shadow: 0 8px 35px rgba(20, 14, 35, 0.55);
     }
@@ -781,6 +886,55 @@
     .gallery-viewer-close:hover {
       color: var(--pop);
       transform: scale(1.08);
+    }
+
+    .gallery-viewer-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.6rem;
+      height: 2.6rem;
+      transform: translateY(-50%);
+      color: var(--pop2);
+      background: rgba(20, 14, 35, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+
+    .gallery-viewer-nav:hover {
+      color: var(--pop);
+      background: rgba(20, 14, 35, 0.65);
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .gallery-viewer-prev { left: 1rem; }
+    .gallery-viewer-next { right: 1rem; }
+
+    .gallery-viewer-caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 1.1rem;
+      z-index: 2;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.48rem;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+      pointer-events: none;
+    }
+
+    .gallery-viewer-caption .gallery-viewer-count {
+      display: block;
+      margin-top: 0.35rem;
+      opacity: 0.7;
+      font-size: 0.42rem;
     }
 
     .music-resume {
@@ -861,16 +1015,24 @@
       }
 
       .gallery-grid {
-        column-count: 1;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.8rem;
       }
 
-      .gallery-top {
-        margin-bottom: 1.4rem;
+      .gallery-viewer-nav {
+        width: 2.1rem;
+        height: 2.1rem;
+        font-size: 0.85rem;
       }
 
-      .gallery-back {
-        left: 0.25rem;
+      .gallery-viewer-prev { left: 0.4rem; }
+      .gallery-viewer-next { right: 0.4rem; }
+
+      .gallery-viewer-caption {
+        bottom: 0.7rem;
+        font-size: 0.42rem;
       }
+
 
       .gallery-piece {
         margin-bottom: 1.4rem;
@@ -950,9 +1112,10 @@
   <section class="gallery-view" id="gallery-view" aria-hidden="true">
     <div class="gallery-shell">
       <header class="gallery-top">
-        <a href="#home" class="gallery-back" id="gallery-back" aria-label="Back to Umiseii" title="Back">
-          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-        </a>
+        <button type="button" class="gallery-back" id="gallery-back" aria-label="Back to Umiseii" title="Back">
+          <i class="fa-solid fa-arrow-left back-arrow" aria-hidden="true"></i>
+          Back
+        </button>
         <h2 class="gallery-title">Gallery</h2>
       </header>
 
@@ -1167,7 +1330,17 @@
     <button class="gallery-viewer-close" id="gallery-viewer-close" aria-label="Close artwork">
       <i class="fa-solid fa-xmark" aria-hidden="true"></i>
     </button>
+    <button class="gallery-viewer-nav gallery-viewer-prev" id="gallery-viewer-prev" aria-label="Previous artwork">
+      <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+    </button>
+    <button class="gallery-viewer-nav gallery-viewer-next" id="gallery-viewer-next" aria-label="Next artwork">
+      <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+    </button>
     <img id="gallery-viewer-image" src="" alt="">
+    <div class="gallery-viewer-caption" id="gallery-viewer-caption">
+      <span id="gallery-viewer-caption-text"></span>
+      <span class="gallery-viewer-count" id="gallery-viewer-count"></span>
+    </div>
   </div>
 
   <script>
@@ -1179,48 +1352,87 @@
       const galleryViewer = document.getElementById('gallery-viewer');
       const galleryViewerImage = document.getElementById('gallery-viewer-image');
       const galleryViewerClose = document.getElementById('gallery-viewer-close');
+      const galleryViewerPrev = document.getElementById('gallery-viewer-prev');
+      const galleryViewerNext = document.getElementById('gallery-viewer-next');
+      const galleryViewerCaptionText = document.getElementById('gallery-viewer-caption-text');
+      const galleryViewerCount = document.getElementById('gallery-viewer-count');
 
       let galleryLoaded = false;
+      let galleryItems = [];
+      let currentGalleryIndex = -1;
+
+      function debounce(fn, wait) {
+        let timer = null;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn(...args), wait);
+        };
+      }
+
+      const galleryRevealObserver = 'IntersectionObserver' in window
+        ? new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('in-view');
+                galleryRevealObserver.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' })
+        : null;
+
+      function layoutGalleryItem(figure) {
+        if (!figure) return;
+
+        const image = figure.querySelector('img');
+        if (!image) return;
+
+        image.style.height = 'auto';
+        image.style.width = '100%';
+        figure.style.gridRowEnd = 'auto';
+      }
+
+      function layoutGallery() {
+        if (!galleryGrid) return;
+        galleryGrid.querySelectorAll('.gallery-piece').forEach(layoutGalleryItem);
+      }
+
+      window.addEventListener('resize', debounce(layoutGallery, 150));
 
       function setGalleryOpen(open, pushHistory = true) {
         if (!galleryView) return;
 
         galleryView.classList.toggle('open', open);
         galleryView.setAttribute('aria-hidden', open ? 'false' : 'true');
+        document.body.classList.toggle('gallery-open', open);
         document.body.style.overflow = open ? 'hidden' : '';
 
         if (pushHistory) {
-          history.pushState({ gallery: open }, '', open ? '#gallery' : '#home');
+          if (open) {
+            history.pushState({ gallery: true }, '', '#gallery');
+          } else {
+            history.pushState({ gallery: false }, '', window.location.pathname + window.location.search);
+          }
         }
 
         if (open) {
           loadGallery();
+          requestAnimationFrame(layoutGallery);
+        }
+      }
+
+      function closeGalleryFromUi() {
+        setGalleryOpen(false, false);
+        closeGalleryViewer();
+        document.body.classList.remove('gallery-open');
+        if (window.location.hash === '#gallery') {
+          history.replaceState({ gallery: false }, '', window.location.pathname + window.location.search);
         }
       }
 
       async function getGalleryFiles() {
         const extensions = /\.(png|jpe?g|webp|gif|avif)$/i;
-
-        try {
-          const directoryResponse = await fetch('./assets/images/', { cache: 'no-store' });
-          if (directoryResponse.ok) {
-            const listing = await directoryResponse.text();
-            const parsed = new DOMParser().parseFromString(listing, 'text/html');
-
-            const localFiles = [...parsed.querySelectorAll('a[href]')]
-              .map((link) => {
-                const url = new URL(link.getAttribute('href'), directoryResponse.url);
-                const parts = url.pathname.split('/').filter(Boolean);
-                return decodeURIComponent(parts[parts.length - 1] || '');
-              })
-              .filter((name) => extensions.test(name))
-              .filter((name) => !['background.png', 'background-night.png'].includes(name.toLowerCase()));
-
-            if (localFiles.length) return localFiles;
-          }
-        } catch (_) {}
-
         const manifestResponse = await fetch('./gallery/images.json', { cache: 'no-store' });
+
         if (!manifestResponse.ok) {
           throw new Error(`Gallery manifest returned ${manifestResponse.status}`);
         }
@@ -1249,27 +1461,62 @@
 
           if (galleryEmpty) galleryEmpty.remove();
 
-          files
-            .sort((a, b) => a.localeCompare(b))
-            .forEach((name) => {
-              const figure = document.createElement('figure');
-              figure.className = 'gallery-piece';
+          const sortedNames = files.slice().sort((a, b) => a.localeCompare(b));
 
-              const image = document.createElement('img');
-              image.src = `./assets/images/${encodeURIComponent(name)}`;
-              image.alt = name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
-              image.loading = 'lazy';
+          galleryItems = sortedNames.map((name) => ({
+            name,
+            src: `./assets/images/${encodeURIComponent(name)}`,
+            alt: name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ')
+          }));
 
-              const caption = document.createElement('figcaption');
-              caption.textContent = image.alt;
+          galleryItems.forEach((item, index) => {
+            const figure = document.createElement('figure');
+            figure.className = 'gallery-piece';
+            figure.tabIndex = 0;
+            figure.setAttribute('role', 'button');
+            figure.setAttribute('aria-label', `Open ${item.alt}`);
 
-              figure.append(image, caption);
-              if (galleryGrid) galleryGrid.appendChild(figure);
+            const image = document.createElement('img');
+            image.alt = item.alt;
+            image.loading = 'lazy';
+            image.decoding = 'async';
 
-              image.addEventListener('click', () => {
-                openGalleryViewer(image);
+            const caption = document.createElement('figcaption');
+            caption.textContent = item.alt;
+
+            figure.append(image, caption);
+            if (galleryGrid) galleryGrid.appendChild(figure);
+
+            const markLoaded = () => {
+              image.classList.add('loaded');
+              figure.classList.add('loaded');
+              requestAnimationFrame(() => {
+                layoutGalleryItem(figure);
+                galleryRevealObserver?.observe(figure);
               });
+            };
+
+            if (image.complete && image.naturalWidth) {
+              markLoaded();
+            } else {
+              image.addEventListener('load', markLoaded, { once: true });
+              image.addEventListener('error', () => {
+                figure.classList.add('loaded');
+                figure.style.display = 'none';
+              }, { once: true });
+            }
+
+            image.src = item.src;
+
+            const open = () => openGalleryViewer(index);
+            figure.addEventListener('click', open);
+            figure.addEventListener('keydown', (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                open();
+              }
             });
+          });
 
           galleryLoaded = true;
         } catch (error) {
@@ -1315,18 +1562,66 @@
         }
       }
 
-      function openGalleryViewer(image) {
+      function preloadGalleryNeighbors(index) {
+        [index - 1, index + 1].forEach((i) => {
+          const item = galleryItems[(i + galleryItems.length) % galleryItems.length];
+          if (!item) return;
+          const preloadImg = new Image();
+          preloadImg.src = item.src;
+        });
+      }
+
+      function showGalleryImage(index, animate = false) {
+        if (!galleryViewerImage || !galleryItems.length) return;
+
+        const nextIndex = (index + galleryItems.length) % galleryItems.length;
+        const item = galleryItems[nextIndex];
+
+        const multiple = galleryItems.length > 1;
+        if (galleryViewerPrev) galleryViewerPrev.style.display = multiple ? '' : 'none';
+        if (galleryViewerNext) galleryViewerNext.style.display = multiple ? '' : 'none';
+
+        const doSwap = () => {
+          currentGalleryIndex = nextIndex;
+          galleryViewerImage.src = item.src;
+          galleryViewerImage.alt = item.alt;
+          galleryViewerImage.dataset.panX = '0';
+          galleryViewerImage.dataset.panY = '0';
+          galleryWasDragged = false;
+          setGalleryZoom(1);
+
+          if (galleryViewerCaptionText) galleryViewerCaptionText.textContent = item.alt;
+          if (galleryViewerCount) galleryViewerCount.textContent = `${nextIndex + 1} / ${galleryItems.length}`;
+
+          if (animate) {
+            galleryViewerImage.style.opacity = '1';
+          }
+
+          preloadGalleryNeighbors(nextIndex);
+        };
+
+        if (animate && currentGalleryIndex >= 0) {
+          galleryViewerImage.style.opacity = '0';
+          setTimeout(doSwap, 180);
+        } else {
+          doSwap();
+        }
+      }
+
+      function showNextGalleryImage() {
+        if (currentGalleryIndex < 0) return;
+        showGalleryImage(currentGalleryIndex + 1, true);
+      }
+
+      function showPrevGalleryImage() {
+        if (currentGalleryIndex < 0) return;
+        showGalleryImage(currentGalleryIndex - 1, true);
+      }
+
+      function openGalleryViewer(index) {
         if (!galleryViewer || !galleryViewerImage) return;
 
-        const source = image?.currentSrc || image?.src || '';
-        if (!source) return;
-
-        galleryViewerImage.src = source;
-        galleryViewerImage.alt = image.alt || '';
-        galleryViewerImage.dataset.panX = '0';
-        galleryViewerImage.dataset.panY = '0';
-        galleryWasDragged = false;
-        setGalleryZoom(1);
+        showGalleryImage(index);
 
         galleryViewer.classList.add('open');
         galleryViewer.setAttribute('aria-hidden', 'false');
@@ -1345,6 +1640,7 @@
         galleryViewerImage.dataset.panY = '0';
         galleryWasDragged = false;
         galleryPanState = null;
+        currentGalleryIndex = -1;
         setGalleryZoom(1);
 
         galleryView?.classList.remove('viewer-open');
@@ -1358,8 +1654,15 @@
 
       galleryBack?.addEventListener('click', (event) => {
         event.preventDefault();
-        setGalleryOpen(false, true);
-        closeGalleryViewer();
+        event.stopPropagation();
+        // Use history.back() if gallery was opened via navigation (hash is #gallery),
+        // so the popstate handler closes it and the browser history stays consistent.
+        // Fall back to manual close if there's no history entry to pop.
+        if (window.location.hash === '#gallery') {
+          history.back();
+        } else {
+          closeGalleryFromUi();
+        }
       });
 
       galleryViewerClose?.addEventListener('click', (event) => {
@@ -1438,16 +1741,64 @@
         setGalleryZoom(current + delta);
       }, { passive: false });
 
+      galleryViewerPrev?.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        showPrevGalleryImage();
+      });
+
+      galleryViewerNext?.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        showNextGalleryImage();
+      });
+
       window.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && galleryViewer?.classList.contains('open')) {
+        if (!galleryViewer?.classList.contains('open')) return;
+
+        if (event.key === 'Escape') {
           closeGalleryViewer();
+        } else if (event.key === 'ArrowRight') {
+          showNextGalleryImage();
+        } else if (event.key === 'ArrowLeft') {
+          showPrevGalleryImage();
+        }
+      });
+
+      let gallerySwipeStartX = null;
+      let gallerySwipeStartY = null;
+
+      galleryViewer?.addEventListener('touchstart', (event) => {
+        if (event.touches.length !== 1) return;
+        gallerySwipeStartX = event.touches[0].clientX;
+        gallerySwipeStartY = event.touches[0].clientY;
+      }, { passive: true });
+
+      galleryViewer?.addEventListener('touchend', (event) => {
+        if (gallerySwipeStartX === null) return;
+        if (Number(galleryViewerImage?.dataset.zoom || '1') > 1) {
+          gallerySwipeStartX = null;
+          return;
+        }
+
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - gallerySwipeStartX;
+        const dy = touch.clientY - (gallerySwipeStartY ?? touch.clientY);
+        gallerySwipeStartX = null;
+
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) {
+          if (dx < 0) showNextGalleryImage();
+          else showPrevGalleryImage();
         }
       });
 
       window.addEventListener('popstate', () => {
         const open = window.location.hash === '#gallery';
         setGalleryOpen(open, false);
-        if (!open) closeGalleryViewer();
+        if (!open) {
+          closeGalleryViewer();
+          document.body.classList.remove('gallery-open');
+        }
       });
 
       if (window.location.hash === '#gallery') {
@@ -1461,4 +1812,3 @@
 </body>
 
 </html>
-
