@@ -13,6 +13,8 @@
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Umiseii" />
   <meta name="twitter:description" content="Vartist - Designer - Vsinger" />
+  <link rel="icon" type="image/png" href="./assets/icons/intro.png" />
+  <link rel="shortcut icon" type="image/png" href="./assets/icons/intro.png" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css">
 
@@ -202,11 +204,13 @@
     }
 
     .splash-name {
-      font-size: clamp(1.1rem, 2.8vw, 1.6rem);
-      color: var(--fg);
-      text-shadow: 0 2px 8px rgba(20, 14, 35, 0.95);
+      display: block;
+      width: clamp(160px, 24vw, 360px);
+      max-width: 80vw;
+      height: auto;
       opacity: 0;
       transform: translateY(25px);
+      filter: drop-shadow(0 8px 18px rgba(20, 14, 35, 0.38));
       animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
     }
 
@@ -1072,7 +1076,7 @@
   </button>
   <div id="splash" class="splash">
     <div class="splash-inner">
-      <div class="splash-name">Umiseii</div>
+      <img class="splash-name" src="./assets/icons/intro.png" alt="Umiseii" />
       <div class="splash-hint">click here to continue</div>
     </div>
   </div>

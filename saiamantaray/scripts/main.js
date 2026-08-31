@@ -137,34 +137,40 @@ async function checkTwitchLive() {
 }
 
 // --- ICONS CAROUSEL FUNCTIONALITY ---
-let currentIconIndex = 0;
+let currentRealIndex = 0;
 let carouselRealCount = 0;
 let carouselTransitioning = false;
+
+function updateCarouselPosition() {
+  const track = document.getElementById('iconsTrack');
+  if (!track) return;
+
+  const totalIndex = carouselRealCount + currentRealIndex;
+  track.style.transform = `translateX(-${totalIndex * 100}%)`;
+}
 
 function slideCarousel(direction) {
   if (carouselTransitioning) return;
 
   const track = document.getElementById('iconsTrack');
   if (!track) return;
-  const itemWidth = 190;
 
-  currentIconIndex += direction;
+  currentRealIndex += direction;
   track.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
-  track.style.transform = `translateX(-${currentIconIndex * itemWidth}px)`;
+  updateCarouselPosition();
 
   carouselTransitioning = true;
   setTimeout(() => {
     carouselTransitioning = false;
-    // Silently snap: if in the clone zone, jump to the real equivalent
-    if (currentIconIndex >= carouselRealCount) {
-      currentIconIndex -= carouselRealCount;
-      track.style.transition = 'none';
-      track.style.transform = `translateX(-${currentIconIndex * itemWidth}px)`;
-    } else if (currentIconIndex < 0) {
-      currentIconIndex += carouselRealCount;
-      track.style.transition = 'none';
-      track.style.transform = `translateX(-${currentIconIndex * itemWidth}px)`;
+
+    if (currentRealIndex < 0) {
+      currentRealIndex = carouselRealCount - 1;
+    } else if (currentRealIndex >= carouselRealCount) {
+      currentRealIndex = 0;
     }
+
+    track.style.transition = 'none';
+    updateCarouselPosition();
   }, 410);
 
   // Play directional SFX
@@ -180,16 +186,26 @@ function slideCarousel(direction) {
 document.addEventListener('DOMContentLoaded', () => {
   checkTwitchLive();
 
-  // Clone items for seamless infinite loop
   const track = document.getElementById('iconsTrack');
   if (track) {
     const origItems = [...track.querySelectorAll('.carousel-item')];
     carouselRealCount = origItems.length;
+
+    const leadingClones = origItems.slice().reverse().map(item => {
+      const clone = item.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      return clone;
+    });
+
+    leadingClones.forEach(clone => track.insertBefore(clone, track.firstChild));
     origItems.forEach(item => {
       const clone = item.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
       track.appendChild(clone);
     });
+
+    updateCarouselPosition();
+    window.addEventListener('resize', updateCarouselPosition);
   }
 
   const wrapper = document.getElementById('carouselWrapper');
