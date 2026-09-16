@@ -47,6 +47,23 @@
       background: #758ba5;
     }
 
+    /* Do not display browser scrollbars. This does not hide the Spotify
+       progress indicator inside the Lanyard card. */
+    html,
+    body,
+    .lanyard-card {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    .lanyard-card::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
     body::before,
     body::after {
       content: '';
@@ -1133,7 +1150,7 @@
 
     .lanyard-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 12px;
     }
 
@@ -1194,9 +1211,13 @@
     .lanyard-custom-status {
       font-size: 0.48rem;
       color: var(--muted);
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
       overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      word-break: break-word;
       margin: 0;
       line-height: 1.4;
     }
@@ -1345,7 +1366,53 @@
       }
       .lanyard-avatar-container { width: 38px; height: 38px; }
     }
-</style>
+
+    /* iOS Safari: do not lock the document to the small/unstable viewport. */
+    html {
+      min-height: 100%;
+      min-height: 100svh;
+      background: #758ba5;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    html, body {
+      height: auto;
+      min-height: 100%;
+      min-height: 100svh;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    main {
+      min-height: 100svh;
+      min-height: 100dvh;
+      box-sizing: border-box;
+      padding-top: max(2rem, env(safe-area-inset-top));
+      padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    }
+
+    .lanyard-card {
+      max-width: calc(100vw - 2rem);
+      box-sizing: border-box;
+      overscroll-behavior: contain;
+    }
+
+    @media (max-width: 768px) {
+      .lanyard-card {
+        bottom: calc(144px + env(safe-area-inset-bottom));
+        max-width: calc(100vw - 2rem);
+        max-height: calc(100svh - 190px - env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .lanyard-card {
+        bottom: calc(144px + env(safe-area-inset-bottom));
+        max-width: calc(100vw - 1rem);
+        max-height: calc(100svh - 190px - env(safe-area-inset-bottom));
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -1462,8 +1529,8 @@
   </footer>
 
   <div class="track">
-    <div class="track-name"><i class="fa-solid fa-music track-icon" aria-hidden="true"></i> WELCOME BACK ／ ナースロボ＿タイプT</div>
-    <div class="track-sub">質の悪いログ</div>
+    <div class="track-name"><i class="fa-solid fa-music track-icon" aria-hidden="true"></i> Dust Cascade</div>
+    <div class="track-sub">I'm a genshin addict</div>
   </div>
 
   <audio id="bgm" preload="auto" loop>
