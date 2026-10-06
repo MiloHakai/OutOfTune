@@ -824,6 +824,29 @@
     }
 
     /* ─────────────────────────────────────────────────────────────
+       SPLASH REVEAL — hide UI chrome until the splash is dismissed
+       ───────────────────────────────────────────────────────────── */
+
+    body.splash-active .container,
+    body.splash-active footer,
+    body.splash-active .border-segments,
+    body.splash-active .sky-widget,
+    body.splash-active .lanyard-card {
+      opacity: 0;
+      pointer-events: none;
+      /* no transition here — transition fires on the way OUT (class removal) */
+    }
+
+    /* Fade-in for every revealed element once splash-active is removed */
+    .container,
+    footer,
+    .border-segments,
+    .sky-widget,
+    .lanyard-card {
+      transition: opacity 0.9s ease;
+    }
+
+    /* ─────────────────────────────────────────────────────────────
        SPLASH AUDIO GATEWAY SYSTEM
        ───────────────────────────────────────────────────────────── */
 
@@ -1500,7 +1523,7 @@
   </style>
 </head>
 
-<body>
+<body class="splash-active">
   <!-- Space plate background -->
   <div class="space-plate" aria-hidden="true"></div>
   <div class="horizon-glow" aria-hidden="true"></div>
@@ -1651,7 +1674,7 @@
     <div class="footer-left">
       <div class="footer-audio-header">
         <div class="song-title" id="songTitle">Loading...</div>
-        <div class="audio-equalizer playing" id="audioEqualizer" title="Click to Toggle Sound">
+        <div class="audio-equalizer paused" id="audioEqualizer" title="Click to Toggle Sound">
           <span class="eq-bar bar-1"></span>
           <span class="eq-bar bar-2"></span>
           <span class="eq-bar bar-3"></span>
@@ -2030,6 +2053,8 @@
           try { t.play().catch(() => { }); } catch (e) { }
         });
         if (current && tracks[current] && !isMuted) fadeTo(tracks[current], DEFAULT_VOLUME, 700);
+        // Sync equalizer UI — switches from paused → playing once audio actually starts
+        updateAudioUI();
       };
 
       window.__bgmManager.onFirstGesture = onFirstGesture;
@@ -2068,6 +2093,8 @@
       function hide() {
         if (splash) {
           splash.classList.add('hidden');
+          // Reveal all page chrome with a fade-in
+          document.body.classList.remove('splash-active');
           // Activate and unmute audio on dismissal
           if (window.__bgmManager && typeof window.__bgmManager.onFirstGesture === 'function') {
             window.__bgmManager.onFirstGesture();
