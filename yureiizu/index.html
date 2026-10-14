@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Yureiizu</title>
+    <meta name="description" content="Silly artist" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Yureiizu" />
+    <meta property="og:description" content="Silly artist" />
+    <meta property="og:url" content="https://outoftune.dev/yureiizu" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Yureiizu" />
+    <meta name="twitter:description" content="Silly artist" />
+    <link class="icon" type="image/svg+xml" href="assets/icons/logo.svg">
+    
+    <!-- GOOGLE FONTS: Press Start 2P for the title, Lexend for Latin letters in the lyrics,
+         Zen Kaku Gothic New (+ Noto Sans JP as backup) for Japanese characters -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Lexend:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@400;500&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* NEUTRAL GRAYSCALE PALETTE (matches the black and white video) */
+            --bg-base: #0e0e10;
+            --bg-base-dark: #080809;
+            --primary: #d6d6da;       
+            --text-main: #ededf0;     
+            --text-muted: #8a8a92;    
+
+            /* Glowing text wave palette */
+            --wave-light: #f2f2f5;
+            --wave-dark: #85858d;
+
+            /* CELESTIAL BACKGROUND ELEMENTS */
+            --moon-rim: rgba(255, 255, 255, 0.85);
+            --moon-rim-soft: rgba(224, 235, 255, 0.25);
+            --moon-halo: rgba(255, 255, 255, 0.08);
+            
+            --band-strong: rgba(255, 255, 255, 0.04);
+            --band-soft: rgba(255, 255, 255, 0.01);
+            --mist: rgba(255, 255, 255, 0.01);
+            --dust: rgba(255, 255, 255, 0.15);
+            
+            /* CRT Overlay properties */
+            --scanline: rgba(255, 255, 255, 0.015);
+            --vignette: rgba(0, 0, 0, 0.4);
+
+            /* Animated border line colours (grayscale adaptation) */
+            --line: rgba(255, 255, 255, 0.92);
+            --line-soft: rgba(210, 210, 215, 0.55);
+            --glow: rgba(200, 200, 210, 0.38);
+
+            /* Layout gutter (matches MiloHakai spacing) */
+            --gutter: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* PAGE LAYOUT
+           One grid holds the three visible pieces, so nothing depends on how tall
+           the current lyric line is. The brand sits in the flexible top row; the
+           lyrics and the footer share a fixed bottom row. */
+        body {
+            position: relative;
+            height: 100vh;   /* fallback */
+            height: 100dvh;  /* follows the phone browser's address bar */
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: minmax(0, 1fr) auto;
+            grid-template-areas:
+                "brand  brand"
+                "lyrics footer";
+            column-gap: 16px;
+            row-gap: 6px;
+            align-items: end;
+            padding:
+                max(var(--gutter), env(safe-area-inset-top))
+                max(calc(var(--gutter) + 8px), env(safe-area-inset-right))
+                max(var(--gutter), env(safe-area-inset-bottom))
+                max(calc(var(--gutter) + 8px), env(safe-area-inset-left));
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           ANIMATED BORDER LINES (snake trace around the viewport)
+           ───────────────────────────────────────────────────────────── */
+        .border-segments {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 6;
+            opacity: 0;
+            transition: opacity 0.9s ease;
+        }
+
+        body.ambient-active .border-segments {
+            opacity: 1;
+        }
+
+        .border-top,
+        .border-right,
+        .border-bottom,
+        .border-left {
+            position: absolute;
+            box-shadow: 0 0 10px var(--glow);
+            animation: border-glow 4.5s ease-in-out infinite;
+            transition: box-shadow 1s ease, filter 1s ease;
+        }
+
+        .border-top { top: 0; left: 0; right: 0; height: 3px; }
+        .border-right { top: 0; right: 0; bottom: 0; width: 3px; }
+        .border-bottom { bottom: 0; left: 0; right: 0; height: 3px; }
+        .border-left { top: 0; left: 0; bottom: 0; width: 3px; }
+
+        .border-top::after,
+        .border-right::after,
+        .border-bottom::after,
+        .border-left::after {
+            content: '';
+            position: absolute;
+            will-change: transform, opacity;
+            border-radius: 4px;
+            opacity: 0;
+        }
+
+        .border-top::after,
+        .border-bottom::after {
+            top: -1px;
+            bottom: -1px;
+            width: 15vw;
+        }
+
+        .border-top::after {
+            left: 0;
+            background: linear-gradient(90deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+            animation: snake-ltr 12s linear infinite;
+        }
+
+        .border-bottom::after {
+            right: 0;
+            background: linear-gradient(270deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+            animation: snake-rtl 12s linear infinite;
+        }
+
+        .border-right::after,
+        .border-left::after {
+            left: -1px;
+            right: -1px;
+            height: 15vh;
+        }
+
+        .border-right::after {
+            top: 0;
+            background: linear-gradient(180deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+            animation: snake-ttb 12s linear infinite;
+        }
+
+        .border-left::after {
+            bottom: 0;
+            background: linear-gradient(0deg, transparent, var(--line-soft), var(--line), var(--line-soft), transparent);
+            animation: snake-btt 12s linear infinite;
+        }
+
+        .border-line-1.border-top::after { animation-delay: 0s; }
+        .border-line-1.border-right::after { animation-delay: 3s; }
+        .border-line-1.border-bottom::after { animation-delay: 6s; }
+        .border-line-1.border-left::after { animation-delay: 9s; }
+        .border-line-2.border-top::after { animation-delay: 6s; }
+        .border-line-2.border-right::after { animation-delay: 9s; }
+        .border-line-2.border-bottom::after { animation-delay: 0s; }
+        .border-line-2.border-left::after { animation-delay: 3s; }
+
+        @keyframes snake-ltr {
+            0% { transform: translateX(-15vw); opacity: 1; }
+            25% { transform: translateX(100vw); opacity: 1; }
+            25.01%, 100% { transform: translateX(100vw); opacity: 0; }
+        }
+
+        @keyframes snake-ttb {
+            0% { transform: translateY(-15vh); opacity: 1; }
+            25% { transform: translateY(100vh); opacity: 1; }
+            25.01%, 100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        @keyframes snake-rtl {
+            0% { transform: translateX(15vw); opacity: 1; }
+            25% { transform: translateX(-100vw); opacity: 1; }
+            25.01%, 100% { transform: translateX(-100vw); opacity: 0; }
+        }
+
+        @keyframes snake-btt {
+            0% { transform: translateY(15vh); opacity: 1; }
+            25% { transform: translateY(-100vh); opacity: 1; }
+            25.01%, 100% { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        @keyframes border-glow {
+            0%, 100% {
+                opacity: 0.75;
+                filter: drop-shadow(0 0 8px var(--glow));
+            }
+            50% {
+                opacity: 1;
+                filter: drop-shadow(0 0 14px var(--glow)) drop-shadow(0 0 6px var(--line-soft));
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           CELESTIAL BACKGROUND SYSTEM
+           ───────────────────────────────────────────────────────────── */
+        .space-plate {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-base-dark) 100%);
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+
+        body.ambient-active .space-plate {
+            opacity: 1;
+        }
+
+        .space-plate::before {
+            content: "";
+            position: absolute;
+            inset: -25%;
+            transform: rotate(-14deg) scale(1.15);
+            opacity: 0.85;
+            background:
+                radial-gradient(ellipse 160% 20% at 68% 55%,
+                    var(--band-strong) 0%,
+                    var(--band-soft) 40%,
+                    transparent 75%),
+                radial-gradient(ellipse 60% 35% at 20% 30%,
+                    var(--mist) 0%,
+                    transparent 70%);
+        }
+
+        .space-plate::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+            background-image: radial-gradient(var(--dust) 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+
+        /* VIDEO BACKGROUND
+           The video already has its own moon and stars, so the CSS moon and
+           canvas stars below are hidden. To bring them back, delete the
+           ".moon, #starCanvas { display: none; }" rule. */
+        .bg-video {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;        /* fills the screen, no black bands */
+            object-position: 32% 50%; /* keeps the moon in view on phones */
+            z-index: 0;
+            pointer-events: none;
+            filter: brightness(0.55); /* dims the bright trees so text stays readable */
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        body.ambient-active .bg-video {
+            opacity: 1;
+        }
+
+        .bg-scrim {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                linear-gradient(90deg, rgba(8, 8, 10, 0.75) 0%, rgba(8, 8, 10, 0.35) 55%, rgba(8, 8, 10, 0.1) 100%),
+                linear-gradient(0deg, rgba(8, 8, 10, 0.7) 0%, transparent 35%);
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        body.ambient-active .bg-scrim {
+            opacity: 1;
+        }
+
+        .moon,
+        #starCanvas {
+            display: none;
+        }
+
+        .moon {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            filter: drop-shadow(0 0 25px var(--moon-halo));
+            transition: opacity 1.5s ease 0.3s, transform 1.5s ease;
+        }
+
+        body.ambient-active .moon {
+            opacity: 0.9;
+        }
+
+        .moon.big {
+            width: 180px;
+            height: 180px;
+            top: 15%;
+            right: 10%;
+            background: radial-gradient(circle at 34% 36%,
+                transparent 58%,
+                var(--moon-rim) 59%,
+                var(--moon-rim) 62%,
+                var(--moon-rim-soft) 66%,
+                transparent 72%);
+            animation: moon-bob 16s ease-in-out infinite;
+        }
+
+        @keyframes moon-bob {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(0.5deg); }
+        }
+
+        #starCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        
+        body.ambient-active #starCanvas {
+            opacity: 0.85;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           CRT SCANLINE LAYER
+           ───────────────────────────────────────────────────────────── */
+        .crt-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .crt-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                var(--scanline) 0px,
+                var(--scanline) 1px,
+                transparent 1px,
+                transparent 4px);
+        }
+
+        .crt-overlay::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 120% 110% at 50% 50%,
+                transparent 0%,
+                transparent 65%,
+                var(--vignette) 100%);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           UI CORE WORKSPACE (DESKTOP MODES)
+           ───────────────────────────────────────────────────────────── */
+        .content-wrapper {
+            grid-area: brand;
+            align-self: center;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            min-width: 0;
+        }
+
+        .brand-section {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .brand-section h1.wave-text {
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+            font-weight: 400;
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: 0.02em;
+            cursor: default;
+            user-select: none;
+            color: var(--primary);
+            display: inline-block;
+        }
+
+        .brand-section h1.wave-text.glow-active {
+            background: linear-gradient(90deg, 
+                var(--wave-light) 0%, 
+                var(--wave-dark) 25%, 
+                var(--wave-light) 50%, 
+                var(--wave-dark) 75%, 
+                var(--wave-light) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: wave-slide 4s linear infinite;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+        }
+
+        @keyframes wave-slide {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            font-weight: 400;
+            max-width: 500px;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+        }
+
+        .socials-row {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            /* each icon has 11px of tap padding; pull the row back so the first
+               icon lines up with the left edge of the text above it */
+            margin: 2px 0 0 -11px;
+        }
+
+        .social-icon-link {
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px; /* comfortable tap target */
+            border-radius: 8px;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .social-icon-link:hover {
+            color: #ffffff;
+            transform: translateY(-3px) scale(1.1);
+        }
+        .social-icon-link:hover svg {
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45));
+        }
+
+        /* Quiet, staggered entrance after the intro overlay is dismissed. */
+        .brand-section > * {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 700ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.ambient-active .brand-section > * {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        body.ambient-active .brand-section > :nth-child(1) { transition-delay: 100ms; }
+        body.ambient-active .brand-section > :nth-child(2) { transition-delay: 220ms; }
+        body.ambient-active .brand-section > :nth-child(3) { transition-delay: 340ms; }
+
+        .track-title,
+        .lyric-line,
+        .footer-copy,
+        .footer-author {
+            transition: opacity 450ms ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+            .border-top,
+            .border-right,
+            .border-bottom,
+            .border-left {
+                animation: none !important;
+            }
+            .border-top::after,
+            .border-right::after,
+            .border-bottom::after,
+            .border-left::after {
+                animation: none !important;
+                opacity: 0 !important;
+            }
+        }
+
+        .social-icon-link:focus-visible {
+            outline: 1px solid var(--primary);
+            outline-offset: -2px;
+        }
+
+        .social-icon-link svg {
+            display: block;
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            transition: filter 0.2s ease;
+        }
+
+        /* Audio Lyrics Display Box */
+        .lyrics-container {
+            grid-area: lyrics;
+            position: relative;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: min(540px, 100%);
+            min-width: 0;
+        }
+
+        .track-title {
+            font-family: 'Lexend', 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            letter-spacing: 0.06em;
+        }
+
+        .lyric-line {
+            font-family: 'Lexend', 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-main);
+            line-height: 1.7;
+            min-height: 2.6em;
+            letter-spacing: 0.06em;
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Each line is animated from the script: it wipes in from the bottom to the top */
+        .lyric-typed {
+            display: inline-block;
+            clip-path: inset(100% 0 0 0);
+        }
+
+
+
+        /* Stacked bottom-right footer system */
+        .footer-right {
+            grid-area: footer;
+            position: relative;
+            z-index: 100;
+            font-family: 'Press Start 2P', monospace;
+            color: var(--text-muted);
+            font-size: 0.4rem;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .footer-copy {
+            opacity: 0.8;
+        }
+
+        .footer-author {
+            opacity: 0.85;
+            color: var(--primary);
+        }
+
+        /* TEXT INTRO SLIDE OVERLAY ARCHITECTURE */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-base);
+            transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-holder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            user-select: none;
+        }
+
+        .intro-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.1rem, 2.8vw, 1.6rem); 
+            color: var(--primary);
+            opacity: 0;
+            transform: translateY(25px);
+            animation: introSlideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s;
+        }
+
+        .intro-sub-click {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.45rem, 1.2vw, 0.52rem); 
+            color: var(--text-muted);
+            opacity: 0;
+            letter-spacing: 1px;
+            animation: fadeInSimple 0.8s ease forwards 0.9s;
+        }
+
+        @keyframes introSlideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInSimple {
+            to { opacity: 0.75; }
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           UPDATED: CENTERED & VERTICALLY BALANCED MOBILE ARCHITECTURE
+           ───────────────────────────────────────────────────────────── */
+        /* DESKTOP AND TABLET (anything wider than a phone)
+           The bottom edge is part of the page grid, so the song name lines up with
+           the copyright line and the lyric lines up with "Bunnisu" on the right
+           (each pair shares a text baseline). The two boxes dissolve
+           (display: contents) so their text can sit directly in the grid. */
+        @media (min-width: 769px) {
+            body {
+                grid-template-rows: minmax(0, 1fr) auto auto;
+                row-gap: 0;
+            }
+
+            .content-wrapper {
+                grid-row: 1;
+                grid-column: 1 / -1;
+                margin-bottom: 20px;
+            }
+
+            /* Only dissolve the lyrics container; footer-right stays as a block */
+            .lyrics-container {
+                display: contents;
+            }
+
+            .track-title,
+            .lyric-line {
+                position: relative;
+                z-index: 100;
+                align-self: baseline;
+            }
+
+            .track-title {
+                grid-row: 2;
+                grid-column: 1;
+                margin-bottom: 4px;
+            }
+
+            .lyric-line {
+                grid-row: 3;
+                grid-column: 1;
+                min-height: 0;
+                max-width: 640px;
+            }
+
+            /* Footer sits as its own flex column spanning both bottom rows */
+            .footer-right {
+                grid-row: 2 / 4;
+                grid-column: 2;
+                align-self: end;
+                justify-self: end;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0;
+            }
+        }
+
+        /* Taller screens: center the title block on the whole page */
+        @media (min-width: 769px) and (min-height: 561px) {
+            .content-wrapper {
+                grid-row: 1 / -1;
+                margin-bottom: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: minmax(0, 1fr) auto auto;
+                grid-template-areas:
+                    "brand"
+                    "lyrics"
+                    "footer";
+                row-gap: 20px;
+                padding:
+                    max(24px, env(safe-area-inset-top))
+                    max(24px, env(safe-area-inset-right))
+                    max(20px, env(safe-area-inset-bottom))
+                    max(24px, env(safe-area-inset-left));
+            }
+
+            .content-wrapper {
+                align-items: center;
+                text-align: center;
+                padding-top: 28dvh; /* keeps the title below the moon in the video */
+            }
+
+            .brand-section {
+                gap: 10px;
+                width: 100%;
+                align-items: center;
+            }
+
+            .brand-section h1.wave-text {
+                font-size: 1.4rem;
+            }
+
+            .socials-row {
+                justify-content: center;
+                margin-left: 0;
+            }
+
+            .bg-scrim {
+                /* text is centered on phones, so dim evenly instead of from the left */
+                background: rgba(8, 8, 10, 0.5);
+            }
+
+            .lyrics-container {
+                width: 100%;
+                align-items: center;
+                text-align: center;
+            }
+
+            .track-title {
+                font-size: 0.7rem;
+                line-height: 1.5;
+                text-align: center;
+            }
+
+            .lyric-line {
+                font-size: 1rem;
+                text-align: center;
+                min-height: 5.1em; /* room for three lines, so the layout never jumps */
+                width: 100%;
+            }
+
+            .footer-right {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+            }
+        }
+
+        /* Short screens, such as a phone held sideways */
+        @media (max-height: 480px) {
+            body {
+                padding-top: max(20px, env(safe-area-inset-top));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        @media (max-width: 768px) and (max-height: 480px) {
+            body {
+                row-gap: 12px;
+            }
+
+            .content-wrapper {
+                padding-top: 0;
+            }
+
+            .lyric-line {
+                min-height: 3.4em;
+            }
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           LANYARD WIDGET (Discord status and rich activity card)
+           ───────────────────────────────────────────────────────────── */
+        .lanyard-card {
+            --lc-bg: rgba(14, 14, 16, 0.65);
+            --lc-line: rgba(255, 255, 255, 0.28);
+            --lc-line-soft: rgba(255, 255, 255, 0.12);
+            --lc-glow: rgba(255, 255, 255, 0.10);
+            --lc-accent: var(--primary);
+
+            position: fixed;
+            right: max(44px, calc(env(safe-area-inset-right) + 24px));
+            top: 50%;
+            transform: translateY(-50%);
+            width: 280px;
+            padding: 14px;
+            background: var(--lc-bg);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--lc-line-soft);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px var(--lc-glow);
+            z-index: 1001;
+            font-family: 'Lexend', 'Noto Sans JP', sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.9s ease, border-color 0.4s ease, box-shadow 0.4s ease,
+                        transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* soft glow behind the card */
+        .lanyard-card::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 16px;
+            pointer-events: none;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, color-mix(in srgb, var(--lc-accent) 35%, transparent 65%), transparent 60%);
+            filter: blur(14px) saturate(120%);
+            opacity: 0.6;
+            mix-blend-mode: screen;
+        }
+
+        /* shown only after the intro overlay is dismissed AND Lanyard has answered */
+        body.ambient-active .lanyard-card.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lanyard-card:hover {
+            transform: translateY(-52%) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 25px var(--lc-glow);
+            border-color: var(--lc-line);
+        }
+
+        @keyframes lanyard-float {
+            0%, 100% { translate: 0 0; }
+            50%      { translate: 0 -6px; }
+        }
+        body.ambient-active .lanyard-card.visible { animation: lanyard-float 6s ease-in-out infinite; }
+        .lanyard-card:hover { animation-play-state: paused; }
+
+        .lanyard-header { display: flex; align-items: center; gap: 12px; }
+
+        .lanyard-avatar-container { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+
+        .lanyard-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid var(--lc-line-soft);
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 0; /* hide the alt text if the avatar is slow or fails to load */
+            color: transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .lanyard-status-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-base);
+            background-color: #80848e;
+            transition: background-color 0.3s ease;
+        }
+        .lanyard-status-dot.online  { background-color: #23a55a; animation: lanyard-pulse 2s infinite; }
+        .lanyard-status-dot.idle    { background-color: #f0b232; }
+        .lanyard-status-dot.dnd     { background-color: #f23f43; }
+        .lanyard-status-dot.offline { background-color: #80848e; }
+
+        @keyframes lanyard-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0.4); }
+            70%  { box-shadow: 0 0 0 6px rgba(35, 165, 90, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0); }
+        }
+
+        .lanyard-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+        .lanyard-username {
+            font-family: 'Lexend', 'Noto Sans JP', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lanyard-custom-status {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+            line-height: 1.3;
+            letter-spacing: 0.02em;
+        }
+
+        .lanyard-status-text {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            opacity: 0.8;
+            letter-spacing: 0.03em;
+        }
+
+        /* Rich activity (Spotify, games, dev tools, streams) */
+        .lanyard-activity {
+            border-top: 1px solid var(--lc-line-soft);
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .lanyard-activity-header {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.45rem;
+            letter-spacing: 0.08em;
+            color: var(--lc-accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lanyard-activity-header svg { width: 11px; height: 11px; stroke: currentColor; flex-shrink: 0; }
+
+        .lanyard-activity-content { display: flex; gap: 10px; align-items: center; }
+
+        .lanyard-activity-image {
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid var(--lc-line-soft);
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .lanyard-activity-details { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex-grow: 1; }
+
+        .lanyard-activity-title {
+            font-weight: 500;
+            font-size: 0.78rem;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+        .lanyard-activity-subtitle {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+        .lanyard-activity-state {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            opacity: 0.75;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+        }
+
+        .lanyard-activity-progress-container { display: flex; flex-direction: column; gap: 4px; }
+        .lanyard-activity-progress-bar {
+            height: 3px;
+            width: 100%;
+            background: var(--lc-line-soft);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .lanyard-activity-progress-fill {
+            height: 100%;
+            background: var(--lc-accent);
+            width: 0%;
+            transition: width 0.5s linear;
+            border-radius: 2px;
+        }
+        .lanyard-activity-time {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Lexend', monospace;
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+        .lanyard-activity-elapsed {
+            font-family: 'Lexend', monospace;
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            opacity: 0.75;
+            letter-spacing: 0.04em;
+        }
+
+        /* Phones: the card flows under the social icons (inside .content-wrapper), so it can
+           never cover the title. The wrapper's top padding shrinks on shorter screens to make room. */
+        @media (max-width: 768px) {
+            .lanyard-card {
+                position: relative;
+                top: auto;
+                right: auto;
+                transform: none;
+                align-self: center;
+                width: 100%;
+                max-width: 320px;
+                margin-top: 20px;
+                padding: 10px 14px;
+                text-align: left;
+            }
+            .lanyard-card:hover { transform: scale(1.01); }
+            .lanyard-username { font-size: 0.9rem; }
+            .lanyard-custom-status { font-size: 0.76rem; }
+            .lanyard-status-text { font-size: 0.7rem; }
+            .lanyard-activity-title { font-size: 0.82rem; }
+            .lanyard-activity-subtitle { font-size: 0.72rem; }
+            .lanyard-activity-state, .lanyard-activity-time, .lanyard-activity-elapsed { font-size: 0.66rem; }
+        }
+        @media (max-width: 768px) and (max-height: 780px) {
+            .content-wrapper { padding-top: 12dvh; }
+        }
+        @media (max-width: 768px) and (max-height: 640px) {
+            .content-wrapper { padding-top: 2dvh; }
+            .lanyard-activity { display: none !important; } /* keep the card compact on very short phones */
+        }
+        /* Not enough room on a phone held sideways: hide rather than cover the title */
+        @media (max-height: 480px) and (max-width: 900px) {
+            .lanyard-card { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .lanyard-status-dot.online { animation: none; }
+            body.ambient-active .lanyard-card.visible { animation: none; }
+            .lanyard-card, .lanyard-card:hover { transition: opacity 0.3s ease; }
+        }
+
+        /* Desktop: the card lives inside .content-wrapper, so it is centered on the brand
+           block itself (same vertical middle) and ends on the same right edge as the footer. */
+        @media (min-width: 769px) {
+            .lanyard-card {
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            .lanyard-card:hover { transform: translateY(-50%) scale(1.02); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="space-plate" aria-hidden="true"></div>
+    <video class="bg-video" autoplay loop muted playsinline preload="auto" aria-hidden="true">
+        <source src="bg.mp4" type="video/mp4">
+        <source src="bg.webm" type="video/webm">
+    </video>
+    <div class="bg-scrim" aria-hidden="true"></div>
+    <div class="moon big" aria-hidden="true"></div>
+    <canvas id="starCanvas" aria-hidden="true"></canvas>
+
+    <div class="crt-overlay" aria-hidden="true"></div>
+
+    <!-- Animated border lines (snake trace around the viewport) -->
+    <div class="border-segments" aria-hidden="true">
+        <div class="border-top border-line-1"></div>
+        <div class="border-right border-line-1"></div>
+        <div class="border-bottom border-line-1"></div>
+        <div class="border-left border-line-1"></div>
+        <div class="border-top border-line-2"></div>
+        <div class="border-right border-line-2"></div>
+        <div class="border-bottom border-line-2"></div>
+        <div class="border-left border-line-2"></div>
+    </div>
+
+    <div id="overlay" class="overlay">
+        <div class="intro-holder">
+            <div class="intro-title">Yureiizu</div>
+            <div class="intro-sub-click">click here to continue</div>
+        </div>
+    </div>
+
+    <main class="content-wrapper">
+        <section class="brand-section">
+            <h1 id="brand-title" class="wave-text">Yureiizu</h1>
+            <p class="subtitle">Silly artist</p>
+            
+            <nav class="socials-row" aria-label="Social links">
+                <a href="https://youtube.com/@kiiyuomi?si=lux6yUmomZJ5oo4t" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="YouTube" title="YouTube">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+                <a href="https://ko-fi.com/miipuff" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Ko-fi" title="Ko-fi">
+                    <svg viewBox="3 3 19 19" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M3 7h14v7a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V7zm7 8.8-3.2-3.2a2.1 2.1 0 0 1 3-3l.2.2.2-.2a2.1 2.1 0 0 1 3 3z"/>
+                        <path d="M17 9.5h1.2a2.4 2.4 0 0 1 0 4.8H17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </a>
+                <a href="https://www.tiktok.com/@kiiyuomi" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="TikTok" title="TikTok">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                    </svg>
+                </a>
+            </nav>
+        </section>
+        <!-- Discord presence (Lanyard) card -->
+        <div class="lanyard-card" id="lanyardCard" aria-label="Discord Status Card">
+            <div class="lanyard-header">
+                <div class="lanyard-avatar-container">
+                    <img class="lanyard-avatar" id="lanyardAvatar" src="" alt="Discord Avatar" />
+                    <div class="lanyard-status-dot" id="lanyardStatusDot"></div>
+                </div>
+                <div class="lanyard-info">
+                    <div class="lanyard-username" id="lanyardUsername">Loading...</div>
+                    <div class="lanyard-custom-status" id="lanyardCustomStatus"></div>
+                    <div class="lanyard-status-text" id="lanyardStatusText">offline</div>
+                </div>
+            </div>
+            <div class="lanyard-activity" id="lanyardActivity" style="display: none;">
+                <div class="lanyard-activity-header" id="lanyardActivityHeader">
+                    <span id="lanyardActivityIcon"></span>
+                    <span id="lanyardActivityBadge">ACTIVITY</span>
+                </div>
+                <div class="lanyard-activity-content">
+                    <img class="lanyard-activity-image" id="lanyardActivityImage" src="" alt="Activity Thumbnail" />
+                    <div class="lanyard-activity-details">
+                        <div class="lanyard-activity-title" id="lanyardActivityTitle">Activity Title</div>
+                        <div class="lanyard-activity-subtitle" id="lanyardActivitySubtitle">Subtitle</div>
+                        <div class="lanyard-activity-state" id="lanyardActivityState" style="display: none;">State</div>
+                    </div>
+                </div>
+                <div class="lanyard-activity-progress-container" id="lanyardProgressContainer" style="display: none;">
+                    <div class="lanyard-activity-progress-bar">
+                        <div class="lanyard-activity-progress-fill" id="lanyardProgressFill"></div>
+                    </div>
+                    <div class="lanyard-activity-time">
+                        <span id="lanyardTimeCurrent">0:00</span>
+                        <span id="lanyardTimeTotal">0:00</span>
+                    </div>
+                </div>
+                <div class="lanyard-activity-elapsed" id="lanyardActivityElapsed" style="display: none;">
+                    <span id="lanyardElapsedTime">00:00 elapsed</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="lyrics-container">
+        <div id="track-name" class="track-title">Loading track…</div>
+        <div class="lyric-line" id="lyric-line-box">
+            <span class="lyric-typed" id="lyric-output">&nbsp;</span>
+        </div>
+    </div>
+
+    <div class="footer-right">
+        <div class="footer-copy">© 2026 - OutOfTune</div>
+        <div class="footer-author">Yureiizu</div>
+    </div>
+
+    <audio id="bgm" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- LYRICS: paste your synced lyrics inside the script block below, one line each, like this:
+         [minutes:seconds.hundredths] the lyric text
+         A timestamp with no text (an empty line) fades the current line out. -->
+    <script type="text/plain" id="lrc-content">
+        [00:27.54] 例えば今世界が終わり
+        [00:40.24] 私の名がかき消されたら
+        [00:53.50] 探して空を　探して風を
+        [01:19.35] 夢に見たのは青色の鳥
+        [01:31.85] 落とした羽かき集めたわ
+        [01:44.78] 探して記憶を　残して明日を
+        [02:11.40] ああ　目を閉じて浮かぶのはあの時見た最後の月
+        [02:40.78] 覚えていて　夜が明ける前に来て
+        [02:59.82] 私の名を呼んで
+        [03:11.64]
+        [03:16.39] 夢に見たのは満開の花
+        [03:28.56] 甘い香りを閉じ込めたわ
+        [03:43.12] 残して声を　残して言葉を
+        [04:10.11] ああ　甘い夢見ているわ　もうずっとずっと
+        [04:32.00] いつかの月に　照らされた
+        [04:45.83] 光の線に沿って
+        [04:55.98] ああ　今夢の続きを見ている
+        [05:09.82]
+    </script>
+
+    <script>
+        /* STARS DRAWING ENGINE */
+        (function () {
+            const canvas = document.getElementById('starCanvas');
+            const ctx = canvas.getContext('2d', { alpha: true });
+            let W = 0, H = 0;
+            let stars = [];
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                W = canvas.width = Math.floor(window.innerWidth * dpr);
+                H = canvas.height = Math.floor(window.innerHeight * dpr);
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                initStars();
+            }
+
+            function rand(min, max) { return min + Math.random() * (max - min); }
+
+            function initStars() {
+                stars = [];
+                const area = window.innerWidth * window.innerHeight;
+                const count = Math.min(Math.floor(area / 1800), 450); 
+
+                for (let i = 0; i < count; i++) {
+                    const r = Math.random();
+                    stars.push({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        size: r < 0.85 ? rand(0.5, 1.2) : rand(1.2, 2.0),
+                        a: rand(0.4, 0.95),
+                        tw: rand(0.005, 0.015),
+                        off: rand(0, Math.PI * 2)
+                    });
+                }
+            }
+
+            function draw(t) {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                ctx.fillStyle = "rgba(230, 242, 255, 1)"; 
+                
+                for (const s of stars) {
+                    const twinkle = Math.sin(t * s.tw * 60 + s.off);
+                    const alpha = s.a * (0.5 + 0.5 * twinkle);
+                    ctx.globalAlpha = alpha;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0;
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            requestAnimationFrame(draw);
+        })();
+
+        /* CORE AUDIO & LYRICS INTERACTION ENGINE */
+        document.addEventListener('DOMContentLoaded', () => {
+            const overlay = document.getElementById('overlay');
+            const audio = document.getElementById('bgm');
+            const brandTitle = document.getElementById('brand-title');
+            const bodyNode = document.body;
+            
+            const lyricOutput = document.getElementById('lyric-output');
+            const trackName = document.getElementById('track-name');
+
+            let parsedLyrics = [];
+            let currentLineIndex = -1;
+
+            trackName.textContent = 'Sign 0 — chouchou';
+            lyricOutput.textContent = '\u00A0';
+
+            function parseLRC() {
+                const lrcText = document.getElementById('lrc-content').textContent;
+                const lines = lrcText.split('\n');
+                const timeReg = /\[(\d+):(\d+)(?:\.(\d{1,3}))?\]/;
+
+                lines.forEach(line => {
+                    const match = timeReg.exec(line);
+                    if (match) {
+                        const minutes = parseInt(match[1]);
+                        const seconds = parseInt(match[2]);
+                        const fraction = match[3] ? Number(`0.${match[3]}`) : 0;
+                        const timeInSeconds = (minutes * 60) + seconds + fraction;
+                        const text = line.replace(timeReg, '').trim();
+                        parsedLyrics.push({ time: timeInSeconds, text: text });
+                    }
+                });
+                parsedLyrics.sort((a, b) => a.time - b.time);
+            }
+            parseLRC();
+
+            overlay.addEventListener('click', () => {
+                overlay.classList.add('hidden');
+                bodyNode.classList.add('ambient-active');
+                brandTitle.classList.add('glow-active');
+                
+                audio.volume = 0.25;
+                audio.play()
+                    .then(() => {
+                        startLyricSyncLoop();
+                    })
+                    .catch(err => {
+                        console.warn('Audio playback handled safely:', err);
+                        lyricOutput.textContent = 'Playback initialized. Stream paused.';
+                    });
+            });
+
+            function startLyricSyncLoop() {
+                function frameCheck() {
+                    if (!audio.paused && !audio.ended) {
+                        const currentTime = audio.currentTime;
+                        let activeIndex = -1;
+
+                        for (let i = 0; i < parsedLyrics.length; i++) {
+                            if (currentTime >= parsedLyrics[i].time) {
+                                activeIndex = i;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (activeIndex === -1 && currentLineIndex !== -1) {
+                            /* the song looped back to the start */
+                            currentLineIndex = -1;
+                            triggerLinePrint('');
+                        }
+
+                        if (activeIndex !== -1 && activeIndex !== currentLineIndex) {
+                            currentLineIndex = activeIndex;
+                            triggerLinePrint(parsedLyrics[currentLineIndex].text);
+                        }
+                    }
+                    requestAnimationFrame(frameCheck);
+                }
+                requestAnimationFrame(frameCheck);
+            }
+
+            /* Each lyric line wipes in from the bottom to the top.
+               An empty timestamp in the lyrics fades the previous line out. */
+            let currentAnim = null;
+            function triggerLinePrint(fullText) {
+                if (currentAnim) currentAnim.cancel();
+
+                if (!fullText) {
+                    currentAnim = lyricOutput.animate(
+                        [{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 0 0)', opacity: 0 }],
+                        { duration: 500, easing: 'ease', fill: 'forwards' }
+                    );
+                    return;
+                }
+
+                lyricOutput.textContent = fullText;
+                currentAnim = lyricOutput.animate(
+                    [
+                        { clipPath: 'inset(100% 0 0 0)', transform: 'translateY(0.5em)' },
+                        { clipPath: 'inset(0 0 0 0)', transform: 'translateY(0)' }
+                    ],
+                    { duration: 800, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' }
+                );
+            }
+        });
+    </script>
+    <!-- Lanyard Integration Script -->
+    <script>
+    (function() {
+      const discordId = '777639566735441932';
+      const card = document.getElementById('lanyardCard');
+      const avatar = document.getElementById('lanyardAvatar');
+      const statusDot = document.getElementById('lanyardStatusDot');
+      const username = document.getElementById('lanyardUsername');
+      const customStatus = document.getElementById('lanyardCustomStatus');
+      const statusText = document.getElementById('lanyardStatusText');
+      const activitySection = document.getElementById('lanyardActivity');
+      const activityIcon = document.getElementById('lanyardActivityIcon');
+      const activityBadge = document.getElementById('lanyardActivityBadge');
+      const activityImage = document.getElementById('lanyardActivityImage');
+      const activityTitle = document.getElementById('lanyardActivityTitle');
+      const activitySubtitle = document.getElementById('lanyardActivitySubtitle');
+      const activityState = document.getElementById('lanyardActivityState');
+      const progressContainer = document.getElementById('lanyardProgressContainer');
+      const progressFill = document.getElementById('lanyardProgressFill');
+      const timeCurrent = document.getElementById('lanyardTimeCurrent');
+      const timeTotal = document.getElementById('lanyardTimeTotal');
+      const elapsedContainer = document.getElementById('lanyardActivityElapsed');
+      const elapsedTime = document.getElementById('lanyardElapsedTime');
+
+      let spotifyProgressTimer = null;
+      let spotifyStart = 0;
+      let spotifyEnd = 0;
+      let gameElapsedTimer = null;
+      let gameStart = 0;
+
+      const ICONS = {
+        music: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`,
+        game: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"></rect><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"></path></svg>`,
+        code: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`,
+        stream: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.93 4.93a10 10 0 0 0 0 14.14M19.07 4.93a10 10 0 0 1 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M16.24 7.76a6 6 0 0 1 0 8.48"></path><circle cx="12" cy="12" r="2"></circle></svg>`
+      };
+
+      function formatTime(ms) {
+        if (isNaN(ms) || ms < 0) return '0:00';
+        const seconds = Math.floor(ms / 1000);
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return mins + ':' + (secs < 10 ? '0' : '') + secs;
+      }
+
+      function formatElapsed(ms) {
+        if (isNaN(ms) || ms < 0) return '00:00 elapsed';
+        const totalSecs = Math.floor(ms / 1000);
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        if (hrs > 0) {
+          return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs} elapsed`;
+        }
+        return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs} elapsed`;
+      }
+
+      function updateSpotifyProgress() {
+        if (!spotifyStart || !spotifyEnd) return;
+        const now = Date.now();
+        const total = spotifyEnd - spotifyStart;
+        const current = Math.min(total, Math.max(0, now - spotifyStart));
+        
+        const pct = (current / total) * 100;
+        if (progressFill) progressFill.style.width = pct.toFixed(1) + '%';
+        if (timeCurrent) timeCurrent.textContent = formatTime(current);
+
+        if (now < spotifyEnd) {
+          spotifyProgressTimer = requestAnimationFrame(updateSpotifyProgress);
+        } else {
+          if (progressFill) progressFill.style.width = '100%';
+          if (timeCurrent) timeCurrent.textContent = formatTime(total);
+        }
+      }
+
+      function updateGameElapsed() {
+        if (!gameStart) return;
+        const now = Date.now();
+        const diff = Math.max(0, now - gameStart);
+        if (elapsedTime) elapsedTime.textContent = formatElapsed(diff);
+      }
+
+      function fetchLanyard() {
+        fetch(`https://api.lanyard.rest/v1/users/${discordId}`)
+          .then(res => res.json())
+          .then(res => {
+            if (!res.success) return;
+            const data = res.data;
+
+            card.classList.add('visible');
+
+            // 1. Profile Information
+            const user = data.discord_user;
+            username.textContent = user.global_name || user.username || 'Yureiizu';
+            
+            if (user.avatar) {
+              const ext = user.avatar.startsWith('a_') ? 'gif' : 'png';
+              avatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=128`;
+            } else {
+              const defaultIndex = user.discriminator === '0' 
+                ? (BigInt(user.id) >> 22n) % 6n 
+                : parseInt(user.discriminator) % 5;
+              avatar.src = `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`;
+            }
+
+            // 2. Status Dot & Status Text
+            const status = data.discord_status;
+            statusDot.className = 'lanyard-status-dot ' + status;
+            
+            let displayStatus = status;
+            if (status === 'dnd') displayStatus = 'Do Not Disturb';
+            else if (status === 'online') displayStatus = 'Online';
+            else if (status === 'idle') displayStatus = 'Idle';
+            else if (status === 'offline') displayStatus = 'Offline';
+            statusText.textContent = displayStatus;
+
+            // 3. Custom Status Message (Strictly without emojis for unique typography)
+            const customActivity = data.activities.find(act => act.type === 4);
+            if (customActivity && customActivity.state) {
+              const cleanText = customActivity.state
+                .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{200D}\u{200C}\u{E0020}-\u{E007F}]/gu, '')
+                .trim();
+              if (cleanText) {
+                customStatus.textContent = cleanText;
+                customStatus.style.display = 'block';
+              } else {
+                customStatus.textContent = '';
+                customStatus.style.display = 'none';
+              }
+            } else {
+              customStatus.textContent = '';
+              customStatus.style.display = 'none';
+            }
+
+            // 4. Universal Activity Detection (Spotify, Game, Dev, Stream)
+            cancelAnimationFrame(spotifyProgressTimer);
+            if (gameElapsedTimer) {
+              clearInterval(gameElapsedTimer);
+              gameElapsedTimer = null;
+            }
+
+            let music = null;
+            if (data.listening_to_spotify && data.spotify) {
+              music = data.spotify;
+            } else {
+              const act = data.activities.find(a => a.type === 2 || a.name === 'Spotify');
+              if (act) {
+                music = {
+                  song: act.details || act.name,
+                  artist: act.state || 'Unknown Artist',
+                  album: act.assets ? act.assets.large_text : '',
+                  album_art_url: '',
+                  timestamps: act.timestamps
+                };
+                if (act.assets && act.assets.large_image) {
+                  const img = act.assets.large_image;
+                  if (img.startsWith('spotify:')) {
+                    music.album_art_url = `https://i.scdn.co/image/${img.substring(8)}`;
+                  } else if (img.startsWith('mp:')) {
+                    music.album_art_url = img.replace('mp:', 'https://media.discordapp.net/');
+                  } else if (act.application_id) {
+                    music.album_art_url = `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`;
+                  }
+                }
+              }
+            }
+
+            const streamAct = data.activities.find(a => a.type === 1);
+            const gameAct = data.activities.find(a => a.type === 0 || a.type === 5);
+
+            if (music) {
+              // Spotify / Music mode
+              activitySection.style.display = 'flex';
+              activityIcon.innerHTML = ICONS.music;
+              activityBadge.textContent = 'LISTENING';
+              activityTitle.textContent = music.song;
+              activitySubtitle.textContent = music.artist;
+              activityState.style.display = 'none';
+              
+              if (music.album_art_url) {
+                activityImage.src = music.album_art_url;
+                activityImage.style.display = 'block';
+              } else {
+                activityImage.src = '';
+                activityImage.style.display = 'none';
+              }
+
+              if (music.timestamps && music.timestamps.start && music.timestamps.end) {
+                timeTotal.textContent = formatTime(music.timestamps.end - music.timestamps.start);
+                spotifyStart = music.timestamps.start;
+                spotifyEnd = music.timestamps.end;
+                updateSpotifyProgress();
+                progressContainer.style.display = 'flex';
+              } else {
+                progressContainer.style.display = 'none';
+                spotifyStart = 0;
+                spotifyEnd = 0;
+              }
+              elapsedContainer.style.display = 'none';
+
+            } else if (gameAct) {
+              // Game or Dev mode
+              activitySection.style.display = 'flex';
+              const nameLower = gameAct.name.toLowerCase();
+              const isDev = nameLower.includes('code') || nameLower.includes('unity') || nameLower.includes('godot') || nameLower.includes('studio') || nameLower.includes('blender') || nameLower.includes('aseprite');
+              
+              activityIcon.innerHTML = isDev ? ICONS.code : ICONS.game;
+              activityBadge.textContent = isDev ? 'DEVELOPING' : 'PLAYING';
+              activityTitle.textContent = gameAct.name;
+              activitySubtitle.textContent = gameAct.details || gameAct.state || 'In Progress';
+              
+              if (gameAct.details && gameAct.state) {
+                activityState.textContent = gameAct.state;
+                activityState.style.display = 'block';
+              } else {
+                activityState.style.display = 'none';
+              }
+
+              let imgUrl = '';
+              if (gameAct.assets && gameAct.assets.large_image) {
+                const img = gameAct.assets.large_image;
+                if (img.startsWith('mp:')) {
+                  imgUrl = img.replace('mp:', 'https://media.discordapp.net/');
+                } else if (gameAct.application_id) {
+                  imgUrl = `https://cdn.discordapp.com/app-assets/${gameAct.application_id}/${img}.png`;
+                }
+              }
+
+              if (imgUrl) {
+                activityImage.src = imgUrl;
+                activityImage.style.display = 'block';
+              } else {
+                activityImage.src = '';
+                activityImage.style.display = 'none';
+              }
+
+              progressContainer.style.display = 'none';
+
+              if (gameAct.timestamps && gameAct.timestamps.start) {
+                gameStart = gameAct.timestamps.start;
+                updateGameElapsed();
+                gameElapsedTimer = setInterval(updateGameElapsed, 1000);
+                elapsedContainer.style.display = 'block';
+              } else {
+                elapsedContainer.style.display = 'none';
+              }
+
+            } else if (streamAct) {
+              // Streaming mode
+              activitySection.style.display = 'flex';
+              activityIcon.innerHTML = ICONS.stream;
+              activityBadge.textContent = 'STREAMING';
+              activityTitle.textContent = streamAct.name;
+              activitySubtitle.textContent = streamAct.details || streamAct.state || 'Live Stream';
+              activityState.style.display = 'none';
+              activityImage.style.display = 'none';
+              progressContainer.style.display = 'none';
+              elapsedContainer.style.display = 'none';
+
+            } else {
+              activitySection.style.display = 'none';
+              progressContainer.style.display = 'none';
+              elapsedContainer.style.display = 'none';
+            }
+          })
+          .catch(err => {
+            console.error('Lanyard API error:', err);
+          });
+      }
+
+      fetchLanyard();
+      setInterval(fetchLanyard, 15000);
+    })();
+  </script>
+</body>
+</html>
+
+<!-- Humanized: small dev signature + easter egg (non-destructive) -->
+<script>
+if (!window.__outoftune_humanized) {
+    window.__outoftune_humanized = true;
+    console.log('%cWhat you looking at?', 'color:#ffe6f0; font-weight:700');
+    function revealTinyEgg(){
+        console.log('%cTiny easter egg: you pressed Ctrl+Shift+H', 'color:#ffd1ee; font-weight:700');
+        try { document.body.style.outline = '3px dashed rgba(255,160,200,0.08)'; setTimeout(()=>document.body.style.outline='',900); } catch(e){}
+    }
+    window.addEventListener('keydown', (e)=>{ if(e.ctrlKey && e.shiftKey && (e.key==='H' || e.key==='h')) revealTinyEgg(); });
+    window.revealOutOfTune = revealTinyEgg;
+}
+</script>

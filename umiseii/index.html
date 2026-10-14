@@ -15,7 +15,7 @@
   <meta name="twitter:description" content="Vartist - Designer - Vsinger" />
   <link rel="icon" type="image/png" href="./assets/icons/intro.png" />
   <link rel="shortcut icon" type="image/png" href="./assets/icons/intro.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Lexend+JP:wght@300;400;500&family=Lexend:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css">
 
   <style>
@@ -478,30 +478,33 @@
     }
 
     .track-name {
-      font-family: 'Press Start 2P', 'Noto Sans JP', monospace;
-      font-weight: 300;
-      font-size: 0.48rem;
-      line-height: 1.4;
+      display: flex;
+      align-items: baseline;
+      font-family: 'Lexend JP', 'Lexend', sans-serif;
+      font-weight: 500;
+      font-size: 0.60rem;
+      line-height: 1.35;
       color: var(--fg);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.035em;
       text-shadow: 0 1px 4px rgba(20, 14, 35, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
     }
 
-
     .track-icon {
-      margin-right: 0.35rem;
+      flex: 0 0 auto;
+      margin-right: 0.42rem;
       color: var(--pop2);
-      font-size: 0.52rem;
-      vertical-align: -0.03em;
+      font-size: 0.55rem;
+      vertical-align: baseline;
     }
 
     .track-sub {
-      font-family: 'Press Start 2P', 'Noto Sans JP', monospace;
-      font-weight: 300;
-      font-size: 0.42rem;
-      line-height: 1.3;
+      padding-left: 1rem;
+      font-family: 'Lexend JP', 'Lexend', sans-serif;
+      font-weight: 400;
+      font-size: 0.52rem;
+      line-height: 1.35;
       color: var(--muted);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.025em;
       text-shadow: 0 1px 4px rgba(20, 14, 35, 0.95), 0 0 2px rgba(0, 0, 0, 0.9);
     }
 
@@ -1089,329 +1092,278 @@
     }
 
     /* ─────────────────────────────────────────────────────────────
-       LANYARD WIDGET (Discord & Spotify Status Card)
-       Palette pulled from Umiseii's :root — pop/pop2/fg/muted —
-       so it sits naturally in the sky/night theme.
+       LANYARD WIDGET — glass card, matching the supplied reference
        ───────────────────────────────────────────────────────────── */
     .lanyard-card {
+      --lc-bg: rgba(20, 14, 35, 0.58);
+      --lc-line: rgba(255, 255, 255, 0.28);
+      --lc-line-soft: rgba(255, 255, 255, 0.13);
+      --lc-glow: rgba(181, 226, 255, 0.16);
+      --lc-accent: var(--pop2);
+
       position: fixed;
-      right: 1.5rem;
       top: 50%;
+      right: max(24px, env(safe-area-inset-right));
       transform: translateY(-50%);
-      width: 260px;
+      width: 280px;
+      max-width: calc(100vw - 2rem);
+      box-sizing: border-box;
       padding: 14px;
-      background: rgba(20, 14, 35, 0.55);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1.5px solid var(--toggle-border);
-      border-radius: 14px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 18px rgba(179, 178, 255, 0.18);
-      z-index: 40;
-      transition: box-shadow 0.4s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-      font-family: 'Press Start 2P', 'Noto Sans JP', monospace;
-      font-weight: 300;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      color: var(--fg);
+      font-family: 'Lexend JP', 'Lexend', sans-serif;
+      font-weight: 400;
+      background: var(--lc-bg);
+      -webkit-backdrop-filter: blur(14px) saturate(125%);
+      backdrop-filter: blur(14px) saturate(125%);
+      border: 1px solid var(--lc-line-soft);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38), 0 0 18px var(--lc-glow);
+      z-index: 40;
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
+      transition: opacity 0.45s ease, visibility 0.45s ease,
+        border-color 0.35s ease, box-shadow 0.35s ease,
+        transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      isolation: isolate;
     }
 
     .lanyard-card::before {
       content: '';
       position: absolute;
       inset: -10px;
-      border-radius: 18px;
-      pointer-events: none;
       z-index: -1;
-      background: radial-gradient(ellipse at center, color-mix(in srgb, var(--pop) 55%, transparent 45%), transparent 60%);
-      filter: blur(16px) saturate(120%);
-      opacity: 0.8;
+      border-radius: 16px;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center,
+        color-mix(in srgb, var(--pop) 34%, transparent 66%), transparent 68%);
+      filter: blur(15px) saturate(120%);
+      opacity: 0.7;
       mix-blend-mode: screen;
     }
 
     .lanyard-card.visible {
       opacity: 1;
+      visibility: visible;
       pointer-events: auto;
+      animation: lanyard-float 6s ease-in-out infinite;
+    }
+
+    @keyframes lanyard-float {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 0 -5px; }
     }
 
     .lanyard-card:hover {
-      transform: translateY(-52%) scale(1.02);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 26px rgba(179, 178, 255, 0.28);
-      border-color: var(--pop2);
+      transform: translateY(-50%) scale(1.02);
+      animation-play-state: paused;
+      border-color: var(--lc-line);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.46), 0 0 25px var(--lc-glow);
     }
 
     body.gallery-open .lanyard-card {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transform: translateY(-50%) scale(0.9);
+      transform: translateY(-50%) scale(0.96);
+      animation: none;
     }
 
-    .lanyard-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .lanyard-avatar-container {
-      position: relative;
-      width: 46px;
-      height: 46px;
-      flex-shrink: 0;
-    }
-
+    .lanyard-header { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .lanyard-avatar-container { position: relative; width: 48px; height: 48px; flex: 0 0 48px; }
     .lanyard-avatar {
+      display: block;
       width: 100%;
       height: 100%;
+      box-sizing: border-box;
       border-radius: 50%;
       object-fit: cover;
-      border: 1.5px solid var(--toggle-border);
+      border: 1.5px solid var(--lc-line-soft);
+      background: rgba(255, 255, 255, 0.05);
+      transition: border-color 0.3s ease;
     }
-
     .lanyard-status-dot {
       position: absolute;
-      bottom: 0;
       right: 0;
-      width: 12px;
-      height: 12px;
+      bottom: 0;
+      width: 13px;
+      height: 13px;
+      box-sizing: border-box;
+      border: 2px solid #21182d;
       border-radius: 50%;
-      border: 2px solid #1a1428;
-      background-color: #80848e;
+      background: #80848e;
       transition: background-color 0.3s ease;
     }
-
-    .lanyard-status-dot.online { background-color: #23a55a; animation: lanyard-pulse-green 2s infinite; }
-    .lanyard-status-dot.idle { background-color: #f0b232; }
-    .lanyard-status-dot.dnd { background-color: #f23f43; }
-    .lanyard-status-dot.offline { background-color: #80848e; }
-
+    .lanyard-status-dot.online { background: #23a55a; animation: lanyard-pulse-green 2s infinite; }
+    .lanyard-status-dot.idle { background: #f0b232; }
+    .lanyard-status-dot.dnd { background: #f23f43; }
+    .lanyard-status-dot.offline { background: #80848e; }
     @keyframes lanyard-pulse-green {
       0% { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0.4); }
       70% { box-shadow: 0 0 0 6px rgba(35, 165, 90, 0); }
       100% { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0); }
     }
 
-    .lanyard-info {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      min-width: 0;
-    }
-
+    .lanyard-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
     .lanyard-username {
-      font-size: 0.5rem;
-      letter-spacing: 0.05em;
+      font-family: 'Lexend JP', 'Lexend', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      line-height: 1.35;
       color: var(--fg);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .lanyard-custom-status {
-      font-size: 0.48rem;
+      font-size: 0.72rem;
+      line-height: 1.4;
       color: var(--muted);
+      white-space: normal;
+      overflow-wrap: anywhere;
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
       line-clamp: 2;
       overflow: hidden;
-      white-space: normal;
-      word-break: break-word;
       margin: 0;
-      line-height: 1.4;
     }
-
     .lanyard-custom-emoji {
       display: inline-block;
-      width: 13px;
-      height: 13px;
-      vertical-align: text-bottom;
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      vertical-align: -2px;
       margin-right: 4px;
     }
-
     .lanyard-status-text {
-      font-size: 0.5rem;
+      font-size: 0.68rem;
+      line-height: 1.35;
       color: var(--muted);
-      opacity: 0.85;
-      letter-spacing: 0.03em;
+      opacity: 0.82;
+      letter-spacing: 0.025em;
+      text-transform: capitalize;
     }
 
-    .lanyard-spotify {
-      border-top: 1px solid var(--toggle-border);
+    .lanyard-activity {
+      border-top: 1px solid var(--lc-line-soft);
       padding-top: 10px;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      min-width: 0;
     }
-
-    .lanyard-spotify-header {
-      font-size: 0.4rem;
-      letter-spacing: 0.08em;
+    .lanyard-activity-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       color: var(--pop);
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.43rem;
+      letter-spacing: 0.06em;
+      line-height: 1.5;
     }
-
-    .lanyard-spotify-header i {
-      color: #1db954;
-      font-size: 0.58rem;
-    }
-
-    .lanyard-spotify-content {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .lanyard-spotify-album {
+    .lanyard-activity-header svg { display: block; width: 12px; height: 12px; stroke: currentColor; flex: 0 0 auto; }
+    .lanyard-activity-content { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .lanyard-activity-details { text-align: left; align-items: flex-start; justify-content: center; }
+    .lanyard-activity-title, .lanyard-activity-subtitle { display: block; width: 100%; box-sizing: border-box; text-align: left; margin: 0; font-family: 'Lexend JP', 'Lexend', sans-serif; }
+    .lanyard-activity-image {
+      display: block;
       width: 44px;
       height: 44px;
-      border-radius: 7px;
+      flex: 0 0 44px;
+      box-sizing: border-box;
+      border: 1px solid var(--lc-line-soft);
+      border-radius: 6px;
       object-fit: cover;
-      border: 1px solid var(--toggle-border);
-      flex-shrink: 0;
-      display: none;
+      background: rgba(255, 255, 255, 0.04);
     }
-
-    .lanyard-spotify-details {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      min-width: 0;
-      flex-grow: 1;
-    }
-
-    .lanyard-spotify-track {
-      font-size: 0.5rem;
+    .lanyard-activity-details { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
+    .lanyard-activity-title {
+      font-size: 0.72rem;
+      font-weight: 500;
       color: var(--fg);
+      line-height: 1.35;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.4;
     }
-
-    .lanyard-spotify-artist {
-      font-size: 0.45rem;
+    .lanyard-activity-subtitle {
+      font-size: 0.64rem;
       color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
       line-height: 1.3;
-    }
-
-    .lanyard-spotify-progress-container {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .lanyard-spotify-progress-bar {
-      height: 3px;
-      width: 100%;
-      background: var(--toggle-border);
-      border-radius: 2px;
+      white-space: nowrap;
       overflow: hidden;
-      position: relative;
+      text-overflow: ellipsis;
     }
-
-    .lanyard-spotify-progress-fill {
-      height: 100%;
-      background: var(--pop2);
-      width: 0%;
-      transition: width 0.5s linear;
-      border-radius: 2px;
-    }
-
-    .lanyard-spotify-time {
-      display: flex;
-      justify-content: space-between;
-      font-family: monospace;
-      font-size: 0.42rem;
+    .lanyard-activity-state {
+      font-size: 0.62rem;
       color: var(--muted);
-      opacity: 0.75;
+      opacity: 0.78;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+    .lanyard-activity-progress-container { display: flex; flex-direction: column; gap: 5px; }
+    .lanyard-activity-progress-bar {
+      position: relative;
+      width: 100%;
+      height: 3px;
+      overflow: hidden;
+      border-radius: 3px;
+      background: var(--lc-line-soft);
+    }
+    .lanyard-activity-progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--pop2), var(--pop));
+      transition: width 0.5s linear;
+    }
+    .lanyard-activity-time { display: flex; justify-content: space-between; gap: 10px; font-family: 'Lexend', monospace; font-size: 0.62rem; color: var(--muted); opacity: 0.78; font-variant-numeric: tabular-nums; }
+    .lanyard-activity-elapsed { font-family: 'Lexend', monospace; font-size: 0.62rem; color: var(--muted); opacity: 0.78; letter-spacing: 0.025em; }
 
     @media (max-width: 768px) {
       .lanyard-card {
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        bottom: 144px;
         top: auto;
-        width: auto;
-        min-width: 230px;
-        max-width: calc(100% - 2rem);
-        padding: 10px 14px;
-        box-sizing: border-box;
-      }
-      .lanyard-card:hover {
-        transform: translateX(-50%) scale(1.01);
-      }
-      .lanyard-username { font-size: 0.58rem; }
-      .lanyard-custom-status { font-size: 0.56rem; }
-      .lanyard-status-text { font-size: 0.5rem; }
-      .lanyard-spotify-track { font-size: 0.58rem; }
-      .lanyard-spotify-artist { font-size: 0.5rem; }
-      .lanyard-spotify-time { font-size: 0.46rem; }
-    }
-
-    @media (max-width: 480px) {
-      .lanyard-card {
-        bottom: 144px;
-        min-width: 200px;
-        padding: 8px 12px;
-        gap: 8px;
-      }
-      .lanyard-avatar-container { width: 38px; height: 38px; }
-    }
-
-    /* iOS Safari: do not lock the document to the small/unstable viewport. */
-    html {
-      min-height: 100%;
-      min-height: 100svh;
-      background: #758ba5;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    html, body {
-      height: auto;
-      min-height: 100%;
-      min-height: 100svh;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
-
-    main {
-      min-height: 100svh;
-      min-height: 100dvh;
-      box-sizing: border-box;
-      padding-top: max(2rem, env(safe-area-inset-top));
-      padding-bottom: max(2rem, env(safe-area-inset-bottom));
-    }
-
-    .lanyard-card {
-      max-width: calc(100vw - 2rem);
-      box-sizing: border-box;
-      overscroll-behavior: contain;
-    }
-
-    @media (max-width: 768px) {
-      .lanyard-card {
+        right: auto;
+        left: 50%;
         bottom: calc(144px + env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        width: min(320px, calc(100vw - 2rem));
         max-width: calc(100vw - 2rem);
         max-height: calc(100svh - 190px - env(safe-area-inset-bottom));
+        overflow-y: auto;
+        padding: 10px 14px;
       }
+      .lanyard-card:hover { transform: translateX(-50%) scale(1.01); }
+      body.gallery-open .lanyard-card { transform: translateX(-50%) scale(0.96); }
+      .lanyard-username { font-size: 0.82rem; }
+      .lanyard-custom-status { font-size: 0.7rem; }
+      .lanyard-status-text { font-size: 0.68rem; }
+      .lanyard-activity-title { font-size: 0.72rem; }
+      .lanyard-activity-subtitle { font-size: 0.64rem; }
+      .lanyard-activity-state, .lanyard-activity-time, .lanyard-activity-elapsed { font-size: 0.64rem; }
+    }
+    @media (max-width: 480px) {
+      .lanyard-card { bottom: calc(144px + env(safe-area-inset-bottom)); width: calc(100vw - 1.5rem); max-width: calc(100vw - 1.5rem); padding: 9px 12px; gap: 9px; }
+      .lanyard-avatar-container { width: 42px; height: 42px; flex-basis: 42px; }
+      .lanyard-activity-image { width: 40px; height: 40px; flex-basis: 40px; }
+    }
+    @media (max-height: 480px) and (max-width: 900px) {
+      .lanyard-card { bottom: 12px; max-height: calc(100svh - 24px); }
+      .lanyard-activity { display: none !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lanyard-status-dot.online, .lanyard-card.visible { animation: none; }
+      .lanyard-card, .lanyard-card:hover { transition: opacity 0.25s ease, visibility 0.25s ease; }
     }
 
-    @media (max-width: 480px) {
-      .lanyard-card {
-        bottom: calc(144px + env(safe-area-inset-bottom));
-        max-width: calc(100vw - 1rem);
-        max-height: calc(100svh - 190px - env(safe-area-inset-bottom));
-      }
-    }
   </style>
 </head>
 
@@ -1483,25 +1435,31 @@
         <div class="lanyard-status-text" id="lanyardStatusText">offline</div>
       </div>
     </div>
-    <div class="lanyard-spotify" id="lanyardSpotify" style="display: none;">
-      <div class="lanyard-spotify-header">
-        <i class="fa-brands fa-spotify"></i> <span>Listening to Spotify</span>
+    <!-- Universal Rich Activity (Spotify, Games, Dev, Stream) -->
+    <div class="lanyard-activity" id="lanyardActivity" style="display: none;">
+      <div class="lanyard-activity-header" id="lanyardActivityHeader">
+        <span id="lanyardActivityIcon"></span>
+        <span id="lanyardActivityBadge">ACTIVITY</span>
       </div>
-      <div class="lanyard-spotify-content">
-        <img class="lanyard-spotify-album" id="lanyardSpotifyAlbum" src="" alt="Album Art" />
-        <div class="lanyard-spotify-details">
-          <div class="lanyard-spotify-track" id="lanyardSpotifyTrack">Song Title</div>
-          <div class="lanyard-spotify-artist" id="lanyardSpotifyArtist">Artist Name</div>
+      <div class="lanyard-activity-content">
+        <img class="lanyard-activity-image" id="lanyardActivityImage" src="" alt="Activity Thumbnail" />
+        <div class="lanyard-activity-details">
+          <div class="lanyard-activity-title" id="lanyardActivityTitle">Activity Title</div>
+          <div class="lanyard-activity-subtitle" id="lanyardActivitySubtitle">Subtitle</div>
+          <div class="lanyard-activity-state" id="lanyardActivityState" style="display: none;">State</div>
         </div>
       </div>
-      <div class="lanyard-spotify-progress-container">
-        <div class="lanyard-spotify-progress-bar">
-          <div class="lanyard-spotify-progress-fill" id="lanyardSpotifyProgressFill"></div>
+      <div class="lanyard-activity-progress-container" id="lanyardProgressContainer" style="display: none;">
+        <div class="lanyard-activity-progress-bar">
+          <div class="lanyard-activity-progress-fill" id="lanyardProgressFill"></div>
         </div>
-        <div class="lanyard-spotify-time">
-          <span id="lanyardSpotifyTimeCurrent">0:00</span>
-          <span id="lanyardSpotifyTimeTotal">0:00</span>
+        <div class="lanyard-activity-time">
+          <span id="lanyardTimeCurrent">0:00</span>
+          <span id="lanyardTimeTotal">0:00</span>
         </div>
+      </div>
+      <div class="lanyard-activity-elapsed" id="lanyardActivityElapsed" style="display: none;">
+        <span id="lanyardElapsedTime">00:00 elapsed</span>
       </div>
     </div>
   </div>
@@ -1529,8 +1487,8 @@
   </footer>
 
   <div class="track">
-    <div class="track-name"><i class="fa-solid fa-music track-icon" aria-hidden="true"></i> Dust Cascade</div>
-    <div class="track-sub">I'm a genshin addict</div>
+    <div class="track-name"><i class="fa-solid fa-music track-icon" aria-hidden="true"></i> WELCOME BACK ／ ナースロボ＿タイプT</div>
+    <div class="track-sub">Fixing everything!</div>
   </div>
 
   <audio id="bgm" preload="auto" loop>
@@ -2216,17 +2174,32 @@
       const username = document.getElementById('lanyardUsername');
       const customStatus = document.getElementById('lanyardCustomStatus');
       const statusText = document.getElementById('lanyardStatusText');
-      const spotifySection = document.getElementById('lanyardSpotify');
-      const spotifyAlbum = document.getElementById('lanyardSpotifyAlbum');
-      const spotifyTrack = document.getElementById('lanyardSpotifyTrack');
-      const spotifyArtist = document.getElementById('lanyardSpotifyArtist');
-      const spotifyProgressFill = document.getElementById('lanyardSpotifyProgressFill');
-      const spotifyTimeCurrent = document.getElementById('lanyardSpotifyTimeCurrent');
-      const spotifyTimeTotal = document.getElementById('lanyardSpotifyTimeTotal');
+      const activitySection = document.getElementById('lanyardActivity');
+      const activityIcon = document.getElementById('lanyardActivityIcon');
+      const activityBadge = document.getElementById('lanyardActivityBadge');
+      const activityImage = document.getElementById('lanyardActivityImage');
+      const activityTitle = document.getElementById('lanyardActivityTitle');
+      const activitySubtitle = document.getElementById('lanyardActivitySubtitle');
+      const activityState = document.getElementById('lanyardActivityState');
+      const progressContainer = document.getElementById('lanyardProgressContainer');
+      const progressFill = document.getElementById('lanyardProgressFill');
+      const timeCurrent = document.getElementById('lanyardTimeCurrent');
+      const timeTotal = document.getElementById('lanyardTimeTotal');
+      const elapsedContainer = document.getElementById('lanyardActivityElapsed');
+      const elapsedTime = document.getElementById('lanyardElapsedTime');
 
       let spotifyProgressTimer = null;
       let spotifyStart = 0;
       let spotifyEnd = 0;
+      let gameElapsedTimer = null;
+      let gameStart = 0;
+
+      const ICONS = {
+        music: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`,
+        game:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"></rect><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"></path></svg>`,
+        code:  `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`,
+        stream:`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.93 4.93a10 10 0 0 0 0 14.14M19.07 4.93a10 10 0 0 1 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M16.24 7.76a6 6 0 0 1 0 8.48"></path><circle cx="12" cy="12" r="2"></circle></svg>`
+      };
 
       function formatTime(ms) {
         if (isNaN(ms) || ms < 0) return '0:00';
@@ -2236,27 +2209,46 @@
         return mins + ':' + (secs < 10 ? '0' : '') + secs;
       }
 
+      function formatElapsed(ms) {
+        if (isNaN(ms) || ms < 0) return '00:00 elapsed';
+        const totalSecs = Math.floor(ms / 1000);
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        if (hrs > 0) {
+          return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs} elapsed`;
+        }
+        return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs} elapsed`;
+      }
+
       function updateSpotifyProgress() {
         if (!spotifyStart || !spotifyEnd) return;
         const now = Date.now();
         const total = spotifyEnd - spotifyStart;
         const current = Math.min(total, Math.max(0, now - spotifyStart));
-
         const pct = (current / total) * 100;
-        spotifyProgressFill.style.width = pct.toFixed(1) + '%';
-        spotifyTimeCurrent.textContent = formatTime(current);
-
+        if (progressFill) progressFill.style.width = pct.toFixed(1) + '%';
+        if (timeCurrent) timeCurrent.textContent = formatTime(current);
         if (now < spotifyEnd) {
           spotifyProgressTimer = requestAnimationFrame(updateSpotifyProgress);
         } else {
-          spotifyProgressFill.style.width = '100%';
-          spotifyTimeCurrent.textContent = formatTime(total);
+          if (progressFill) progressFill.style.width = '100%';
+          if (timeCurrent) timeCurrent.textContent = formatTime(total);
         }
       }
 
+      function updateGameElapsed() {
+        if (!gameStart) return;
+        const diff = Math.max(0, Date.now() - gameStart);
+        if (elapsedTime) elapsedTime.textContent = formatElapsed(diff);
+      }
+
+      let lanyardRequestInFlight = false;
       function fetchLanyard() {
+        if (lanyardRequestInFlight) return;
+        lanyardRequestInFlight = true;
         fetch(`https://api.lanyard.rest/v1/users/${discordId}`)
-          .then(res => res.json())
+          .then(res => { if (!res.ok) throw new Error(`Lanyard HTTP ${res.status}`); return res.json(); })
           .then(res => {
             if (!res.success) return;
             const data = res.data;
@@ -2280,7 +2272,6 @@
             // 2. Status dot & text
             const status = data.discord_status;
             statusDot.className = 'lanyard-status-dot ' + status;
-
             let displayStatus = status;
             if (status === 'dnd') displayStatus = 'Do Not Disturb';
             else if (status === 'online') displayStatus = 'Online';
@@ -2307,15 +2298,13 @@
               customStatus.style.display = 'none';
             }
 
-            // 4. Spotify / music activity
+            // 4. Universal Activity Detection (Spotify, Game, Dev, Stream)
             cancelAnimationFrame(spotifyProgressTimer);
+            if (gameElapsedTimer) { clearInterval(gameElapsedTimer); gameElapsedTimer = null; }
 
             let music = null;
-            let isSpotify = false;
-
             if (data.listening_to_spotify && data.spotify) {
               music = data.spotify;
-              isSpotify = true;
             } else {
               const act = data.activities.find(a => a.type === 2 || a.name === 'Spotify');
               if (act) {
@@ -2326,74 +2315,105 @@
                   album_art_url: '',
                   timestamps: act.timestamps
                 };
-
                 if (act.assets && act.assets.large_image) {
                   const img = act.assets.large_image;
                   if (img.startsWith('spotify:')) {
                     music.album_art_url = `https://i.scdn.co/image/${img.substring(8)}`;
-                    isSpotify = true;
                   } else if (img.startsWith('mp:')) {
                     music.album_art_url = img.replace('mp:', 'https://media.discordapp.net/');
                   } else if (act.application_id) {
                     music.album_art_url = `https://cdn.discordapp.com/app-assets/${act.application_id}/${img}.png`;
                   }
                 }
-                if (act.name === 'Spotify') {
-                  isSpotify = true;
-                }
               }
             }
 
+            const streamAct = data.activities.find(a => a.type === 1);
+            const gameAct = data.activities.find(a => a.type === 0 || a.type === 5);
+
             if (music) {
-              spotifySection.style.display = 'flex';
-
-              const spotifyHeaderSpan = spotifySection.querySelector('.lanyard-spotify-header span');
-              const spotifyHeaderIcon = spotifySection.querySelector('.lanyard-spotify-header i');
-              if (isSpotify) {
-                spotifyHeaderSpan.textContent = 'Listening to Spotify';
-                spotifyHeaderIcon.className = 'fa-brands fa-spotify';
-                spotifyHeaderIcon.style.color = '#1db954';
-              } else {
-                spotifyHeaderSpan.textContent = 'Listening to Music';
-                spotifyHeaderIcon.className = 'fa-solid fa-music';
-                spotifyHeaderIcon.style.color = 'var(--pop)';
-              }
-
-              spotifyTrack.textContent = music.song;
-              spotifyArtist.textContent = music.artist;
-
+              activitySection.style.display = 'flex';
+              activityIcon.innerHTML = ICONS.music;
+              activityBadge.textContent = 'LISTENING';
+              activityTitle.textContent = music.song;
+              activitySubtitle.textContent = music.artist;
+              activityState.style.display = 'none';
               if (music.album_art_url) {
-                spotifyAlbum.src = music.album_art_url;
-                spotifyAlbum.style.display = 'block';
+                activityImage.src = music.album_art_url;
+                activityImage.style.display = 'block';
               } else {
-                spotifyAlbum.src = '';
-                spotifyAlbum.style.display = 'none';
+                activityImage.src = '';
+                activityImage.style.display = 'none';
               }
-
-              const progressContainer = card.querySelector('.lanyard-spotify-progress-container');
               if (music.timestamps && music.timestamps.start && music.timestamps.end) {
-                spotifyTimeTotal.textContent = formatTime(music.timestamps.end - music.timestamps.start);
+                timeTotal.textContent = formatTime(music.timestamps.end - music.timestamps.start);
                 spotifyStart = music.timestamps.start;
                 spotifyEnd = music.timestamps.end;
                 updateSpotifyProgress();
-                if (progressContainer) progressContainer.style.display = 'flex';
+                progressContainer.style.display = 'flex';
               } else {
-                if (progressContainer) progressContainer.style.display = 'none';
+                progressContainer.style.display = 'none';
                 spotifyStart = 0;
                 spotifyEnd = 0;
               }
+              elapsedContainer.style.display = 'none';
+
+            } else if (gameAct) {
+              activitySection.style.display = 'flex';
+              const nameLower = gameAct.name.toLowerCase();
+              const isDev = nameLower.includes('code') || nameLower.includes('unity') || nameLower.includes('godot') || nameLower.includes('studio') || nameLower.includes('blender') || nameLower.includes('aseprite');
+              activityIcon.innerHTML = isDev ? ICONS.code : ICONS.game;
+              activityBadge.textContent = isDev ? 'DEVELOPING' : 'PLAYING';
+              activityTitle.textContent = gameAct.name;
+              activitySubtitle.textContent = gameAct.details || gameAct.state || 'In Progress';
+              if (gameAct.details && gameAct.state) {
+                activityState.textContent = gameAct.state;
+                activityState.style.display = 'block';
+              } else {
+                activityState.style.display = 'none';
+              }
+              let imgUrl = '';
+              if (gameAct.assets && gameAct.assets.large_image) {
+                const img = gameAct.assets.large_image;
+                if (img.startsWith('mp:')) {
+                  imgUrl = img.replace('mp:', 'https://media.discordapp.net/');
+                } else if (gameAct.application_id) {
+                  imgUrl = `https://cdn.discordapp.com/app-assets/${gameAct.application_id}/${img}.png`;
+                }
+              }
+              if (imgUrl) { activityImage.src = imgUrl; activityImage.style.display = 'block'; }
+              else { activityImage.src = ''; activityImage.style.display = 'none'; }
+              progressContainer.style.display = 'none';
+              if (gameAct.timestamps && gameAct.timestamps.start) {
+                gameStart = gameAct.timestamps.start;
+                updateGameElapsed();
+                gameElapsedTimer = setInterval(updateGameElapsed, 1000);
+                elapsedContainer.style.display = 'block';
+              } else {
+                elapsedContainer.style.display = 'none';
+              }
+
+            } else if (streamAct) {
+              activitySection.style.display = 'flex';
+              activityIcon.innerHTML = ICONS.stream;
+              activityBadge.textContent = 'STREAMING';
+              activityTitle.textContent = streamAct.name;
+              activitySubtitle.textContent = streamAct.details || streamAct.state || 'Live Stream';
+              activityState.style.display = 'none';
+              activityImage.style.display = 'none';
+              progressContainer.style.display = 'none';
+              elapsedContainer.style.display = 'none';
+
             } else {
-              spotifySection.style.display = 'none';
-              spotifyStart = 0;
-              spotifyEnd = 0;
+              activitySection.style.display = 'none';
+              progressContainer.style.display = 'none';
+              elapsedContainer.style.display = 'none';
             }
           })
-          .catch(err => {
-            console.error('Lanyard API error:', err);
-          });
+          .catch(err => console.error('Lanyard API error:', err))
+          .finally(() => { lanyardRequestInFlight = false; });
       }
 
-      // Initial fetch & poll every 15s
       fetchLanyard();
       setInterval(fetchLanyard, 15000);
     })();
