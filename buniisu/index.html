@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Bunnisu</title>
     <meta name="description" content="Silly artist" />
     <meta property="og:type" content="website" />
@@ -15,23 +15,24 @@
     <meta name="twitter:description" content="Silly artist" />
     <link class="icon" type="image/svg+xml" href="assets/icons/logo.svg">
     
-    <!-- GOOGLE FONTS: Noto Sans JP and KR for clean Japanese/Korean character fallback -->
+    <!-- GOOGLE FONTS: Press Start 2P for the title, Lexend for Latin letters in the lyrics,
+         Zen Kaku Gothic New (+ Noto Sans JP as backup) for Japanese characters -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Lexend:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@400;500&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* DEEPLY DIMMED TWILIGHT NAVY PALETTE */
-            --bg-base: #181e29;
-            --bg-base-dark: #12161f;
-            --primary: #a5b4fc;       
-            --text-main: #e2e8f0;     
-            --text-muted: #64748b;    
+            /* NEUTRAL GRAYSCALE PALETTE (matches the black and white video) */
+            --bg-base: #0e0e10;
+            --bg-base-dark: #080809;
+            --primary: #d6d6da;       
+            --text-main: #ededf0;     
+            --text-muted: #8a8a92;    
 
             /* Glowing text wave palette */
-            --wave-light: #C7D7FF;
-            --wave-dark: #7D92B5;
+            --wave-light: #f2f2f5;
+            --wave-dark: #85858d;
 
             /* CELESTIAL BACKGROUND ELEMENTS */
             --moon-rim: rgba(255, 255, 255, 0.85);
@@ -64,12 +65,27 @@
             width: 100%;
         }
 
+        /* PAGE LAYOUT
+           One grid holds the three visible pieces, so nothing depends on how tall
+           the current lyric line is. The brand sits in the flexible top row; the
+           lyrics and the footer share a fixed bottom row. */
         body {
-            height: 100svh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
+            height: 100vh;   /* fallback */
+            height: 100dvh;  /* follows the phone browser's address bar */
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: minmax(0, 1fr) auto;
+            grid-template-areas:
+                "brand  brand"
+                "lyrics footer";
+            column-gap: 24px;
+            row-gap: 20px;
+            align-items: end;
+            padding:
+                max(40px, env(safe-area-inset-top))
+                max(40px, env(safe-area-inset-right))
+                max(40px, env(safe-area-inset-bottom))
+                max(40px, env(safe-area-inset-left));
         }
 
         /* ─────────────────────────────────────────────────────────────
@@ -113,6 +129,49 @@
             mix-blend-mode: overlay;
             background-image: radial-gradient(var(--dust) 1px, transparent 1px);
             background-size: 4px 4px;
+        }
+
+        /* VIDEO BACKGROUND
+           The video already has its own moon and stars, so the CSS moon and
+           canvas stars below are hidden. To bring them back, delete the
+           ".moon, #starCanvas { display: none; }" rule. */
+        .bg-video {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;        /* fills the screen, no black bands */
+            object-position: 32% 50%; /* keeps the moon in view on phones */
+            z-index: 0;
+            pointer-events: none;
+            filter: brightness(0.55); /* dims the bright trees so text stays readable */
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        body.ambient-active .bg-video {
+            opacity: 1;
+        }
+
+        .bg-scrim {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                linear-gradient(90deg, rgba(8, 8, 10, 0.75) 0%, rgba(8, 8, 10, 0.35) 55%, rgba(8, 8, 10, 0.1) 100%),
+                linear-gradient(0deg, rgba(8, 8, 10, 0.7) 0%, transparent 35%);
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        body.ambient-active .bg-scrim {
+            opacity: 1;
+        }
+
+        .moon,
+        #starCanvas {
+            display: none;
         }
 
         .moon {
@@ -198,16 +257,15 @@
            UI CORE WORKSPACE (DESKTOP MODES)
            ───────────────────────────────────────────────────────────── */
         .content-wrapper {
+            grid-area: brand;
+            align-self: center;
             position: relative;
+            z-index: 10;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: flex-start;
             text-align: left;
-            z-index: 10;
-            width: 100%;
-            padding-left: 40px;
-            padding-right: 40px;
+            min-width: 0;
         }
 
         .brand-section {
@@ -243,7 +301,7 @@
             background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: wave-slide 4s linear infinite;
-            filter: drop-shadow(0 0 8px rgba(199, 215, 255, 0.65));
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
         }
 
         @keyframes wave-slide {
@@ -262,17 +320,23 @@
         }
 
         .socials-row {
-            margin-top: 8px;
             display: flex;
             align-items: center;
+            gap: 2px;
+            /* each icon has 11px of tap padding; pull the row back so the first
+               icon lines up with the left edge of the text above it */
+            margin: 2px 0 0 -11px;
         }
 
         .social-icon-link {
             color: var(--primary);
-            transition: transform 0.2s ease, color 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 44px;
+            height: 44px; /* comfortable tap target */
+            border-radius: 8px;
+            transition: transform 0.2s ease, color 0.2s ease;
         }
 
         .social-icon-link:hover {
@@ -280,69 +344,96 @@
             transform: scale(1.1);
         }
 
+        /* Quiet, staggered entrance after the intro overlay is dismissed. */
+        .brand-section > * {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 700ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.ambient-active .brand-section > * {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        body.ambient-active .brand-section > :nth-child(1) { transition-delay: 100ms; }
+        body.ambient-active .brand-section > :nth-child(2) { transition-delay: 220ms; }
+        body.ambient-active .brand-section > :nth-child(3) { transition-delay: 340ms; }
+
+        .track-title,
+        .lyric-line,
+        .footer-copy,
+        .footer-author {
+            transition: opacity 450ms ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .social-icon-link:focus-visible {
+            outline: 1px solid var(--primary);
+            outline-offset: -2px;
+        }
+
         .social-icon-link svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             fill: currentColor;
         }
 
         /* Audio Lyrics Display Box */
         .lyrics-container {
-            position: fixed;
-            left: 40px;
-            bottom: 40px;
+            grid-area: lyrics;
+            position: relative;
             z-index: 100;
             display: flex;
             flex-direction: column;
             gap: 8px;
-            width: min(540px, calc(100vw - 80px));
+            width: min(540px, 100%);
+            min-width: 0;
         }
 
         .track-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.45rem;
+            font-family: 'Lexend', 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+            font-size: 0.72rem;
             color: var(--text-muted);
-            font-weight: bold;
-            letter-spacing: 0.04em;
+            font-weight: 400;
+            letter-spacing: 0.06em;
         }
 
         .lyric-line {
-            font-family: 'Press Start 2P', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
-            font-size: 0.5rem; 
+            font-family: 'Lexend', 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
             color: var(--text-main);
             line-height: 1.7;
-            min-height: 3.2em; 
-            transition: color 0.3s ease;
-            letter-spacing: 0.04em;
+            min-height: 3.4em;
+            letter-spacing: 0.06em;
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
         }
 
+        /* Each line is animated from the script: it wipes in from the bottom to the top */
         .lyric-typed {
-            display: inline;
-        }
-
-        .lyric-caret {
             display: inline-block;
-            width: 0.5ch;
-            margin-left: 4px;
-            color: var(--primary);
-            animation: caretBlink 0.65s step-end infinite;
-            vertical-align: baseline;
+            clip-path: inset(100% 0 0 0);
         }
 
-        @keyframes caretBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+
 
         /* Stacked bottom-right footer system */
         .footer-right {
-            position: fixed;
-            right: 40px;
-            bottom: 40px;
+            grid-area: footer;
+            position: relative;
             z-index: 100;
             font-family: 'Press Start 2P', monospace;
             color: var(--text-muted);
-            font-size: 0.42rem;
+            font-size: 0.5rem;
             line-height: 1.7;
             letter-spacing: 0.5px;
             text-align: right;
@@ -352,7 +443,7 @@
         }
 
         .footer-copy {
-            opacity: 0.6;
+            opacity: 0.8;
         }
 
         .footer-author {
@@ -417,86 +508,160 @@
         /* ─────────────────────────────────────────────────────────────
            UPDATED: CENTERED & VERTICALLY BALANCED MOBILE ARCHITECTURE
            ───────────────────────────────────────────────────────────── */
-        @media (max-width: 768px) {
+        /* DESKTOP AND TABLET (anything wider than a phone)
+           The bottom edge is part of the page grid, so the song name lines up with
+           the copyright line and the lyric lines up with "Bunnisu" on the right
+           (each pair shares a text baseline). The two boxes dissolve
+           (display: contents) so their text can sit directly in the grid. */
+        @media (min-width: 769px) {
             body {
-                justify-content: center; /* FIXED: Vertically centers everything on the screen */
-                align-items: center;     /* Horizontally centers everything */
-                padding: 24px; 
+                grid-template-rows: minmax(0, 1fr) auto auto;
+                row-gap: 0;
             }
 
             .content-wrapper {
-                padding: 0;
-                justify-content: center;
-                align-items: center; 
-                text-align: center;  
-                height: auto;
-                width: 100%;
+                grid-row: 1;
+                grid-column: 1 / -1;
+                margin-bottom: 20px;
+            }
+
+            .lyrics-container,
+            .footer-right {
+                display: contents;
+            }
+
+            .track-title,
+            .lyric-line,
+            .footer-copy,
+            .footer-author {
+                position: relative;
+                z-index: 100;
+                align-self: baseline;
+            }
+
+            .track-title {
+                grid-row: 2;
+                grid-column: 1;
+                margin-bottom: 4px;
+            }
+
+            .lyric-line {
+                grid-row: 3;
+                grid-column: 1;
+                min-height: 0;
+                max-width: 640px;
+            }
+
+            .footer-copy {
+                grid-row: 2;
+                grid-column: 2;
+                justify-self: end;
+                margin-bottom: 4px;
+            }
+
+            .footer-author {
+                grid-row: 3;
+                grid-column: 2;
+                justify-self: end;
+            }
+        }
+
+        /* Taller screens: center the title block on the whole page */
+        @media (min-width: 769px) and (min-height: 561px) {
+            .content-wrapper {
+                grid-row: 1 / -1;
+                margin-bottom: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: minmax(0, 1fr) auto auto;
+                grid-template-areas:
+                    "brand"
+                    "lyrics"
+                    "footer";
+                row-gap: 20px;
+                padding:
+                    max(24px, env(safe-area-inset-top))
+                    max(24px, env(safe-area-inset-right))
+                    max(20px, env(safe-area-inset-bottom))
+                    max(24px, env(safe-area-inset-left));
+            }
+
+            .content-wrapper {
+                align-items: center;
+                text-align: center;
+                padding-top: 28dvh; /* keeps the title below the moon in the video */
             }
 
             .brand-section {
                 gap: 10px;
                 width: 100%;
-                align-items: center; 
+                align-items: center;
             }
 
             .brand-section h1.wave-text {
-                font-size: 1.4rem; 
+                font-size: 1.4rem;
             }
 
             .socials-row {
-                justify-content: center; 
-                width: 100%;
+                justify-content: center;
+                margin-left: 0;
             }
 
-            .moon.big {
-                width: 90px;
-                height: 90px;
-                top: 8%; /* FIXED: Pushed down slightly from the very top border edge */
-                right: auto;
-                left: 50%;
-                transform: translateX(-50%); 
-                animation: moon-bob-mobile 16s ease-in-out infinite;
-            }
-
-            @keyframes moon-bob-mobile {
-                0%, 100% { transform: translate(-50%, 0); }
-                50% { transform: translate(-50%, -8px); }
+            .bg-scrim {
+                /* text is centered on phones, so dim evenly instead of from the left */
+                background: rgba(8, 8, 10, 0.5);
             }
 
             .lyrics-container {
-                position: relative;
-                left: auto;
-                bottom: auto;
-                top: auto;
-                margin-top: 32px; /* FIXED: Proportional spacing relative to the brand header */
                 width: 100%;
-                gap: 8px;
-                align-items: center; 
+                align-items: center;
+                text-align: center;
             }
 
             .track-title {
-                font-size: 0.44rem;
+                font-size: 0.7rem;
                 line-height: 1.5;
                 text-align: center;
             }
 
             .lyric-line {
-                font-size: 0.58rem; 
-                text-align: center; 
-                min-height: 4.5em; 
+                font-size: 1rem;
+                text-align: center;
+                min-height: 5.1em; /* room for three lines, so the layout never jumps */
                 width: 100%;
             }
 
             .footer-right {
-                position: fixed;
-                left: 24px;
-                right: 24px;
-                bottom: 24px;
-                text-align: center;
-                align-items: center;
                 flex-direction: row;
                 justify-content: space-between;
-                width: calc(100% - 48px);
+                align-items: center;
+                width: 100%;
+            }
+        }
+
+        /* Short screens, such as a phone held sideways */
+        @media (max-height: 480px) {
+            body {
+                padding-top: max(20px, env(safe-area-inset-top));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        @media (max-width: 768px) and (max-height: 480px) {
+            body {
+                row-gap: 12px;
+            }
+
+            .content-wrapper {
+                padding-top: 0;
+            }
+
+            .lyric-line {
+                min-height: 3.4em;
             }
         }
     </style>
@@ -505,6 +670,11 @@
 <body>
 
     <div class="space-plate" aria-hidden="true"></div>
+    <video class="bg-video" autoplay loop muted playsinline preload="auto" aria-hidden="true">
+        <source src="bg.mp4" type="video/mp4">
+        <source src="bg.webm" type="video/webm">
+    </video>
+    <div class="bg-scrim" aria-hidden="true"></div>
     <div class="moon big" aria-hidden="true"></div>
     <canvas id="starCanvas" aria-hidden="true"></canvas>
 
@@ -522,20 +692,30 @@
             <h1 id="brand-title" class="wave-text">Bunnisu</h1>
             <p class="subtitle">Silly artist</p>
             
-            <div class="socials-row">
-                <a href="https://ko-fi.com/miipuff" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Support on Ko-fi">
+            <nav class="socials-row" aria-label="Social links">
+                <a href="https://youtube.com/@kiiyuomi?si=lux6yUmomZJ5oo4t" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="YouTube" title="YouTube">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+                <a href="https://ko-fi.com/miipuff" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Ko-fi" title="Ko-fi">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.73s-.515.025-.67.437c-.13.344-.04 1.159-.04 1.159l.49 11.232c.155 1.546 1.495 2.371 2.758 2.397h11.233c1.392-.026 2.654-.876 2.887-2.397l.438-4.432s3.659-.077 5.101-1.392c1.444-1.314 1.732-4.01 1.055-6.411zm-5.024 3.737c-.31 1.727-2.062 1.83-2.062 1.83h-1.314v-7.292h1.365s1.805-.078 2.114 1.623c.31 1.7.155 2.113-.103 3.839zM5.334 7.505s1.16-.026 1.907.825c0 0 2.19-2.268 4.303-.567 0 0 1.03 1.005-.18 2.525 0 0-1.856 2.113-4.123 4.149 0 0-.258.206-.49.206l-.052-.026s-.206-.051-.386-.232c-2.165-2.061-3.66-3.865-3.66-3.865-1.03-1.417.681-3.015.681-3.015.953-.876 1.904.032 1.904.032z"/>
                     </svg>
                 </a>
-            </div>
+                <a href="https://www.tiktok.com/@kiiyuomi" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="TikTok" title="TikTok">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                    </svg>
+                </a>
+            </nav>
         </section>
     </main>
 
     <div class="lyrics-container">
         <div id="track-name" class="track-title">Loading track…</div>
         <div class="lyric-line" id="lyric-line-box">
-            <span class="lyric-typed" id="lyric-output"></span><span class="lyric-caret" id="lyric-caret">|</span>
+            <span class="lyric-typed" id="lyric-output">&nbsp;</span>
         </div>
     </div>
 
@@ -548,59 +728,28 @@
         <source src="bgm.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- LYRICS: paste your synced lyrics inside the script block below, one line each, like this:
+         [minutes:seconds.hundredths] the lyric text
+         A timestamp with no text (an empty line) fades the current line out. -->
     <script type="text/plain" id="lrc-content">
-        [00:10.09]ひらめきは刹那
-        [00:14.23]かがやきは永遠
-        [00:18.70]この胸に突き刺さったなら
-        [00:24.66]Killer tune
-        [00:28.09]踊りたいの 歌いたいの
-        [00:35.67]That's all I want
-        [00:37.29]すれ違って振り返ったなら
-        [00:43.14]それは killer tune
-        [00:46.90]あの曲なら もう プレイリストから外した
-        [00:55.31]アドレスもアカウントも変えたの
-        [00:59.69]写真も消した
-        [01:01.71]終わったことだもの
-        [01:04.42]素敵な音 見つかるけど
-        [01:08.90]これじゃないみたい
-        [01:13.23]イントロだけは最高
-        [01:15.85]心奪って欲しいのに ah
-        [01:23.00]始めたいの 忘れよう もう
-        [01:30.32]Goodbye my love
-        [01:31.92]巡り逢う新しい恋は
-        [01:37.45]Killer tune
-        [01:41.22]踊りたいの 歌いたいの
-        [01:48.66]That's all I want
-        [01:50.30]すれ違って振り返ったなら
-        [01:56.39]それは killer tune killer tune killer tune
-        [02:00.65]그저 숨겨놓은 상처들이
-        [02:02.48]반창고를 붙여서 보이지 않았을뿐
-        [02:06.19]그대로 남아있잖아
-        [02:09.55]차가워저버린 내 마음은
-        [02:11.64]더이상 이어폰을 끼지않고
-        [02:15.04]今日も時間を소모
-        [02:17.24]そんなRoutine も
-        [02:19.45]抜け出すかのように
-        [02:22.08]聴코える 懐かしのメロディー
-        [02:26.65]ときめきは永遠
-        [02:28.71]心奪われる
-        [02:30.48]やっぱり あの曲しかないね
-        [02:35.63]光浴びて ビートに抱かれ
-        [02:39.82]傷も癒えたけど
-        [02:44.14]あの夢 あの感情 遠ざかってゆく
-        [02:49.06]It's so faraway ah
-        [02:53.77]星は帰った 私も帰る
-        [03:02.89]ひとりぼっち 口ずさんれる killer tune
-        [03:11.98]君は今も聴いてるかな あの曲
-        [03:21.22]胸의오쿠 突き刺さったままの killer tune
-        [03:28.82]Killer tune
-        [03:29.68]Killer tune kills me
-        [03:38.48]Killer tune killer tune killer tune
-        [03:43.00]Goodbye my love...
-        [03:47.50]Killer tune killer tune killer tune
-        [03:52.06]Goodbye my love...
-        [03:56.53]Killer tune killer tune killer tune
-        [04:01.66]I want to cherish my tune
+        [00:27.54] 例えば今世界が終わり
+        [00:40.24] 私の名がかき消されたら
+        [00:53.50] 探して空を　探して風を
+        [01:19.35] 夢に見たのは青色の鳥
+        [01:31.85] 落とした羽かき集めたわ
+        [01:44.78] 探して記憶を　残して明日を
+        [02:11.40] ああ　目を閉じて浮かぶのはあの時見た最後の月
+        [02:40.78] 覚えていて　夜が明ける前に来て
+        [02:59.82] 私の名を呼んで
+        [03:11.64]
+        [03:16.39] 夢に見たのは満開の花
+        [03:28.56] 甘い香りを閉じ込めたわ
+        [03:43.12] 残して声を　残して言葉を
+        [04:10.11] ああ　甘い夢見ているわ　もうずっとずっと
+        [04:32.00] いつかの月に　照らされた
+        [04:45.83] 光の線に沿って
+        [04:55.98] ああ　今夢の続きを見ている
+        [05:09.82]
     </script>
 
     <script>
@@ -671,30 +820,27 @@
             
             const lyricOutput = document.getElementById('lyric-output');
             const trackName = document.getElementById('track-name');
-            const lyricCaret = document.getElementById('lyric-caret');
 
             let parsedLyrics = [];
             let currentLineIndex = -1;
 
-            trackName.textContent = 'Killer Tune — Kirinji (ft. YonYon)';
-            lyricOutput.textContent = '';
+            trackName.textContent = 'Sign 0 — chouchou';
+            lyricOutput.textContent = '\u00A0';
 
             function parseLRC() {
                 const lrcText = document.getElementById('lrc-content').textContent;
                 const lines = lrcText.split('\n');
-                const timeReg = /\[(\d+):(\d+)\.(\d+)\]/;
+                const timeReg = /\[(\d+):(\d+)(?:\.(\d{1,3}))?\]/;
 
                 lines.forEach(line => {
                     const match = timeReg.exec(line);
                     if (match) {
                         const minutes = parseInt(match[1]);
                         const seconds = parseInt(match[2]);
-                        const milliseconds = parseInt(match[3]) * 10;
-                        const timeInSeconds = (minutes * 60) + seconds + (milliseconds / 1000);
+                        const fraction = match[3] ? Number(`0.${match[3]}`) : 0;
+                        const timeInSeconds = (minutes * 60) + seconds + fraction;
                         const text = line.replace(timeReg, '').trim();
-                        if(text) {
-                            parsedLyrics.push({ time: timeInSeconds, text: text });
-                        }
+                        parsedLyrics.push({ time: timeInSeconds, text: text });
                     }
                 });
                 parsedLyrics.sort((a, b) => a.time - b.time);
@@ -731,6 +877,12 @@
                             }
                         }
 
+                        if (activeIndex === -1 && currentLineIndex !== -1) {
+                            /* the song looped back to the start */
+                            currentLineIndex = -1;
+                            triggerLinePrint('');
+                        }
+
                         if (activeIndex !== -1 && activeIndex !== currentLineIndex) {
                             currentLineIndex = activeIndex;
                             triggerLinePrint(parsedLyrics[currentLineIndex].text);
@@ -741,21 +893,28 @@
                 requestAnimationFrame(frameCheck);
             }
 
-            let printInterval = null;
+            /* Each lyric line wipes in from the bottom to the top.
+               An empty timestamp in the lyrics fades the previous line out. */
+            let currentAnim = null;
             function triggerLinePrint(fullText) {
-                if (printInterval) clearInterval(printInterval);
-                lyricOutput.textContent = '';
-                lyricCaret.hidden = false;
-                
-                let charIdx = 0;
-                printInterval = setInterval(() => {
-                    if (charIdx < fullText.length) {
-                        lyricOutput.textContent += fullText[charIdx];
-                        charIdx++;
-                    } else {
-                        clearInterval(printInterval);
-                    }
-                }, 25); 
+                if (currentAnim) currentAnim.cancel();
+
+                if (!fullText) {
+                    currentAnim = lyricOutput.animate(
+                        [{ clipPath: 'inset(0 0 0 0)', opacity: 1 }, { clipPath: 'inset(0 0 0 0)', opacity: 0 }],
+                        { duration: 500, easing: 'ease', fill: 'forwards' }
+                    );
+                    return;
+                }
+
+                lyricOutput.textContent = fullText;
+                currentAnim = lyricOutput.animate(
+                    [
+                        { clipPath: 'inset(100% 0 0 0)', transform: 'translateY(0.5em)' },
+                        { clipPath: 'inset(0 0 0 0)', transform: 'translateY(0)' }
+                    ],
+                    { duration: 800, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' }
+                );
             }
         });
     </script>
