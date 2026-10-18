@@ -29,6 +29,11 @@
             --accent-cyan: #00ffcc;
             --accent-orange: #ff6b35;
             --accent-pink: #ff0080;
+
+            /* Reveal easing (same curves as the Indura reference) */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+            --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         html,
@@ -67,6 +72,7 @@
             z-index: 0;
             transition: background 0.4s ease;
         }
+        body.ambient-active::before { animation: fadeInSimple 1.2s ease backwards; }
 
         /* Alternative approach with individual border segments */
         .border-segments {
@@ -78,6 +84,7 @@
             pointer-events: none;
             z-index: 1;
         }
+        body.ambient-active .border-segments { animation: fadeInSimple 1.6s ease 0.2s backwards; }
 
         /* Border line animations */
         .border-top,
@@ -85,6 +92,7 @@
         .border-bottom,
         .border-left {
             position: absolute;
+            filter: drop-shadow(0 0 4px rgba(0, 255, 204, 0.45));
         }
 
         /* Dark theme borders (default) */
@@ -202,7 +210,7 @@
             margin: 0;
         }
 
-        /* Wave effect setup */
+        /* Wave effect setup (reveal runs alongside the wave, on different properties) */
         .wave-text {
             background: linear-gradient(90deg, #00ffcc 0%, #00d9ff 25%, #ff6b35 50%, #00d9ff 75%, #00ffcc 100%);
             background-size: 300% 100%;
@@ -214,8 +222,23 @@
             filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.6));
         }
 
+        body.ambient-active .wave-text {
+            animation: revealUp 1s var(--ease-out-expo) 0.35s backwards,
+                       wave-effect 6s linear infinite;
+        }
+
         @keyframes wave-effect { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
         h1:active { transform: scale(0.98); }
+
+        /* Underline that draws itself in beneath the title */
+        .title-bar {
+            height: 2px;
+            width: 140px;
+            margin-top: 1rem;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-orange) 60%, rgba(255, 107, 53, 0));
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.35);
+        }
+        body.ambient-active .title-bar { animation: barDraw 1.1s var(--ease-draw) 0.9s backwards; }
 
         p.subtitle {
             margin-top: 1.2rem;
@@ -228,6 +251,10 @@
             letter-spacing: 0.05em;
             line-height: 1.4;
         }
+        body.ambient-active p.subtitle {
+            animation: revealUpSub 0.9s var(--ease-out-expo) 0.55s backwards,
+                       subtle-pulse 12s ease-in-out 1.5s infinite;
+        }
 
         @keyframes subtle-pulse { 0%, 100% { opacity: 0.9; } 50% { opacity: 1; } }
 
@@ -235,12 +262,12 @@
         .icons {
             margin-top: 1.6rem; 
             display: flex;
-            gap: 22px; 
+            gap: 18px; 
         }
 
         /* FIXED: Increased icon size and visual visibility */
         .icons a {
-            font-size: 1.7rem; 
+            font-size: 1.2rem; 
             color: inherit;
             text-decoration: none;
             transition: all 0.2s ease;
@@ -248,6 +275,10 @@
             align-items: center;
             justify-content: center;
         }
+        body.ambient-active .icons a { animation: iconPop 0.45s var(--ease-pop) backwards; }
+        body.ambient-active .icons a:nth-child(1) { animation-delay: 0.7s; }
+        body.ambient-active .icons a:nth-child(2) { animation-delay: 0.78s; }
+        body.ambient-active .icons a:nth-child(3) { animation-delay: 0.86s; }
         .icons a:hover { color: #ffffff; transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(0, 255, 204, 0.8)); }
 
         .click-counter {
@@ -264,18 +295,97 @@
             text-shadow: 0 0 10px rgba(0, 255, 204, 0.6);
         }
 
-        /* Bottom Left - Song Display */
-        .song-info {
+        /* Bottom Left - Track info (same structure as Indura; no lyrics, so the author sits where lyrics would be) */
+        .track-box {
             position: fixed;
             left: 40px;
             bottom: 40px;
             z-index: 100;
-            font-family: 'Press Start 2P', monospace;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: min(540px, calc(100vw - 80px));
+        }
+        body.ambient-active .track-box { animation: revealUp 0.9s var(--ease-out-expo) 1.2s backwards; }
+
+        .track-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .track-title {
             font-size: 0.5rem;
-            color: var(--text-dark);
+            font-weight: bold;
+            color: var(--accent-cyan);
+            letter-spacing: 0.04em;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.6), 0 0 22px rgba(0, 255, 204, 0.3);
+        }
+
+        .track-author {
+            font-size: 0.43rem;
+            line-height: 1.7;
+            color: #7a9aa8;
             letter-spacing: 0.04em;
         }
-        .song-info i { margin-right: 8px; color: #00ffcc; }
+
+        .mute-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mute-btn:hover { transform: scale(1.15); }
+        .mute-btn:focus,
+        .mute-btn:focus-visible { outline: none; }
+        .mute-btn:focus-visible .eq i { background: #ffffff; }
+
+        /* Muted: bars freeze flat and grey, with a slash through them */
+        .mute-btn.muted .eq i {
+            animation: none !important;
+            transform: scaleY(0.2);
+            background: #7a9aa8;
+        }
+        .mute-btn.muted::after {
+            content: "";
+            position: absolute;
+            left: 4px;
+            right: 4px;
+            top: 50%;
+            height: 1.5px;
+            background: var(--accent-orange);
+            transform: rotate(-35deg);
+        }
+
+        .eq {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 10px;
+            padding-left: 4px;
+        }
+        .eq i {
+            display: block;
+            width: 2px;
+            height: 100%;
+            background: var(--accent-cyan);
+            transform-origin: bottom;
+            transform: scaleY(0.25);
+        }
+        body.ambient-active .eq i { animation: eqBar 0.9s ease-in-out infinite; }
+        body.ambient-active .eq i:nth-child(2) { animation-duration: 0.7s; animation-delay: -0.3s; }
+        body.ambient-active .eq i:nth-child(3) { animation-duration: 1.1s; animation-delay: -0.6s; }
+        body.ambient-active .eq i:nth-child(4) { animation-duration: 0.8s; animation-delay: -0.15s; }
+        @keyframes eqBar {
+            0%, 100% { transform: scaleY(0.25); }
+            50% { transform: scaleY(1); }
+        }
 
         /* Stacked bottom-right footer system */
         .footer-right {
@@ -292,9 +402,104 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 255, 204, 0.22);
         }
+        body.ambient-active .footer-right { animation: revealUp 0.9s var(--ease-out-expo) 1.4s backwards; }
         .footer-right .footer-copy { opacity: 0.6; }
         .footer-right .footer-author { opacity: 0.85; color: #00ffcc; }
+
+        /* Reveal keyframes */
+        @keyframes revealUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes revealUpSub {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 0.9; transform: translateY(0); }
+        }
+        @keyframes iconPop {
+            0% { opacity: 0; transform: translateY(14px) scale(0.4) rotate(-12deg); }
+            100% { opacity: 1; transform: none; }
+        }
+        @keyframes barDraw {
+            from { width: 0; opacity: 0; }
+            to { width: 140px; opacity: 1; }
+        }
+        @keyframes fadeInSimple {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* CLICK TO CONTINUE INTRO (same behaviour as Indura) */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-dark);
+            cursor: pointer;
+            transition: opacity 0.9s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 1s var(--ease-draw),
+                        filter 0.9s ease;
+        }
+        .overlay.hidden {
+            opacity: 0;
+            transform: scale(1.12);
+            filter: blur(12px);
+            pointer-events: none;
+        }
+        .intro-holder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            user-select: none;
+        }
+        .intro-title {
+            font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+            color: var(--accent-cyan);
+            opacity: 0;
+            transform: translateY(25px);
+            animation: introSlideUp 0.9s var(--ease-out-expo) forwards 0.2s,
+                       introGlow 2.8s ease-in-out infinite 1.2s;
+        }
+        .intro-sub-click {
+            font-size: clamp(0.45rem, 1.2vw, 0.52rem);
+            color: #7a9aa8;
+            letter-spacing: 1px;
+            opacity: 0;
+            animation: introFade 0.8s ease forwards 0.9s,
+                       introBlink 2.2s ease-in-out infinite 1.8s;
+        }
+        @keyframes introSlideUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes introFade { to { opacity: 0.75; } }
+        @keyframes introGlow {
+            0%, 100% { text-shadow: 0 0 0 rgba(0, 255, 204, 0); }
+            50% { text-shadow: 0 0 18px rgba(0, 255, 204, 0.7); }
+        }
+        @keyframes introBlink { 0%, 100% { opacity: 0.75; } 50% { opacity: 0.3; } }
+
+        /* Ripple that expands from the click point */
+        .click-ripple {
+            position: fixed;
+            z-index: 10000;
+            width: 24px;
+            height: 24px;
+            margin: -12px 0 0 -12px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(0, 255, 204, 0.55) 0%, rgba(0, 255, 204, 0) 70%);
+            animation: ripple 1s var(--ease-out-expo) forwards;
+        }
+        @keyframes ripple {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(90); opacity: 0; }
+        }
 
         @media (max-width: 768px) {
             body { align-items: center; justify-content: center; }
@@ -302,15 +507,33 @@
             h1 { font-size: 1.5rem; }
             .subtitle { font-size: 0.6rem; }
             .icons { justify-content: center; gap: 20px; margin-top: 1.4rem; }
-            .icons a { font-size: 1.5rem; }
+            .icons a { font-size: 1.1rem; }
             
-            .song-info { position: fixed; left: 24px; bottom: 24px; font-size: 0.4rem; }
+            .track-box { left: 24px; bottom: 24px; }
+            .track-title { font-size: 0.42rem; }
+            .track-author { font-size: 0.36rem; }
             .footer-right { position: fixed; right: 24px; bottom: 24px; font-size: 0.35rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-delay: 0s !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
     </style>
 </head>
 
 <body>
+
+    <div id="overlay" class="overlay" role="button" tabindex="0" aria-label="Click to continue">
+        <div class="intro-holder">
+            <div class="intro-title">Karakule</div>
+            <div class="intro-sub-click">click here to continue</div>
+        </div>
+    </div>
 
     <div class="border-segments">
         <div class="border-top border-line-1"></div>
@@ -325,6 +548,7 @@
 
     <main class="content-wrapper">
         <h1 id="username" class="wave-text" onclick="playClickSound()">Karakule</h1>
+        <div class="title-bar" aria-hidden="true"></div>
         <p class="subtitle">Your local kebab man!</p>
 
         <div class="icons">
@@ -338,8 +562,14 @@
         </div>
     </main>
 
-    <div class="song-info">
-        <i class="fas fa-music"></i> Melancholy - NyxTheShield
+    <div class="track-box">
+        <div class="track-row">
+            <div id="track-name" class="track-title">Melancholy</div>
+            <button type="button" id="mute-btn" class="mute-btn" aria-label="Mute audio" aria-pressed="false" title="Mute / unmute">
+                <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            </button>
+        </div>
+        <div id="track-author" class="track-author">NyxTheShield</div>
     </div>
 
     <div class="footer-right">
@@ -420,18 +650,36 @@
         const clickSound = document.getElementById('clickSound');
         clickSound.volume = 0.3; 
 
-        // Start background music when page loads
-        window.addEventListener('load', () => {
-            startBackgroundAudio();
+        // Mute / unmute (equalizer button next to the song name)
+        const muteBtn = document.getElementById('mute-btn');
+        muteBtn.addEventListener('click', () => {
+            audio.muted = !audio.muted;
+            muteBtn.classList.toggle('muted', audio.muted);
+            muteBtn.setAttribute('aria-pressed', String(audio.muted));
+            muteBtn.setAttribute('aria-label', audio.muted ? 'Unmute audio' : 'Mute audio');
         });
 
-        // Fallback: start audio on first user interaction
-        document.addEventListener('click', function () {
-            if (audio.paused) {
-                startBackgroundAudio();
-            }
-        }, {
-            once: true
+        // Click-to-continue: ripple, dissolve the intro, start the reveal and the music
+        const overlay = document.getElementById('overlay');
+        function enterSite(e) {
+            if (overlay.classList.contains('hidden')) return;
+            const rect = overlay.getBoundingClientRect();
+            const x = (e && e.clientX) || rect.width / 2;
+            const y = (e && e.clientY) || rect.height / 2;
+            const ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 1100);
+
+            overlay.classList.add('hidden');
+            document.body.classList.add('ambient-active');
+            startBackgroundAudio();
+        }
+        overlay.addEventListener('click', enterSite);
+        overlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); }
         });
     </script>
 </body>

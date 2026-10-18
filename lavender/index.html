@@ -4,25 +4,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
-  <title>Lavender</title>
-  <meta name="description" content="Digital and Music Artist — Lavender on OutOfTune.">
+  <title>EmptyAmethyst</title>
+  <meta name="description" content="Digital and Music Artist — EmptyAmethyst on OutOfTune.">
   <!-- Open Graph / Social Media Sharing -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Lavender" />
-  <meta property="og:description" content="Digital and Music Artist — Lavender on OutOfTune." />
+  <meta property="og:title" content="EmptyAmethyst" />
+  <meta property="og:description" content="Digital and Music Artist — EmptyAmethyst on OutOfTune." />
   <meta property="og:url" content="https://outoftune.dev/lavender/" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Lavender" />
-  <meta name="twitter:description" content="Digital and Music Artist — Lavender on OutOfTune." />
+  <meta name="twitter:title" content="EmptyAmethyst" />
+  <meta name="twitter:description" content="Digital and Music Artist — EmptyAmethyst on OutOfTune." />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: rgb(26, 15, 46);
-      --text-dark: #a8e6cf;
-      --accent-cyan: #4dd9d9;
-      --accent-gold: #bfa14a;
+      --bg-dark: #0b0a24;
+      --text-dark: #e6defa;
+      --accent: #b9a7ff;
+      --accent-moon: #8fd694;
+      --muted: #8a86b8;
+
+      /* Reveal easing */
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+      --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     html,
@@ -61,6 +67,7 @@
       background: rgba(10, 10, 20, 0.57);
       z-index: 0;
     }
+    body.ambient-active::before { animation: fadeInSimple 1.2s ease backwards; }
 
     /* Animated Border Lines */
     .border-segments {
@@ -72,12 +79,14 @@
       pointer-events: none;
       z-index: 1;
     }
+    body.ambient-active .border-segments { animation: fadeInSimple 1.6s ease 0.2s backwards; }
 
     .border-top,
     .border-right,
     .border-bottom,
     .border-left {
       position: absolute;
+      filter: drop-shadow(0 0 4px rgba(185, 167, 255, 0.45));
     }
 
     .border-top {
@@ -85,7 +94,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
+      background: linear-gradient(90deg, transparent 0%, transparent 30%, #b9a7ff 40%, #8fd694 50%, #b9a7ff 60%, transparent 70%, transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal 12s linear infinite;
     }
@@ -95,7 +104,7 @@
       right: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(180deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
+      background: linear-gradient(180deg, transparent 0%, transparent 30%, #b9a7ff 40%, #8fd694 50%, #b9a7ff 60%, transparent 70%, transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical 12s linear infinite;
     }
@@ -105,7 +114,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(-90deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
+      background: linear-gradient(-90deg, transparent 0%, transparent 30%, #b9a7ff 40%, #8fd694 50%, #b9a7ff 60%, transparent 70%, transparent 100%);
       background-size: 300% 100%;
       animation: move-horizontal-reverse 12s linear infinite;
     }
@@ -115,7 +124,7 @@
       left: 0;
       bottom: 0;
       width: 2px;
-      background: linear-gradient(-180deg, transparent 0%, transparent 30%, #4dd9d9 40%, #bfa14a 50%, #4dd9d9 60%, transparent 70%, transparent 100%);
+      background: linear-gradient(-180deg, transparent 0%, transparent 30%, #b9a7ff 40%, #8fd694 50%, #b9a7ff 60%, transparent 70%, transparent 100%);
       background-size: 100% 300%;
       animation: move-vertical-reverse 12s linear infinite;
     }
@@ -165,17 +174,31 @@
     }
 
     .wave-text {
-      background: linear-gradient(90deg, #4dd9d9 0%, #a8e6cf 35%, #bfa14a 50%, #a8e6cf 65%, #4dd9d9 100%);
+      background: linear-gradient(90deg, #b9a7ff 0%, #e6defa 35%, #8fd694 50%, #e6defa 65%, #b9a7ff 100%);
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: wave-effect 6s linear infinite;
-      text-shadow: 0 0 20px rgba(77, 217, 217, 0.4);
+      text-shadow: 0 0 20px rgba(185, 167, 255, 0.4);
+    }
+    body.ambient-active .wave-text {
+      animation: revealUp 1s var(--ease-out-expo) 0.35s backwards,
+                 wave-effect 6s linear infinite;
     }
 
     @keyframes wave-effect { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
     h1:active { transform: scale(0.98); }
+
+    /* Underline that draws itself in beneath the title */
+    .title-bar {
+      height: 2px;
+      width: 140px;
+      margin-top: 1rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent-moon) 60%, rgba(143, 214, 148, 0));
+      box-shadow: 0 0 10px rgba(185, 167, 255, 0.3);
+    }
+    body.ambient-active .title-bar { animation: barDraw 1.1s var(--ease-draw) 0.9s backwards; }
 
     p {
       margin: 0;
@@ -183,10 +206,11 @@
       font-size: 0.75rem;
       font-family: 'Press Start 2P', monospace;
       font-weight: 400;
-      color: #a8e6cf;
+      color: #e6defa;
       letter-spacing: 0.02em;
       line-height: 1.4;
     }
+    body.ambient-active .container > p { animation: revealUp 0.9s var(--ease-out-expo) 0.55s backwards; }
 
     /* MATCHED LAYOUT: Left-justified icons list spacing */
     .icons {
@@ -197,19 +221,24 @@
     }
 
     .icons a {
-      font-size: 1.4rem;
-      color: #a8e6cf;
+      font-size: 1.2rem;
+      color: #e6defa;
       text-decoration: none;
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
+    body.ambient-active .icons a { animation: iconPop 0.45s var(--ease-pop) backwards; }
+    body.ambient-active .icons a:nth-child(1) { animation-delay: 0.7s; }
+    body.ambient-active .icons a:nth-child(2) { animation-delay: 0.78s; }
+    body.ambient-active .icons a:nth-child(3) { animation-delay: 0.86s; }
+    body.ambient-active .icons a:nth-child(4) { animation-delay: 0.94s; }
 
     .icons a:hover {
-      color: #4dd9d9;
+      color: #b9a7ff;
       transform: scale(1.1);
-      filter: drop-shadow(0 0 8px rgba(77, 217, 217, 0.8));
+      filter: drop-shadow(0 0 8px rgba(185, 167, 255, 0.8));
     }
 
     .click-counter {
@@ -227,53 +256,220 @@
 
     .click-counter p {
       font-size: 0.55rem;
-      color: #33a3c2;
+      color: #a99cf0;
       margin: 0;
-      text-shadow: 0 0 10px rgba(77, 217, 217, 0.5);
+      text-shadow: 0 0 10px rgba(185, 167, 255, 0.5);
     }
 
     /* MATCHED FOOTER: OutOfTune dual split footer wrapper */
     footer {
       position: fixed;
-      bottom: 20px;
+      bottom: 28px;
       left: 30px;
       right: 30px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
       font-size: 0.55rem;
-      color: #557788;
+      color: var(--muted);
       z-index: 2;
       font-family: 'Press Start 2P', monospace;
       pointer-events: none;
     }
 
-    footer .track-info {
+    /* Track info (same structure as Indura; no lyrics, so the author sits where lyrics would be) */
+    .track-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: auto;
+    }
+    body.ambient-active .track-box { animation: revealUp 0.9s var(--ease-out-expo) 1.2s backwards; }
+
+    .track-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      pointer-events: auto;
     }
 
-    footer .track-info i {
-      font-size: 0.6rem;
-      color: #4dd9d9;
+    .track-title {
+      font-size: 0.5rem;
+      font-weight: bold;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 10px rgba(185, 167, 255, 0.6), 0 0 22px rgba(185, 167, 255, 0.3);
+    }
+
+    .track-author {
+      font-size: 0.43rem;
+      line-height: 1.7;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .mute-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mute-btn:hover { transform: scale(1.15); }
+    .mute-btn:focus,
+    .mute-btn:focus-visible { outline: none; }
+    .mute-btn:focus-visible .eq i { background: #ffffff; }
+
+    /* Muted: bars freeze flat and grey, with a slash through them */
+    .mute-btn.muted .eq i {
+      animation: none !important;
+      transform: scaleY(0.2);
+      background: var(--muted);
+    }
+    .mute-btn.muted::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      top: 50%;
+      height: 1.5px;
+      background: var(--accent-moon);
+      transform: rotate(-35deg);
+    }
+
+    .eq {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 10px;
+      padding-left: 4px;
+    }
+    .eq i {
+      display: block;
+      width: 2px;
+      height: 100%;
+      background: var(--accent);
+      transform-origin: bottom;
+      transform: scaleY(0.25);
+    }
+    body.ambient-active .eq i { animation: eqBar 0.9s ease-in-out infinite; }
+    body.ambient-active .eq i:nth-child(2) { animation-duration: 0.7s; animation-delay: -0.3s; }
+    body.ambient-active .eq i:nth-child(3) { animation-duration: 1.1s; animation-delay: -0.6s; }
+    body.ambient-active .eq i:nth-child(4) { animation-duration: 0.8s; animation-delay: -0.15s; }
+    @keyframes eqBar {
+      0%, 100% { transform: scaleY(0.25); }
+      50% { transform: scaleY(1); }
     }
 
     footer .copyright-info {
       text-align: right;
       line-height: 1.6;
+      padding-top: 10px;
+      border-top: 1px solid rgba(185, 167, 255, 0.22);
       pointer-events: auto;
     }
+    body.ambient-active footer .copyright-info { animation: revealUp 0.9s var(--ease-out-expo) 1.4s backwards; }
 
     footer a {
-      color: #4dd9d9;
+      color: #b9a7ff;
       text-decoration: none;
       transition: color 0.3s ease;
     }
 
     footer a:hover {
-      color: #bfa14a;
+      color: #8fd694;
+    }
+
+    /* Reveal keyframes */
+    @keyframes revealUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes iconPop {
+      0% { opacity: 0; transform: translateY(14px) scale(0.4) rotate(-12deg); }
+      100% { opacity: 1; transform: none; }
+    }
+    @keyframes barDraw {
+      from { width: 0; opacity: 0; }
+      to { width: 140px; opacity: 1; }
+    }
+    @keyframes fadeInSimple {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* CLICK TO CONTINUE INTRO */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-dark);
+      cursor: pointer;
+      transition: opacity 0.9s cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 1s var(--ease-draw),
+                  filter 0.9s ease;
+    }
+    .overlay.hidden {
+      opacity: 0;
+      transform: scale(1.12);
+      filter: blur(12px);
+      pointer-events: none;
+    }
+    .intro-holder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      text-align: center;
+      user-select: none;
+    }
+    .intro-title {
+      font-size: clamp(1.1rem, 2.8vw, 1.6rem);
+      color: var(--accent);
+      opacity: 0;
+      transform: translateY(25px);
+      animation: introSlideUp 0.9s var(--ease-out-expo) forwards 0.2s,
+                 introGlow 2.8s ease-in-out infinite 1.2s;
+    }
+    .intro-sub-click {
+      font-size: clamp(0.45rem, 1.2vw, 0.52rem);
+      color: var(--muted);
+      letter-spacing: 1px;
+      opacity: 0;
+      animation: introFade 0.8s ease forwards 0.9s,
+                 introBlink 2.2s ease-in-out infinite 1.8s;
+    }
+    @keyframes introSlideUp { to { opacity: 1; transform: translateY(0); } }
+    @keyframes introFade { to { opacity: 0.75; } }
+    @keyframes introGlow {
+      0%, 100% { text-shadow: 0 0 0 rgba(185, 167, 255, 0); }
+      50% { text-shadow: 0 0 18px rgba(185, 167, 255, 0.7); }
+    }
+    @keyframes introBlink { 0%, 100% { opacity: 0.75; } 50% { opacity: 0.3; } }
+
+    /* Ripple that expands from the click point */
+    .click-ripple {
+      position: fixed;
+      z-index: 10000;
+      width: 24px;
+      height: 24px;
+      margin: -12px 0 0 -12px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(185, 167, 255, 0.55) 0%, rgba(185, 167, 255, 0) 70%);
+      animation: ripple 1s var(--ease-out-expo) forwards;
+    }
+    @keyframes ripple {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(90); opacity: 0; }
     }
 
     @media (max-width: 600px) {
@@ -290,7 +486,7 @@
       }
 
       h1 {
-        font-size: 1.8rem;
+        font-size: min(1.8rem, 5.6vw);
       }
 
       p {
@@ -301,9 +497,11 @@
         justify-content: center;
         gap: 16px;
       }
+      .icons a { font-size: 1.1rem; }
 
       footer {
         flex-direction: column;
+        align-items: center;
         gap: 12px;
         bottom: 15px;
         left: 10px;
@@ -311,14 +509,35 @@
         text-align: center;
       }
 
+      .track-row { justify-content: center; }
+      .track-box { align-items: center; }
+      .track-title { font-size: 0.42rem; }
+      .track-author { font-size: 0.36rem; }
+
       footer .copyright-info {
         text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
 </head>
 
 <body>
+
+  <div id="overlay" class="overlay" role="button" tabindex="0" aria-label="Click to continue">
+    <div class="intro-holder">
+      <div class="intro-title">EmptyAmethyst</div>
+      <div class="intro-sub-click">click here to continue</div>
+    </div>
+  </div>
 
   <!-- Animated Border Lines -->
   <div class="border-segments">
@@ -333,7 +552,8 @@
   </div>
 
   <div class="container">
-    <h1 id="username" class="wave-text" onclick="playClickSound()">Lavender</h1>
+    <h1 id="username" class="wave-text" onclick="playClickSound()">EmptyAmethyst</h1>
+    <div class="title-bar" aria-hidden="true"></div>
     <p>Your local artist man!</p>
 
     <div id="clickCounter" class="click-counter" style="display: none;">
@@ -348,15 +568,19 @@
     </div>
   </div>
 
-  <!-- FIXED: Replaced standard footer with the standard OutOfTune network split player style -->
   <footer>
-    <div class="track-info">
-      <i class="fas fa-music"></i>
-      <span></span>
+    <div class="track-box">
+      <div class="track-row">
+        <div id="track-name" class="track-title">I forgot the song name</div>
+        <button type="button" id="mute-btn" class="mute-btn" aria-label="Mute audio" aria-pressed="false" title="Mute / unmute">
+          <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        </button>
+      </div>
+      <div id="track-author" class="track-author">Sorry</div>
     </div>
     <div class="copyright-info">
       © 2026 OutOfTune<br>
-      Lavender
+      EmptyAmethyst
     </div>
   </footer>
 
@@ -416,16 +640,36 @@
     const clickSound = document.getElementById('clickSound');
     clickSound.volume = 0.5; 
 
-    window.addEventListener('load', () => {
-      startBackgroundAudio();
+    // Mute / unmute (equalizer button next to the song name)
+    const muteBtn = document.getElementById('mute-btn');
+    muteBtn.addEventListener('click', () => {
+      audio.muted = !audio.muted;
+      muteBtn.classList.toggle('muted', audio.muted);
+      muteBtn.setAttribute('aria-pressed', String(audio.muted));
+      muteBtn.setAttribute('aria-label', audio.muted ? 'Unmute audio' : 'Mute audio');
     });
 
-    document.addEventListener('click', function () {
-      if (audio.paused) {
-        startBackgroundAudio();
-      }
-    }, {
-      once: true
+    // Click-to-continue: ripple, dissolve the intro, start the reveal and the music
+    const overlay = document.getElementById('overlay');
+    function enterSite(e) {
+      if (overlay.classList.contains('hidden')) return;
+      const rect = overlay.getBoundingClientRect();
+      const x = (e && e.clientX) || rect.width / 2;
+      const y = (e && e.clientY) || rect.height / 2;
+      const ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      document.body.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 1100);
+
+      overlay.classList.add('hidden');
+      document.body.classList.add('ambient-active');
+      startBackgroundAudio();
+    }
+    overlay.addEventListener('click', enterSite);
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); }
     });
   </script>
     <!-- Humanized: small dev signature + easter egg (non-destructive) -->
