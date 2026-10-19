@@ -34,8 +34,10 @@
       --fs-hint: 0.42rem;
       --fs-arrow: 0.75rem;
       --fs-credit: 0.4rem;
-      --fs-lyric: clamp(0.42rem, 0.8vw, 0.5rem);
-      --lyrics-line-h: 19px;
+      --fs-lyric: clamp(0.54rem, 0.95vw, 0.64rem);
+      --fs-lyric-secondary: calc(var(--fs-lyric) * 0.85);
+      --lyrics-line-h: 22px;
+      --lyrics-sec-line-h: 18px;
 
       /* entry gate is the one exception to the small ambient type elsewhere —
          it's a one-time readable moment, and the only place the 12px
@@ -262,27 +264,48 @@
       transform: translateY(0);
     }
 
+    /* Bare chevrons — no circle. Each is drawn twice (thick black halo under
+       a thinner white stroke) so it stays readable on any frame of the
+       dithered black/white video, without needing a backing shape. */
     .carousel-button {
       appearance: none;
       border: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: none;
       color: var(--fg);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
+      width: 36px;
+      height: 44px;
       padding: 0;
       display: grid;
       place-items: center;
       cursor: pointer;
-      font: 400 var(--fs-arrow)/1 var(--font-mono);
-      opacity: 0.65;
-      transition: opacity 180ms var(--ease-smooth), transform 180ms var(--ease-smooth), background 180ms var(--ease-smooth);
+      opacity: 0.8;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 180ms var(--ease-smooth), transform 180ms var(--ease-smooth);
+    }
+
+    .carousel-button svg {
+      width: 14px;
+      height: 22px;
+      overflow: visible;
+      fill: none;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+      pointer-events: none;
+    }
+
+    .carousel-button .chev-halo {
+      stroke: #000;
+      stroke-width: 6;
+    }
+
+    .carousel-button .chev {
+      stroke: #fff;
+      stroke-width: 2.5;
     }
 
     .carousel-button:hover,
     .carousel-button:focus-visible {
       opacity: 1;
-      background: rgba(255, 255, 255, 0.15);
     }
 
     .carousel-button:first-child:hover,
@@ -416,6 +439,23 @@
       flex: 0 0 auto;
     }
 
+    /* secondary (overlapping) line: sits under the main one, smaller and grayed */
+    .lyrics-viewport-secondary {
+      height: var(--lyrics-sec-line-h);
+    }
+
+    .lyrics-viewport-secondary .lyrics-line {
+      height: var(--lyrics-sec-line-h);
+      font-size: var(--fs-lyric-secondary);
+      color: var(--muted-faint);
+    }
+
+    /* tail syllable of a split word (memor|y) — cancel the flex gap so it
+       attaches to the previous chunk instead of reading as a space */
+    .lyrics-word.lyrics-join {
+      margin-left: -0.35em;
+    }
+
     .lyrics-line.is-previous {
       opacity: 0;
     }
@@ -442,6 +482,26 @@
       .lyrics-line {
         transition: none;
       }
+    }
+
+    /* Fade-to-black shown while leaving for a member profile */
+    .leave-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 550ms var(--ease-smooth);
+    }
+
+    .leave-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .leave-overlay { transition: none; }
     }
 
     /*
@@ -549,7 +609,7 @@
 
   <!-- Background Video Container -->
   <div class="bg-video-container">
-    <video class="bg-video" id="bg-video" muted loop playsinline preload="auto">
+    <video class="bg-video" id="bg-video" autoplay muted loop playsinline preload="auto">
       <source src="bg.mp4" type="video/mp4">
     </video>
     <div class="bg-video-dim"></div>
@@ -574,7 +634,12 @@
     <p class="subtitle">Open source — built for creators &amp; friends.</p>
 
     <div class="member-carousel" aria-label="OutOfTune members">
-      <button class="carousel-button" id="member-prev" type="button" aria-label="Previous member">←</button>
+      <button class="carousel-button" id="member-prev" type="button" aria-label="Previous member">
+        <svg viewBox="0 0 14 22" aria-hidden="true">
+          <polyline class="chev-halo" points="12,2 3,11 12,20"/>
+          <polyline class="chev" points="12,2 3,11 12,20"/>
+        </svg>
+      </button>
 
       <div class="member-info" id="member-display" tabindex="0" role="button" aria-label="Open member profile">
         <div class="member-text" id="member-text">
@@ -586,11 +651,18 @@
         <div class="member-hint">view profile ↗</div>
       </div>
 
-      <button class="carousel-button" id="member-next" type="button" aria-label="Next member">→</button>
+      <button class="carousel-button" id="member-next" type="button" aria-label="Next member">
+        <svg viewBox="0 0 14 22" aria-hidden="true">
+          <polyline class="chev-halo" points="2,2 11,11 2,20"/>
+          <polyline class="chev" points="2,2 11,11 2,20"/>
+        </svg>
+      </button>
     </div>
   </main>
 
-  <audio id="bgm" loop preload="none">
+  <div class="leave-overlay" id="leave-overlay" aria-hidden="true"></div>
+
+  <audio id="bgm" loop preload="auto">
     <source src="bg.mp3" type="audio/mpeg">
   </audio>
 
@@ -612,6 +684,9 @@
     <div class="lyrics-viewport">
       <div class="lyrics-track" id="lyrics-track"></div>
     </div>
+    <div class="lyrics-viewport lyrics-viewport-secondary">
+      <div class="lyrics-track" id="lyrics-track-secondary"></div>
+    </div>
   </div>
 
   <script>
@@ -619,10 +694,12 @@
     const members = [
       { display: 'MiloHakai',     path: 'milohakai',   category: 'FOUNDERS' },
       { display: 'SaiaMantaRay',  path: 'saiamantaray', category: 'FOUNDERS' },
+      { display: 'Cinnovabun',    path: 'cinnovabun',   category: 'COLLABORATORS' },
+      { display: 'EmptyAmethyst', path: 'emptyamethyst', category: 'COLLABORATORS' },
       { display: 'Indura',        path: 'indura',       category: 'COLLABORATORS' },
       { display: 'Karakule',      path: 'karakule',     category: 'COLLABORATORS' },
-      { display: 'Lavender',      path: 'lavender',     category: 'COLLABORATORS' },
       { display: 'Ren Yi',        path: 'renyi',        category: 'COLLABORATORS' },
+      { display: 'Reyvonlune',    path: 'reyvonlune',   category: 'COLLABORATORS' },
       { display: 'Shotokiii',     path: 'shotokiii',    category: 'COLLABORATORS' },
       { display: 'Umilushi',      path: 'umilushi',     category: 'COLLABORATORS' },
       { display: 'Umiseii',       path: 'umiseii',      category: 'COLLABORATORS' },
@@ -646,10 +723,46 @@
     const pointerSfx = document.getElementById('pointer-sfx');
     const nameSwapSfx = document.getElementById('nameSwap-sfx');
     const confirmSfx = document.getElementById('confirm-sfx');
-    [pointerSfx, nameSwapSfx, confirmSfx].forEach((s) => { if (s) s.volume = 0.3; });
+    const SFX_VOLUME = 0.3;
+    [pointerSfx, nameSwapSfx, confirmSfx].forEach((s) => { if (s) s.volume = SFX_VOLUME; });
+
+    // SFX go through Web Audio: the files are decoded into memory once, so
+    // each play is near-instant. A plain <audio> element re-seeks and
+    // re-buffers on every play(), which is where the small delay came from.
+    // If decoding fails (e.g. opened via file://), it falls back to the
+    // <audio> elements above.
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const sfxCtx = AudioCtx ? new AudioCtx() : null;
+    const sfxBuffers = new Map();
+
+    function loadSfxBuffer(el) {
+      if (!sfxCtx || !el) return;
+      const srcEl = el.querySelector('source');
+      if (!srcEl) return;
+      fetch(srcEl.src)
+        .then((r) => r.arrayBuffer())
+        .then((data) => new Promise((res, rej) => sfxCtx.decodeAudioData(data, res, rej)))
+        .then((buf) => sfxBuffers.set(el, buf))
+        .catch(() => { /* fallback to <audio> element */ });
+    }
+    [pointerSfx, nameSwapSfx, confirmSfx, document.getElementById('back-sfx')].forEach(loadSfxBuffer);
+
+    function resumeSfxContext() {
+      if (sfxCtx && sfxCtx.state === 'suspended') sfxCtx.resume().catch(() => {});
+    }
 
     function playSfx(sound) {
       if (!sound) return;
+      const buf = sfxBuffers.get(sound);
+      if (buf && sfxCtx && sfxCtx.state === 'running') {
+        const src = sfxCtx.createBufferSource();
+        const gain = sfxCtx.createGain();
+        gain.gain.value = SFX_VOLUME;
+        src.buffer = buf;
+        src.connect(gain).connect(sfxCtx.destination);
+        src.start(0);
+        return;
+      }
       try {
         sound.currentTime = 0;
         sound.play().catch(() => {}); // ignore — e.g. file missing, or gate not dismissed yet
@@ -750,10 +863,47 @@
       isAnimating = false;
     }
 
+    let isLeaving = false;
+    const leaveOverlay = document.getElementById('leave-overlay');
+    const BGM_VOLUME = 0.15; // background music level (0 to 1), lower = quieter
+
+    function fadeBgmTo(target, ms) {
+      const start = bgm.volume;
+      const t0 = performance.now();
+      function tick(now) {
+        const p = Math.min((now - t0) / ms, 1);
+        bgm.volume = Math.max(0, Math.min(1, start + (target - start) * p));
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
     function goToProfile() {
+      if (isLeaving) return; // ignore double clicks
+      isLeaving = true;
+
       const member = members[currentIndex];
+      // file:// has no server to resolve a folder to its index.html, so keep
+      // the explicit filename there; on a real host use the clean URL.
+      const url = location.protocol === 'file:'
+        ? `./${member.path}/index.html`
+        : `./${member.path}/`;
+
       playSfx(confirmSfx);
-      window.location.href = `./${member.path}/index.html`;
+
+      // Wait roughly as long as the confirm sound lasts (clamped), so it
+      // isn't cut off. Falls back to 550ms if the buffer isn't decoded.
+      const buf = sfxBuffers.get(confirmSfx);
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const wait = reduceMotion
+        ? 250
+        : (buf ? Math.min(Math.max(buf.duration * 1000, 400), 1200) : 550);
+
+      leaveOverlay.style.transitionDuration = `${wait}ms`;
+      leaveOverlay.classList.add('active');
+      fadeBgmTo(0, wait);
+
+      setTimeout(() => { window.location.href = url; }, wait);
     }
 
     const prevBtn = document.getElementById('member-prev');
@@ -796,8 +946,10 @@
       if (!isEntryActive()) return;
       entryOverlay.classList.add('hidden');
       entryOverlay.setAttribute('aria-hidden', 'true');
+
+      resumeSfxContext();
       
-      bgm.volume = 0.35;
+      bgm.volume = BGM_VOLUME;
       bgm.play().catch((err) => {
         console.warn('Background audio did not start:', err.message);
       });
@@ -817,6 +969,10 @@
 
     entryOverlay.focus();
 
+    // Muted video is allowed to autoplay without a gesture, so get it
+    // running (behind the gate) right away instead of waiting for the click.
+    bgVideo.play().catch(() => {});
+
     // Fired on every load, but critically also when the page is restored
     // from the browser's back/forward cache (event.persisted === true) —
     // e.g. clicking a member link, then hitting the browser's back button.
@@ -826,9 +982,18 @@
     // returning via back leaves the background frozen and silent even
     // though everything visually looks "resumed."
     window.addEventListener('pageshow', (event) => {
-      if (event.persisted && !isEntryActive()) {
-        bgVideo.play().catch(() => {});
-        bgm.play().catch(() => {});
+      if (event.persisted) {
+        // coming back via back/forward cache: undo the leave state
+        isLeaving = false;
+        leaveOverlay.style.transitionDuration = '0ms';
+        leaveOverlay.classList.remove('active');
+        requestAnimationFrame(() => { leaveOverlay.style.transitionDuration = ''; });
+        bgm.volume = BGM_VOLUME;
+
+        if (!isEntryActive()) {
+          bgVideo.play().catch(() => {});
+          bgm.play().catch(() => {});
+        }
       }
     });
 
@@ -837,40 +1002,64 @@
     // reading bgm.currentTime every animation frame rather than scheduling
     // timers, so it stays correct through pause, seek, or a slow tab —
     // nothing to drift or get out of sync.
-    const LYRICS = [{"t":21.12,"words":[{"t":21.12,"w":"Old"},{"t":21.81,"w":"friends,"},{"t":23.43,"w":"same"},{"t":24.28,"w":"disease"}]},{"t":26.44,"words":[{"t":26.44,"w":"I'm"},{"t":26.92,"w":"killing"},{"t":27.53,"w":"myself"},{"t":28.49,"w":"again"}]},{"t":30.63,"words":[{"t":30.63,"w":"Old"},{"t":31.38,"w":"friends,"},{"t":33.22,"w":"same"},{"t":33.87,"w":"to"},{"t":34.19,"w":"me"}]},{"t":36.02,"words":[{"t":36.02,"w":"I"},{"t":36.5,"w":"can't"},{"t":37.17,"w":"get"},{"t":37.45,"w":"away"},{"t":38.11,"w":"from"},{"t":38.58,"w":"it"}]},{"t":40.17,"words":[{"t":40.17,"w":"Old"},{"t":40.99,"w":"friends"},{"t":42.56,"w":"are"},{"t":43.16,"w":"just"},{"t":43.49,"w":"a"},{"t":43.66,"w":"memor"},{"t":44.46,"w":"y"}]},{"t":45.64,"words":[{"t":45.64,"w":"That"},{"t":46.01,"w":"I"},{"t":46.23,"w":"didn't"},{"t":46.75,"w":"need"}]},{"t":48.03,"words":[{"t":48.03,"w":"I"},{"t":48.2,"w":"can't"},{"t":48.47,"w":"be"},{"t":49.18,"w":"saved"}]},{"t":51.32,"words":[{"t":51.32,"w":"Reaching"},{"t":51.76,"w":"for"},{"t":52.05,"w":"the"},{"t":52.32,"w":"life"},{"t":52.62,"w":"we"},{"t":52.88,"w":"threw"},{"t":53.38,"w":"awa"},{"t":53.79,"w":"y"}]},{"t":56.1,"words":[{"t":56.1,"w":"Watching"},{"t":56.57,"w":"as"},{"t":56.87,"w":"it"},{"t":57.12,"w":"circles"},{"t":57.77,"w":"in"},{"t":58.03,"w":"the"},{"t":58.4,"w":"drain"}]},{"t":60.82,"words":[{"t":60.82,"w":"With"},{"t":61.0,"w":"everything"},{"t":61.72,"w":"I"},{"t":61.89,"w":"loved,"},{"t":62.55,"w":"that's"},{"t":62.75,"w":"gone"},{"t":62.93,"w":"to"},{"t":63.2,"w":"waste"}]},{"t":65.65,"words":[{"t":65.65,"w":"With"},{"t":65.82,"w":"everything"},{"t":66.53,"w":"I"},{"t":66.68,"w":"was"},{"t":67.38,"w":"but"},{"t":67.53,"w":"couldn't"},{"t":67.83,"w":"change"}]},{"t":69.03,"words":[{"t":69.03,"w":"Old"},{"t":69.77,"w":"friends,"},{"t":71.48,"w":"same"},{"t":72.32,"w":"disease"}]},{"t":74.38,"words":[{"t":74.38,"w":"I"},{"t":74.86,"w":"can't"},{"t":75.42,"w":"get"},{"t":75.87,"w":"away"},{"t":76.55,"w":"from"},{"t":76.98,"w":"it"}]},{"t":78.65,"words":[{"t":78.65,"w":"Old"},{"t":79.33,"w":"friends,"},{"t":81.1,"w":"same"},{"t":81.82,"w":"as"},{"t":82.23,"w":"enem"},{"t":82.8,"w":"ies"}]},{"t":84.02,"words":[{"t":84.02,"w":"I'm"},{"t":84.51,"w":"killing"},{"t":85.16,"w":"myself"},{"t":86.07,"w":"again"}]},{"t":88.78,"words":[{"t":88.78,"w":"I'm"},{"t":89.44,"w":"killing"},{"t":90.16,"w":"myself"},{"t":90.98,"w":"again"}]},{"t":93.6,"words":[{"t":93.6,"w":"I'm"},{"t":94.13,"w":"killing"},{"t":94.76,"w":"mys"},{"t":95.43,"w":"elf"}]},{"t":95.96,"words":[{"t":95.96,"w":"I"},{"t":96.23,"w":"can't"},{"t":96.47,"w":"be"},{"t":97.11,"w":"saved"}]},{"t":99.35,"words":[{"t":99.35,"w":"Reaching"},{"t":99.79,"w":"for"},{"t":99.94,"w":"the"},{"t":100.14,"w":"life"},{"t":100.62,"w":"we"},{"t":100.92,"w":"threw"},{"t":101.33,"w":"awa"},{"t":101.63,"w":"y"}]},{"t":104.04,"words":[{"t":104.04,"w":"Watching"},{"t":104.53,"w":"as"},{"t":104.74,"w":"it"},{"t":105.14,"w":"circles"},{"t":105.86,"w":"in"},{"t":106.02,"w":"the"},{"t":106.36,"w":"drain"}]},{"t":108.77,"words":[{"t":108.77,"w":"With"},{"t":108.9,"w":"everything"},{"t":109.68,"w":"I"},{"t":109.85,"w":"loved,"},{"t":110.51,"w":"that's"},{"t":110.7,"w":"gone"},{"t":110.88,"w":"to"},{"t":111.16,"w":"waste"}]},{"t":113.58,"words":[{"t":113.58,"w":"With"},{"t":113.8,"w":"everything"},{"t":114.46,"w":"I"},{"t":114.61,"w":"was"},{"t":115.31,"w":"but"},{"t":115.47,"w":"couldn't"},{"t":115.76,"w":"change"}]},{"t":117.86,"words":[{"t":117.86,"w":"We're"},{"t":118.38,"w":"bored"},{"t":118.78,"w":"when"},{"t":119.08,"w":"we're"},{"t":119.39,"w":"sober"},{"t":120.38,"w":"again"}]},{"t":122.42,"words":[{"t":122.42,"w":"But"},{"t":122.94,"w":"miserable"},{"t":123.99,"w":"when"},{"t":124.39,"w":"we're"},{"t":124.74,"w":"not"}]},{"t":127.1,"words":[{"t":127.1,"w":"We're"},{"t":127.64,"w":"bored"},{"t":128.4,"w":"when"},{"t":128.6,"w":"we're"},{"t":128.83,"w":"sober"},{"t":129.97,"w":"again"}]},{"t":132.03,"words":[{"t":132.03,"w":"But"},{"t":132.52,"w":"what"},{"t":132.95,"w":"else"},{"t":133.62,"w":"have"},{"t":134.04,"w":"we"},{"t":134.32,"w":"got?"}]},{"t":134.36,"words":[{"t":134.36,"w":"I"},{"t":134.58,"w":"can't"},{"t":134.94,"w":"be"},{"t":135.63,"w":"saved"}]},{"t":137.13,"words":[{"t":137.13,"w":"We're"},{"t":137.56,"w":"bored"},{"t":138.0,"w":"when"},{"t":138.28,"w":"we're"},{"t":138.48,"w":"sober"},{"t":139.43,"w":"again"}]},{"t":137.69,"words":[{"t":137.69,"w":"Reaching"},{"t":138.15,"w":"for"},{"t":138.43,"w":"the"},{"t":138.65,"w":"life"},{"t":139.01,"w":"we"},{"t":139.29,"w":"threw"},{"t":139.63,"w":"awa"},{"t":140.19,"w":"y"}]},{"t":141.65,"words":[{"t":141.65,"w":"But"},{"t":142.19,"w":"miserable"},{"t":143.35,"w":"when"},{"t":143.66,"w":"we're"},{"t":144.02,"w":"not"}]},{"t":142.49,"words":[{"t":142.49,"w":"Watching"},{"t":142.96,"w":"as"},{"t":143.26,"w":"it"},{"t":143.52,"w":"circles"},{"t":144.32,"w":"in"},{"t":144.5,"w":"the"},{"t":145.27,"w":"drain"}]},{"t":146.47,"words":[{"t":146.47,"w":"We're"},{"t":147.03,"w":"bored"},{"t":147.61,"w":"when"},{"t":147.86,"w":"we're"},{"t":148.09,"w":"sober"},{"t":149.13,"w":"again"}]},{"t":147.29,"words":[{"t":147.29,"w":"With"},{"t":147.49,"w":"everything"},{"t":148.19,"w":"I"},{"t":148.37,"w":"loved,"},{"t":148.97,"w":"that's"},{"t":149.21,"w":"gone"},{"t":149.46,"w":"to"},{"t":149.66,"w":"waste"}]},{"t":151.2,"words":[{"t":151.2,"w":"But"},{"t":151.64,"w":"what"},{"t":152.31,"w":"else"},{"t":152.99,"w":"have"},{"t":153.34,"w":"we"},{"t":153.66,"w":"got?"}]},{"t":151.97,"words":[{"t":151.97,"w":"With"},{"t":152.2,"w":"everything"},{"t":152.83,"w":"I"},{"t":153.13,"w":"was"},{"t":153.8,"w":"but"},{"t":153.95,"w":"couldn't"},{"t":154.29,"w":"change"}]},{"t":172.85,"words":[{"t":172.85,"w":"I"},{"t":172.95,"w":"can't"},{"t":173.18,"w":"be"},{"t":174.03,"w":"saved"}]},{"t":176.14,"words":[{"t":176.14,"w":"Reaching"},{"t":176.59,"w":"for"},{"t":176.87,"w":"the"},{"t":177.11,"w":"life"},{"t":177.46,"w":"we"},{"t":177.75,"w":"threw"},{"t":178.05,"w":"awa"},{"t":178.62,"w":"y"}]},{"t":180.86,"words":[{"t":180.86,"w":"Watching"},{"t":181.38,"w":"as"},{"t":181.62,"w":"it"},{"t":181.84,"w":"circles"},{"t":182.58,"w":"in"},{"t":182.74,"w":"the"},{"t":183.6,"w":"drain"}]},{"t":185.57,"words":[{"t":185.57,"w":"With"},{"t":185.72,"w":"everything"},{"t":186.45,"w":"I"},{"t":186.69,"w":"loved,"},{"t":187.31,"w":"that's"},{"t":187.5,"w":"gone"},{"t":187.68,"w":"to"},{"t":187.96,"w":"waste"}]},{"t":190.41,"words":[{"t":190.41,"w":"With"},{"t":190.62,"w":"everything"},{"t":191.27,"w":"I"},{"t":191.46,"w":"was"},{"t":192.14,"w":"but"},{"t":192.29,"w":"couldn't"},{"t":192.59,"w":"change"}]},{"t":194.94,"words":[{"t":194.94,"w":"We're"},{"t":195.14,"w":"bored"},{"t":195.59,"w":"when"},{"t":195.88,"w":"we're"},{"t":196.08,"w":"sober"},{"t":197.14,"w":"again"}]},{"t":199.26,"words":[{"t":199.26,"w":"But"},{"t":199.75,"w":"miserable"},{"t":200.89,"w":"when"},{"t":201.19,"w":"we're"},{"t":201.63,"w":"not"}]}];
+    const LYRICS = [{"t":21.12,"words":[{"t":21.12,"w":"Old"},{"t":21.81,"w":"friends,"},{"t":23.43,"w":"same"},{"t":24.28,"w":"disease"}]},{"t":26.44,"words":[{"t":26.44,"w":"I'm"},{"t":26.92,"w":"killing"},{"t":27.53,"w":"myself"},{"t":28.49,"w":"again"}]},{"t":30.63,"words":[{"t":30.63,"w":"Old"},{"t":31.38,"w":"friends,"},{"t":33.22,"w":"same"},{"t":33.87,"w":"to"},{"t":34.19,"w":"me"}]},{"t":36.02,"words":[{"t":36.02,"w":"I"},{"t":36.5,"w":"can't"},{"t":37.17,"w":"get"},{"t":37.45,"w":"away"},{"t":38.11,"w":"from"},{"t":38.58,"w":"it"}]},{"t":40.17,"words":[{"t":40.17,"w":"Old"},{"t":40.99,"w":"friends"},{"t":42.56,"w":"are"},{"t":43.16,"w":"just"},{"t":43.49,"w":"a"},{"t":43.66,"w":"memor"},{"t":44.46,"w":"y","j":1}]},{"t":45.64,"words":[{"t":45.64,"w":"That"},{"t":46.01,"w":"I"},{"t":46.23,"w":"didn't"},{"t":46.75,"w":"need"}]},{"t":48.03,"words":[{"t":48.03,"w":"I"},{"t":48.2,"w":"can't"},{"t":48.47,"w":"be"},{"t":49.18,"w":"saved"}]},{"t":51.32,"words":[{"t":51.32,"w":"Reaching"},{"t":51.76,"w":"for"},{"t":52.05,"w":"the"},{"t":52.32,"w":"life"},{"t":52.62,"w":"we"},{"t":52.88,"w":"threw"},{"t":53.38,"w":"awa"},{"t":53.79,"w":"y","j":1}]},{"t":56.1,"words":[{"t":56.1,"w":"Watching"},{"t":56.57,"w":"as"},{"t":56.87,"w":"it"},{"t":57.12,"w":"circles"},{"t":57.77,"w":"in"},{"t":58.03,"w":"the"},{"t":58.4,"w":"drain"}]},{"t":60.82,"words":[{"t":60.82,"w":"With"},{"t":61.0,"w":"everything"},{"t":61.72,"w":"I"},{"t":61.89,"w":"loved,"},{"t":62.55,"w":"that's"},{"t":62.75,"w":"gone"},{"t":62.93,"w":"to"},{"t":63.2,"w":"waste"}]},{"t":65.65,"words":[{"t":65.65,"w":"With"},{"t":65.82,"w":"everything"},{"t":66.53,"w":"I"},{"t":66.68,"w":"was"},{"t":67.38,"w":"but"},{"t":67.53,"w":"couldn't"},{"t":67.83,"w":"change"}]},{"t":69.03,"words":[{"t":69.03,"w":"Old"},{"t":69.77,"w":"friends,"},{"t":71.48,"w":"same"},{"t":72.32,"w":"disease"}]},{"t":74.38,"words":[{"t":74.38,"w":"I"},{"t":74.86,"w":"can't"},{"t":75.42,"w":"get"},{"t":75.87,"w":"away"},{"t":76.55,"w":"from"},{"t":76.98,"w":"it"}]},{"t":78.65,"words":[{"t":78.65,"w":"Old"},{"t":79.33,"w":"friends,"},{"t":81.1,"w":"same"},{"t":81.82,"w":"as"},{"t":82.23,"w":"enem"},{"t":82.8,"w":"ies","j":1}]},{"t":84.02,"words":[{"t":84.02,"w":"I'm"},{"t":84.51,"w":"killing"},{"t":85.16,"w":"myself"},{"t":86.07,"w":"again"}]},{"t":88.78,"words":[{"t":88.78,"w":"I'm"},{"t":89.44,"w":"killing"},{"t":90.16,"w":"myself"},{"t":90.98,"w":"again"}]},{"t":93.6,"words":[{"t":93.6,"w":"I'm"},{"t":94.13,"w":"killing"},{"t":94.76,"w":"mys"},{"t":95.43,"w":"elf","j":1}]},{"t":95.96,"words":[{"t":95.96,"w":"I"},{"t":96.23,"w":"can't"},{"t":96.47,"w":"be"},{"t":97.11,"w":"saved"}]},{"t":99.35,"words":[{"t":99.35,"w":"Reaching"},{"t":99.79,"w":"for"},{"t":99.94,"w":"the"},{"t":100.14,"w":"life"},{"t":100.62,"w":"we"},{"t":100.92,"w":"threw"},{"t":101.33,"w":"awa"},{"t":101.63,"w":"y","j":1}]},{"t":104.04,"words":[{"t":104.04,"w":"Watching"},{"t":104.53,"w":"as"},{"t":104.74,"w":"it"},{"t":105.14,"w":"circles"},{"t":105.86,"w":"in"},{"t":106.02,"w":"the"},{"t":106.36,"w":"drain"}]},{"t":108.77,"words":[{"t":108.77,"w":"With"},{"t":108.9,"w":"everything"},{"t":109.68,"w":"I"},{"t":109.85,"w":"loved,"},{"t":110.51,"w":"that's"},{"t":110.7,"w":"gone"},{"t":110.88,"w":"to"},{"t":111.16,"w":"waste"}]},{"t":113.58,"words":[{"t":113.58,"w":"With"},{"t":113.8,"w":"everything"},{"t":114.46,"w":"I"},{"t":114.61,"w":"was"},{"t":115.31,"w":"but"},{"t":115.47,"w":"couldn't"},{"t":115.76,"w":"change"}]},{"t":117.86,"words":[{"t":117.86,"w":"We're"},{"t":118.38,"w":"bored"},{"t":118.78,"w":"when"},{"t":119.08,"w":"we're"},{"t":119.39,"w":"sober"},{"t":120.38,"w":"again"}]},{"t":122.42,"words":[{"t":122.42,"w":"But"},{"t":122.94,"w":"miserable"},{"t":123.99,"w":"when"},{"t":124.39,"w":"we're"},{"t":124.74,"w":"not"}]},{"t":127.1,"words":[{"t":127.1,"w":"We're"},{"t":127.64,"w":"bored"},{"t":128.4,"w":"when"},{"t":128.6,"w":"we're"},{"t":128.83,"w":"sober"},{"t":129.97,"w":"again"}]},{"t":132.03,"words":[{"t":132.03,"w":"But"},{"t":132.52,"w":"what"},{"t":132.95,"w":"else"},{"t":133.62,"w":"have"},{"t":134.04,"w":"we"},{"t":134.32,"w":"got?"}]},{"t":134.36,"words":[{"t":134.36,"w":"I"},{"t":134.58,"w":"can't"},{"t":134.94,"w":"be"},{"t":135.63,"w":"saved"}]},{"t":137.13,"s":1,"words":[{"t":137.13,"w":"We're"},{"t":137.56,"w":"bored"},{"t":138.0,"w":"when"},{"t":138.28,"w":"we're"},{"t":138.48,"w":"sober"},{"t":139.43,"w":"again"}]},{"t":137.69,"words":[{"t":137.69,"w":"Reaching"},{"t":138.15,"w":"for"},{"t":138.43,"w":"the"},{"t":138.65,"w":"life"},{"t":139.01,"w":"we"},{"t":139.29,"w":"threw"},{"t":139.63,"w":"awa"},{"t":140.19,"w":"y","j":1}]},{"t":141.65,"s":1,"words":[{"t":141.65,"w":"But"},{"t":142.19,"w":"miserable"},{"t":143.35,"w":"when"},{"t":143.66,"w":"we're"},{"t":144.02,"w":"not"}]},{"t":142.49,"words":[{"t":142.49,"w":"Watching"},{"t":142.96,"w":"as"},{"t":143.26,"w":"it"},{"t":143.52,"w":"circles"},{"t":144.32,"w":"in"},{"t":144.5,"w":"the"},{"t":145.27,"w":"drain"}]},{"t":146.47,"s":1,"words":[{"t":146.47,"w":"We're"},{"t":147.03,"w":"bored"},{"t":147.61,"w":"when"},{"t":147.86,"w":"we're"},{"t":148.09,"w":"sober"},{"t":149.13,"w":"again"}]},{"t":147.29,"words":[{"t":147.29,"w":"With"},{"t":147.49,"w":"everything"},{"t":148.19,"w":"I"},{"t":148.37,"w":"loved,"},{"t":148.97,"w":"that's"},{"t":149.21,"w":"gone"},{"t":149.46,"w":"to"},{"t":149.66,"w":"waste"}]},{"t":151.2,"s":1,"words":[{"t":151.2,"w":"But"},{"t":151.64,"w":"what"},{"t":152.31,"w":"else"},{"t":152.99,"w":"have"},{"t":153.34,"w":"we"},{"t":153.66,"w":"got?"}]},{"t":151.97,"words":[{"t":151.97,"w":"With"},{"t":152.2,"w":"everything"},{"t":152.83,"w":"I"},{"t":153.13,"w":"was"},{"t":153.8,"w":"but"},{"t":153.95,"w":"couldn't"},{"t":154.29,"w":"change"}]},{"t":154.88,"words":[]},{"t":172.85,"words":[{"t":172.85,"w":"I"},{"t":172.95,"w":"can't"},{"t":173.18,"w":"be"},{"t":174.03,"w":"saved"}]},{"t":176.14,"words":[{"t":176.14,"w":"Reaching"},{"t":176.59,"w":"for"},{"t":176.87,"w":"the"},{"t":177.11,"w":"life"},{"t":177.46,"w":"we"},{"t":177.75,"w":"threw"},{"t":178.05,"w":"awa"},{"t":178.62,"w":"y","j":1}]},{"t":180.86,"words":[{"t":180.86,"w":"Watching"},{"t":181.38,"w":"as"},{"t":181.62,"w":"it"},{"t":181.84,"w":"circles"},{"t":182.58,"w":"in"},{"t":182.74,"w":"the"},{"t":183.6,"w":"drain"}]},{"t":185.57,"words":[{"t":185.57,"w":"With"},{"t":185.72,"w":"everything"},{"t":186.45,"w":"I"},{"t":186.69,"w":"loved,"},{"t":187.31,"w":"that's"},{"t":187.5,"w":"gone"},{"t":187.68,"w":"to"},{"t":187.96,"w":"waste"}]},{"t":190.41,"words":[{"t":190.41,"w":"With"},{"t":190.62,"w":"everything"},{"t":191.27,"w":"I"},{"t":191.46,"w":"was"},{"t":192.14,"w":"but"},{"t":192.29,"w":"couldn't"},{"t":192.59,"w":"change"}]},{"t":194.94,"words":[{"t":194.94,"w":"We're"},{"t":195.14,"w":"bored"},{"t":195.59,"w":"when"},{"t":195.88,"w":"we're"},{"t":196.08,"w":"sober"},{"t":197.14,"w":"again"}]},{"t":199.26,"words":[{"t":199.26,"w":"But"},{"t":199.75,"w":"miserable"},{"t":200.89,"w":"when"},{"t":201.19,"w":"we're"},{"t":201.63,"w":"not"}]}];
+
+    // Main lines drive the top row. Lines marked "s" in the data
+    // (overlapping vocals) show underneath, smaller and grayed out.
+    const PRIMARY = LYRICS.filter((line) => !line.s);
+    const SECONDARY = LYRICS.filter((line) => line.s);
+
+    // A secondary line ends when the next one starts, or when a blank main
+    // entry (no words) clears the display — whichever comes first.
+    SECONDARY.forEach((line, i) => {
+      const nextSecondary = SECONDARY[i + 1] ? SECONDARY[i + 1].t : Infinity;
+      const clear = PRIMARY.find((p) => !p.words.length && p.t > line.t);
+      line._end = Math.min(nextSecondary, clear ? clear.t : Infinity);
+    });
 
     // Build the line/word DOM once. Each word starts empty and gets
     // typed in character-by-character as its own timestamp is reached.
-    const lyricsTrack = document.getElementById('lyrics-track');
-    const lyricLineEls = LYRICS.map((line) => {
-      const lineEl = document.createElement('div');
-      lineEl.className = 'lyrics-line';
-      line.words.forEach((word) => {
-        const wordEl = document.createElement('span');
-        wordEl.className = 'lyrics-word';
-        word._el = wordEl;
-        word._shown = 0;
-        lineEl.appendChild(wordEl);
+    function buildLyricLines(lines, trackEl) {
+      return lines.map((line) => {
+        const lineEl = document.createElement('div');
+        lineEl.className = 'lyrics-line';
+        line.words.forEach((word) => {
+          const wordEl = document.createElement('span');
+          wordEl.className = 'lyrics-word';
+          if (word.j) wordEl.classList.add('lyrics-join'); // syllable continuing the previous word
+          word._el = wordEl;
+          word._shown = 0;
+          lineEl.appendChild(wordEl);
+        });
+        trackEl.appendChild(lineEl);
+        return lineEl;
       });
-      lyricsTrack.appendChild(lineEl);
-      return lineEl;
-    });
+    }
+
+    const primaryTrack = document.getElementById('lyrics-track');
+    const secondaryTrack = document.getElementById('lyrics-track-secondary');
+    const primaryEls = buildLyricLines(PRIMARY, primaryTrack);
+    const secondaryEls = buildLyricLines(SECONDARY, secondaryTrack);
 
     // How long each word gets to "type" — capped so it stays snappy even
     // on a long gap, but never longer than the room before the next word.
-    LYRICS.forEach((line, li) => {
-      line.words.forEach((word, wi) => {
-        const nextStart = wi < line.words.length - 1
-          ? line.words[wi + 1].t
-          : (LYRICS[li + 1] ? LYRICS[li + 1].t : word.t + 1.2);
-        word._typeDur = Math.max(Math.min((nextStart - word.t) * 0.85, 0.24), 0.05);
+    function setTypeDurations(lines) {
+      lines.forEach((line, li) => {
+        line.words.forEach((word, wi) => {
+          const nextStart = wi < line.words.length - 1
+            ? line.words[wi + 1].t
+            : (lines[li + 1] ? lines[li + 1].t : word.t + 1.2);
+          word._typeDur = Math.max(Math.min((nextStart - word.t) * 0.85, 0.24), 0.05);
+        });
       });
-    });
+    }
+    setTypeDurations(PRIMARY);
+    setTypeDurations(SECONDARY);
 
-    function findLyricsLineIndex(t) {
+    function findLyricsLineIndex(lines, t) {
       let idx = -1;
-      for (let i = 0; i < LYRICS.length; i++) {
-        if (LYRICS[i].t <= t) idx = i; else break;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].t <= t) idx = i; else break;
       }
       return idx;
     }
@@ -885,47 +1074,62 @@
       });
     }
 
-    let lyricsLastLine = -2; // -2 so the very first frame always reconciles
+    // Reconciles one row (lines before idx fully shown, after idx cleared,
+    // idx marked current) and slides its track to the current line.
+    function syncLyricsRow(lines, els, trackEl, idx) {
+      lines.forEach((line, i) => {
+        if (i < idx) setLyricsLineShown(line, true);
+        else if (i > idx) setLyricsLineShown(line, false);
+      });
+      els.forEach((el, i) => {
+        el.classList.toggle('is-current', i === idx);
+        el.classList.toggle('is-previous', i === idx - 1);
+      });
+      const lineH = els[0] ? els[0].offsetHeight : 0;
+      trackEl.style.transform = `translateY(${-Math.max(idx, 0) * lineH}px)`;
+    }
+
     const lyricsReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function typeLyricsLine(line, t) {
+      line.words.forEach((word) => {
+        let shown;
+        if (lyricsReduceMotion) {
+          shown = t >= word.t ? word.w.length : 0;
+        } else if (t <= word.t) {
+          shown = 0;
+        } else if (t >= word.t + word._typeDur) {
+          shown = word.w.length;
+        } else {
+          shown = Math.max(1, Math.round(((t - word.t) / word._typeDur) * word.w.length));
+        }
+        if (word._shown !== shown) {
+          word._shown = shown;
+          word._el.textContent = word.w.slice(0, shown);
+        }
+      });
+    }
+
+    let lyricsLastPrimary = -2; // -2 so the very first frame always reconciles
+    let lyricsLastSecondary = -2;
 
     function renderLyrics() {
       const t = bgm.currentTime || 0;
-      const li = findLyricsLineIndex(t);
 
-      if (li !== lyricsLastLine) {
-        LYRICS.forEach((line, i) => {
-          if (i < li) setLyricsLineShown(line, true);
-          else if (i > li) setLyricsLineShown(line, false);
-        });
-        lyricLineEls.forEach((el, i) => {
-          el.classList.toggle('is-current', i === li);
-          el.classList.toggle('is-previous', i === li - 1);
-        });
-        const lineH = lyricLineEls[0] ? lyricLineEls[0].offsetHeight : 0;
-        const rowOffset = Math.max(li, 0);
-        lyricsTrack.style.transform = `translateY(${-rowOffset * lineH}px)`;
-        lyricsLastLine = li;
+      const li = findLyricsLineIndex(PRIMARY, t);
+      if (li !== lyricsLastPrimary) {
+        syncLyricsRow(PRIMARY, primaryEls, primaryTrack, li);
+        lyricsLastPrimary = li;
       }
+      if (li >= 0) typeLyricsLine(PRIMARY[li], t);
 
-      if (li >= 0) {
-        const line = LYRICS[li];
-        line.words.forEach((word) => {
-          let shown;
-          if (lyricsReduceMotion) {
-            shown = t >= word.t ? word.w.length : 0;
-          } else if (t <= word.t) {
-            shown = 0;
-          } else if (t >= word.t + word._typeDur) {
-            shown = word.w.length;
-          } else {
-            shown = Math.max(1, Math.round(((t - word.t) / word._typeDur) * word.w.length));
-          }
-          if (word._shown !== shown) {
-            word._shown = shown;
-            word._el.textContent = word.w.slice(0, shown);
-          }
-        });
+      let si = findLyricsLineIndex(SECONDARY, t);
+      if (si >= 0 && t >= SECONDARY[si]._end) si = -1; // that secondary line has finished
+      if (si !== lyricsLastSecondary) {
+        syncLyricsRow(SECONDARY, secondaryEls, secondaryTrack, si);
+        lyricsLastSecondary = si;
       }
+      if (si >= 0) typeLyricsLine(SECONDARY[si], t);
 
       requestAnimationFrame(renderLyrics);
     }

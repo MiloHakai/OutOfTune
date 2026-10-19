@@ -121,16 +121,16 @@
     .wave-text {
       background: linear-gradient(90deg,
           var(--wave-a) 0%,
-          var(--wave-a) 38%,
+          var(--wave-a) 40%,
           var(--wave-b) 50%,
-          var(--wave-a) 62%,
+          var(--wave-a) 60%,
           var(--wave-a) 100%);
 
       background-size: 300% 100%;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: wave-effect 6s linear infinite;
+      animation: wave-effect 2.6s linear infinite;
 
       text-shadow:
         0 0 12px var(--glow),
@@ -1628,7 +1628,7 @@
     @keyframes rvFade { from { opacity: 0; } to { opacity: 1; } }
 
     body:not(.splash-active) .sky-widget          { animation: rvUp 1s cubic-bezier(0.16,1,0.3,1) 0.10s backwards; }
-    body:not(.splash-active) .hero > h1           { animation: wave-effect 6s linear infinite,
+    body:not(.splash-active) .hero > h1           { animation: wave-effect 2.6s linear infinite,
                                                                rvUp 1.2s cubic-bezier(0.16,1,0.3,1) 0.20s backwards; }
     body:not(.splash-active) .hero > p            { animation: rvUp 1.1s cubic-bezier(0.16,1,0.3,1) 0.38s backwards; }
     body:not(.splash-active) .icons a             { animation: rvUp 1s cubic-bezier(0.16,1,0.3,1) backwards; }
@@ -1722,6 +1722,22 @@
     /* trace overlay covers the card's full border box (the 1px border included) */
     .card-trace { inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); }
     .card-sheen { inset: -1px; }
+  
+    /* ═════════ ITALY: tricolore ═════════ */
+    .it-flag span {
+      -webkit-text-stroke: 0.5px rgba(20, 10, 30, 0.45);
+      paint-order: stroke fill;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.18);
+    }
+    .it-flag .g { color: #19b25a; }
+    .it-flag .w { color: #ffffff; }
+    .it-flag .r { color: #e63946; }
+
+    /* ═════════ TITLE WAVE: keyboard-RGB sweep, same colours, left -> right ═════════ */
+    @keyframes wave-effect {
+      0%   { background-position: 100% 0; }
+      100% { background-position: 0% 0; }
+    }
   </style>
 </head>
 
@@ -1798,7 +1814,7 @@
   <div class="container">
    <div class="hero">
     <h1 id="username" class="wave-text" onclick="playClickSound()">MiloHakai</h1>
-    <p>Game Designer and occasional streamer from Italy.</p>
+    <p>Game Designer and occasional streamer from <span class="it-flag" aria-label="Italy"><span class="g">I</span><span class="g">t</span><span class="w">a</span><span class="r">l</span><span class="r">y</span></span>.</p>
 
     <!-- Social links -->
     <div class="icons">
